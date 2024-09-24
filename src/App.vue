@@ -1,15 +1,19 @@
-<script setup lang="ts">
-import LoginPage from '@/components/LoginPage.vue'
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <RouterLink to="/login"> Login </RouterLink>
-  <div class="container m-3 py-8">
-    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto explicabo corrupti,
-    similique ducimus quasi repellat fugit alias soluta corporis velit minus ipsa sint itaque dolor
-    placeat cumque est voluptatibus. Expedita.
-  </div>
-  <RouterView />
+  <header>
+    <nav class="text-xl font-medium text-black">
+      <RouterLink to="/"> Home </RouterLink>
+      <RouterLink to="/login"> Login </RouterLink>
+      <RouterLink to="/sign-up"> Sign Up </RouterLink>
+    </nav>
+  </header>
+  <Suspense>
+    <RouterView />
+    <template #fallback>
+      <p class="text-2xl">Loading...</p>
+    </template>
+  </Suspense>
 </template>
 
 <style></style>

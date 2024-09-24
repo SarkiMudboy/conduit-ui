@@ -6,16 +6,16 @@ import { Label } from '@/components/ui/label'
 </script>
 
 <template>
-  <Card class="mx-auto max-w-sm">
+  <Card class="mx-auto max-w-sm mt-12">
     <CardHeader>
       <CardTitle class="text-2xl"> Login </CardTitle>
-      <CardDescription> Enter your email below to login to your account </CardDescription>
+      <CardDescription> Enter your email or tag below to login to your account </CardDescription>
     </CardHeader>
     <CardContent>
       <div class="grid gap-4">
         <div class="grid gap-2">
-          <Label for="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Label for="email">Email/Tag</Label>
+          <Input id="email" type="text" placeholder="m@example.com or @ted5x4" required />
         </div>
         <div class="grid gap-2">
           <div class="flex items-center">
