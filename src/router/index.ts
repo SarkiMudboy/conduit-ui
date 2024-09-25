@@ -23,6 +23,11 @@ const router = createRouter({
       path: '/files',
       name: 'storage',
       component: () => import('@/views/Storage.vue')
+    },
+    {
+      path: '/reset-password',
+      name: 'password-reset',
+      component: () => import('@/views/ResetPassword.vue')
     }
   ]
 })

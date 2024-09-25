@@ -20,11 +20,7 @@ const tokenStore = useTokenStore()
 let identifier = ref('')
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
-async function logIn(creds: {
-  email: string | undefined
-  tag: string | undefined
-  password: string
-}) {
+async function logIn(creds: { email?: string; tag?: string; password: string }) {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
 
@@ -73,7 +69,9 @@ async function signInUser() {
         <div class="grid gap-2">
           <div class="flex items-center">
             <Label for="password">Password</Label>
-            <a href="#" class="ml-auto inline-block text-sm underline"> Forgot your password? </a>
+            <RouterLink to="/reset-password" class="ml-auto inline-block text-sm underline"
+              >Forgot Password?</RouterLink
+            >
           </div>
           <Input id="password" type="password" v-model="credentials.password" required />
         </div>
