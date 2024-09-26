@@ -20,6 +20,11 @@ const emailToken = defineProps({
     required: true
   }
 })
+
+const emit = defineEmits<{
+  (e: 'otp-confirmed', token: string): void
+}>()
+
 const formSchema = toTypedSchema(
   z.object({
     password: z.array(z.coerce.string()).length(6, { message: 'Invalid Input' })
@@ -42,8 +47,11 @@ const onPasswordSubmit = handleSubmit(({ password }) => {
     url: 'http://localhost:8000/api/v1/users/confirm-reset-password/',
     method: 'POST'
   }
-  const response = req(requestParams)
-  //   emit event here...
+
+  req(requestParams).then((data) => {
+    // change to data.response.token
+    emit('otp-confirmed', data.token)
+  })
 })
 </script>
 

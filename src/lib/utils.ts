@@ -9,10 +9,10 @@ export type reqOptions = {
   data: any
   headers: Headers
   url: string
-  method: 'POST' | 'GET'
+  method: 'POST' | 'GET' | 'PUT'
 }
 
-export async function req(options: reqOptions) {
+export async function req(options: reqOptions): Promise<any> {
   const raw = JSON.stringify(options.data)
 
   const requestOptions = {
@@ -21,12 +21,15 @@ export async function req(options: reqOptions) {
     body: raw
   }
 
-  await fetch(options.url, requestOptions)
+  const responseData = await fetch(options.url, requestOptions)
     .then((response) => {
-      if (response.ok) return response.json()
+      if (response.ok)
+        return response.json() // change this to return {status: response.statusCode, response: response.json()}
       else throw new Error('An error occured')
     })
     .catch((error) => console.error(error))
+
+  return responseData
 }
 
 export function validatePassword(password: string) {

@@ -6,3 +6,4 @@
     <div class="container">02</div>
   </div>
 </template>
+<!-- this will in its created lifecycle hook try to get the drives, if it fails (like 404): re-route to login -->
