@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
+import { useToast } from '@/components/ui/toast/use-toast'
+import { Toaster } from '@/components/ui/toast'
 import { Input } from '@/components/ui/input'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -24,6 +26,7 @@ const emailToken = defineProps({
   }
 })
 const router = useRouter()
+const { toast } = useToast()
 const newPassword = ref('')
 
 const formSchema = toTypedSchema(
@@ -51,16 +54,31 @@ const onSubmit = form.handleSubmit((passwords) => {
     url: 'http://localhost:8000/api/v1/users/reset-password/',
     method: 'PUT'
   }
-  req(requestParams)
-  /* sum like .then((data) => {
-        switch (data.status) {
-            case 200:
-                router.pu...
-            case (400 ...):
-                toast(Error)
-        }
-  }) */
-  router.push('/login')
+  req(requestParams).then((r) => {
+    console.log(r)
+    switch (r.status) {
+      case 200:
+        toast({
+          title: 'Success',
+          description: 'Your Password has been successfully reset.'
+        })
+        setTimeout(() => {
+          // console.log('Executed after 2 seconds')
+          router.push('/login')
+        }, 3000)
+        break
+      case 400:
+      case 500:
+        toast({
+          title: 'Uh Oh',
+          description: 'Something went wrong, Please try again',
+          variant: 'destructive'
+        })
+        break
+      default:
+        console.log('Nope')
+    }
+  })
 })
 </script>
 
@@ -112,4 +130,5 @@ const onSubmit = form.handleSubmit((passwords) => {
       </CardFooter>
     </form>
   </Card>
+  <Toaster />
 </template>

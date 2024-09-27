@@ -12,7 +12,7 @@ export type reqOptions = {
   method: 'POST' | 'GET' | 'PUT'
 }
 
-export async function req(options: reqOptions): Promise<any> {
+export async function req(options: reqOptions) {
   const raw = JSON.stringify(options.data)
 
   const requestOptions = {
@@ -22,12 +22,14 @@ export async function req(options: reqOptions): Promise<any> {
   }
 
   const responseData = await fetch(options.url, requestOptions)
-    .then((response) => {
-      if (response.ok)
-        return response.json() // change this to return {status: response.statusCode, response: response.json()}
-      else throw new Error('An error occured')
+    .then(async (response) => {
+      const data = Number(response.headers.get('content-length'))
+      const json = data > 0 ? await response.json() : {}
+      return { status: response.status, response: json }
     })
-    .catch((error) => console.error(error))
+    .catch((error) => {
+      return { status: 0, response: error }
+    })
 
   return responseData
 }

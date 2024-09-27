@@ -13,6 +13,8 @@ import { PinInput, PinInputGroup, PinInputInput } from '@/components/ui/pin-inpu
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
+import { useToast } from '@/components/ui/toast/use-toast'
+import { Toaster } from '@/components/ui/toast'
 
 const emailToken = defineProps({
   email_token: {
@@ -20,6 +22,8 @@ const emailToken = defineProps({
     required: true
   }
 })
+
+const { toast } = useToast()
 
 const emit = defineEmits<{
   (e: 'otp-confirmed', token: string): void
@@ -48,9 +52,22 @@ const onPasswordSubmit = handleSubmit(({ password }) => {
     method: 'POST'
   }
 
-  req(requestParams).then((data) => {
-    // change to data.response.token
-    emit('otp-confirmed', data.token)
+  req(requestParams).then((r) => {
+    switch (r.status) {
+      case 200:
+        emit('otp-confirmed', r.response.token)
+        break
+      case 400:
+      case 500:
+        toast({
+          title: 'Uh Oh',
+          description: 'Something went wrong, Please try again',
+          variant: 'destructive'
+        })
+        break
+      default:
+        console.log('Nope')
+    }
   })
 })
 </script>
@@ -87,4 +104,5 @@ const onPasswordSubmit = handleSubmit(({ password }) => {
 
     <Button>Submit</Button>
   </form>
+  <Toaster />
 </template>
