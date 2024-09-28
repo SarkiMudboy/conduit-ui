@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import CustomHeader from '@/components/CustomHeader.vue'
 import { reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUserStore, useTokenStore } from '@/stores/userStore'
@@ -54,6 +55,9 @@ async function signUp() {
 </script>
 
 <template>
+  <CustomHeader>
+    <RouterLink to="/"> Home </RouterLink>
+  </CustomHeader>
   <Card class="mx-auto max-w-sm mt-12">
     <CardHeader>
       <CardTitle class="text-xl"> Sign Up </CardTitle>
@@ -85,6 +89,18 @@ async function signUp() {
       <div class="mt-4 text-center text-sm">
         Already have an account?
         <RouterLink to="/login" class="underline">Sign in</RouterLink>
+      </div>
+      <div class="pt-5">
+        <p class="text-xs text-foreground-lighter sm:mx-auto sm:max-w-sm">
+          By continuing, you agree to Conduit's
+          <a class="underline hover:text-foreground-light" href="https://supabase.com/terms"
+            >Terms of Service</a
+          >
+          and
+          <a class="underline hover:text-foreground-light" href="https://supabase.com/privacy"
+            >Privacy Policy</a
+          >, and to receive periodic emails with updates.
+        </p>
       </div>
     </CardContent>
   </Card>

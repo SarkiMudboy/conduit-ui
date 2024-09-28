@@ -2,6 +2,7 @@
 import RequestPasswordReset from '@/components/password/RequestPasswordReset.vue'
 import OTPView from '@/components/password/OTPView.vue'
 import ChangePassword from '@/components/password/ChangePassword.vue'
+import CustomHeader from '@/components/CustomHeader.vue'
 import { computed, ref } from 'vue'
 
 const pages: any = {
@@ -32,6 +33,9 @@ const token = computed(() => {
 </script>
 
 <template>
+  <CustomHeader>
+    <RouterLink to="/"> Home </RouterLink>
+  </CustomHeader>
   <Suspense>
     <component
       :is="renderPage"

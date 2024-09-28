@@ -53,20 +53,14 @@ const onPasswordSubmit = handleSubmit(({ password }) => {
   }
 
   req(requestParams).then((r) => {
-    switch (r.status) {
-      case 200:
-        emit('otp-confirmed', r.response.token)
-        break
-      case 400:
-      case 500:
-        toast({
-          title: 'Uh Oh',
-          description: 'Something went wrong, Please try again',
-          variant: 'destructive'
-        })
-        break
-      default:
-        console.log('Nope')
+    if (r.status == 200) {
+      emit('otp-confirmed', r.response.token)
+    } else {
+      toast({
+        title: 'Uh Oh',
+        description: 'Something went wrong, Please try again',
+        variant: 'destructive'
+      })
     }
   })
 })

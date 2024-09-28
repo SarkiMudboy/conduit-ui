@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
+
 import { Input } from '@/components/ui/input'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -56,27 +57,20 @@ const onSubmit = form.handleSubmit((passwords) => {
   }
   req(requestParams).then((r) => {
     console.log(r)
-    switch (r.status) {
-      case 200:
-        toast({
-          title: 'Success',
-          description: 'Your Password has been successfully reset.'
-        })
-        setTimeout(() => {
-          // console.log('Executed after 2 seconds')
-          router.push('/login')
-        }, 3000)
-        break
-      case 400:
-      case 500:
-        toast({
-          title: 'Uh Oh',
-          description: 'Something went wrong, Please try again',
-          variant: 'destructive'
-        })
-        break
-      default:
-        console.log('Nope')
+    if (r.status == 200) {
+      toast({
+        title: 'Success',
+        description: 'Your Password has been successfully reset.'
+      })
+      setTimeout(() => {
+        router.push('/login')
+      }, 3000)
+    } else {
+      toast({
+        title: 'Uh Oh',
+        description: 'Something went wrong, Please try again',
+        variant: 'destructive'
+      })
     }
   })
 })

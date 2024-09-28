@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTokenStore } from '@/stores/userStore'
+import CustomHeader from '@/components/CustomHeader.vue'
 
 const credentials: { email: string | undefined; tag: string | undefined; password: string } =
   reactive({
@@ -49,6 +50,9 @@ async function signInUser() {
 </script>
 
 <template>
+  <CustomHeader>
+    <RouterLink to="/"> Home </RouterLink>
+  </CustomHeader>
   <Card class="mx-auto max-w-sm mt-12">
     <CardHeader>
       <CardTitle class="text-2xl"> Login </CardTitle>
