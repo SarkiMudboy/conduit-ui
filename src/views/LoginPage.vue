@@ -7,6 +7,7 @@ import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTokenStore } from '@/stores/userStore'
 import CustomHeader from '@/components/CustomHeader.vue'
+import { storeToRefs } from 'pinia'
 
 const credentials: { email: string | undefined; tag: string | undefined; password: string } =
   reactive({
@@ -17,6 +18,7 @@ const credentials: { email: string | undefined; tag: string | undefined; passwor
 
 const router = useRouter()
 const tokenStore = useTokenStore()
+let { setTokens } = tokenStore
 
 let identifier = ref('')
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -26,19 +28,19 @@ async function logIn(creds: { email?: string; tag?: string; password: string }) 
   myHeaders.append('Content-Type', 'application/json')
 
   const raw = JSON.stringify(creds)
-
   const requestOptions = {
     method: 'POST',
     headers: myHeaders,
     body: raw
   }
 
-  let responseData = await fetch('http://localhost:8000/api/v1/users/sign-in/', requestOptions)
-    .then((response) => response.json())
+  await fetch('http://localhost:8000/api/v1/users/sign-in/', requestOptions)
+    .then(async (response) => {
+      const r = await response.json()
+      setTokens({ access: r.token.access, refresh: r.token.refresh })
+      router.push('/files')
+    })
     .catch((error) => console.error(error))
-  // console.log(responseData)
-  tokenStore.tokens = { access: responseData.token.access, refresh: responseData.token.refresh }
-  router.push('/files')
 }
 
 async function signInUser() {

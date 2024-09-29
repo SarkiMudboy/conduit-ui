@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useTokenStore } from '@/stores/userStore'
 // import HomeView from '@/views/HomeView.vue'
 
 const router = createRouter({
@@ -22,7 +23,11 @@ const router = createRouter({
     {
       path: '/files',
       name: 'storage',
-      component: () => import('@/views/Storage.vue')
+      component: () => import('@/views/Storage.vue'),
+      beforeEnter: (to, from) => {
+        const tokenStore = useTokenStore()
+        if (tokenStore.tokens.access == '') return { name: 'login' }
+      }
     },
     {
       path: '/reset-password',

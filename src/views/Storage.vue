@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { Bell, CircleUser, HardDrive, Menu, Search, Mail } from 'lucide-vue-next'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import Drives from '@/components/Drives.vue'
 </script>
 
 <template>
@@ -123,6 +122,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
         <div class="flex items-center">
           <h1 class="text-lg font-semibold md:text-2xl">Your Drives</h1>
         </div>
+        <Drives />
       </main>
     </div>
   </div>
