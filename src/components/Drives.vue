@@ -2,6 +2,7 @@
 import { ref, type Ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
+import Objects from './Objects.vue'
 
 type Drive = {
   name: string
@@ -11,9 +12,41 @@ type Drive = {
   used: number
 }
 
-const drives: Ref<Drive[] | []> = ref([])
+interface Resource {
+  title: string
+  component: object | string
+  objects: Drive[] | Object[] // change this
+  grid: string
+}
 
-async function getDrives() {
+const currentResource: Ref<Resource> = ref({
+  title: 'Your Drives',
+  component: DriveCard,
+  objects: [],
+  grid: 'grid grid-cols-3 gap-4'
+})
+
+const getDrive = async (uid: string) => {
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/json')
+  const params: reqOptions = {
+    data: null,
+    headers: myHeaders,
+    url: `http://localhost:8000/api/v1/drives/${uid}`,
+    method: 'GET'
+  }
+  await protectedReq(params).then((r) => {
+    console.log(r.response)
+    currentResource.value = {
+      title: 'Object name',
+      component: Objects,
+      objects: r.response.storage_objects,
+      grid: 'grid grid-cols-5 gap-4'
+    }
+  })
+}
+
+async function listDrives() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
   const params: reqOptions = {
@@ -23,13 +56,21 @@ async function getDrives() {
     method: 'GET'
   }
   await protectedReq(params).then((r) => {
-    drives.value = r.response
+    currentResource.value.objects = r.response
   })
 }
-await getDrives()
+await listDrives()
 </script>
 <template>
-  <ul class="flex flex-col space-y-2">
-    <DriveCard v-for="drive in drives" :drive="drive" />
+  <div class="flex items-center">
+    <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
+  </div>
+  <ul :class="currentResource.grid">
+    <component
+      :is="currentResource.component"
+      v-for="obj in currentResource.objects"
+      :resource="obj"
+      @selected-drive="getDrive"
+    />
   </ul>
 </template>

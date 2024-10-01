@@ -50,6 +50,7 @@ export async function protectedReq(params: reqOptions) {
   if (response.status == 401)
     await tokenStore.refreshToken().then((r) => {
       if (!r) router.push('/login')
+      // else block that makes the request again
     })
   return response
 }
