@@ -4,18 +4,31 @@ import { protectedReq, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
 import Objects from './Objects.vue'
 
-type Drive = {
+type base = {
   name: string
   size: number
-  type: 'shared' | 'personal'
   uid: string
   used: number
+}
+
+type Drive = base & {
+  type: 'shared' | 'personal'
+}
+
+type StorageObjects = base & {
+  metadata: object
+  path: string | null
+}
+
+type Object = base & {
+  members: string[]
+  storage_objects: StorageObjects[]
 }
 
 interface Resource {
   title: string
   component: object | string
-  objects: Drive[] | Object[] // change this
+  objects: Drive[] | Object // change this to
   grid: string
 }
 
@@ -38,10 +51,10 @@ const getDrive = async (uid: string) => {
   await protectedReq(params).then((r) => {
     console.log(r.response)
     currentResource.value = {
-      title: 'Object name',
+      title: r.response.name,
       component: Objects,
       objects: r.response.storage_objects,
-      grid: 'grid grid-cols-5 gap-4'
+      grid: 'grid grid-cols-7 gap-4'
     }
   })
 }
