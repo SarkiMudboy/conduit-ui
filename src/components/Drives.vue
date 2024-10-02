@@ -22,13 +22,13 @@ type StorageObjects = base & {
 
 type Object = base & {
   members: string[]
-  storage_objects: StorageObjects[]
+  // storage_objects: StorageObjects[]
 }
 
 interface Resource {
   title: string
   component: object | string
-  objects: Drive[] | Object // change this to
+  objects: Drive[] | StorageObjects[] // change this to
   grid: string
 }
 
@@ -39,23 +39,37 @@ const currentResource: Ref<Resource> = ref({
   grid: 'grid grid-cols-3 gap-4'
 })
 
-const getDrive = async (uid: string) => {
+const selectedDrive = ref('')
+
+const getObject = async (uid: string, objtype: 'drive' | 'object') => {
+  let path = 'http://localhost:8000/api/v1/drives/'
+
+  if (objtype === 'drive') {
+    selectedDrive.value = uid
+    path += uid
+  } else path += `${selectedDrive.value}/objects/${uid}`
+
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
   const params: reqOptions = {
     data: null,
     headers: myHeaders,
-    url: `http://localhost:8000/api/v1/drives/${uid}`,
+    url: path,
     method: 'GET'
   }
   await protectedReq(params).then((r) => {
     console.log(r.response)
-    currentResource.value = {
+
+    let resource = {
       title: r.response.name,
       component: Objects,
-      objects: r.response.storage_objects,
+      objects: [],
       grid: 'grid grid-cols-7 gap-4'
     }
+    objtype === 'drive'
+      ? (resource.objects = r.response.storage_objects)
+      : (resource.objects = r.response.content)
+    currentResource.value = resource
   })
 }
 
@@ -83,7 +97,7 @@ await listDrives()
       :is="currentResource.component"
       v-for="obj in currentResource.objects"
       :resource="obj"
-      @selected-drive="getDrive"
+      @selected-object="getObject"
     />
   </ul>
 </template>

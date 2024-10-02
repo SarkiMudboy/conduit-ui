@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { User, Users, Circle } from 'lucide-vue-next'
-import { protectedReq, type reqOptions } from '@/lib/utils'
 // import Button from './ui/button/Button.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -10,24 +9,10 @@ const drive = defineProps({
     required: true
   }
 })
-
-// const getDrive = async () => {
-//   const myHeaders = new Headers()
-//   myHeaders.append('Content-Type', 'application/json')
-//   const params: reqOptions = {
-//     data: null,
-//     headers: myHeaders,
-//     url: `http://localhost:8000/api/v1/drives/${drive.resource.uid}`,
-//     method: 'GET'
-//   }
-//   await protectedReq(params).then((r) => {
-//     console.log(r.response)
-//   })
-// }
 </script>
 
 <template>
-  <Card @click="$emit('selectedDrive', drive.resource.uid)" class="hover:bg-muted">
+  <Card @click="$emit('selectedObject', drive.resource.uid, 'drive')" class="hover:bg-muted">
     <CardHeader class="grid grid-cols-[minmax(0,1fr)_110px] items-start gap-4 space-y-0">
       <div class="space-y-1">
         <CardTitle>{{ drive.resource.name }}</CardTitle>
