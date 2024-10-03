@@ -13,6 +13,23 @@ import {
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import Drives from '@/components/Drives.vue'
+import { computed, ref } from 'vue'
+
+const pages: any = {
+  Drive: Drives
+}
+
+const currentPage = ref('Drive')
+const render = ref(0)
+
+const toggleCurrentPage = (page: 'Drive' | 'Inbox') => {
+  currentPage.value = page
+  render.value = Math.random()
+}
+
+const renderCurrentPage = computed(() => {
+  return pages[currentPage.value]
+})
 </script>
 
 <template>
@@ -31,23 +48,23 @@ import Drives from '@/components/Drives.vue'
         </div>
         <div class="flex-1">
           <nav class="grid items-start px-2 text-sm font-medium lg:px-4">
-            <a
-              href="/"
-              class="flex items-center gap-3 rounded-lg px-3 py-2 bg-muted transition-all hover:text-primary"
+            <div
+              @click="toggleCurrentPage('Drive')"
+              class="flex items-center gap-3 rounded-lg px-3 py-2 bg-muted transition-all hover:text-primary cursor-pointer"
             >
               <HardDrive class="h-4 w-4" />
               Drives
-            </a>
-            <a
-              href="#"
-              class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            </div>
+            <div
+              @click="toggleCurrentPage('Inbox')"
+              class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary cursor-pointer"
             >
               <Mail class="h-4 w-4" />
               Inbox
               <Badge class="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                 6
               </Badge>
-            </a>
+            </div>
           </nav>
         </div>
       </div>
@@ -119,7 +136,7 @@ import Drives from '@/components/Drives.vue'
         </DropdownMenu>
       </header>
       <main class="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-        <Drives />
+        <component :is="renderCurrentPage" :key="render" />
       </main>
     </div>
   </div>
