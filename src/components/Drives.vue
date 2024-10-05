@@ -4,6 +4,7 @@ import { protectedReq, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
 import Objects from './Objects.vue'
 import Button from '@/components/ui/button/Button.vue'
+import AddDrive from './AddDrive.vue'
 
 type base = {
   name: string
@@ -88,8 +89,9 @@ async function listDrives() {
 await listDrives()
 </script>
 <template>
-  <div class="flex items-center">
+  <div class="flex items-center justify-between">
     <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
+    <AddDrive v-if="currentResource.component == DriveCard" />
   </div>
   <ul v-if="currentResource.objects.length > 0" :class="currentResource.grid">
     <component

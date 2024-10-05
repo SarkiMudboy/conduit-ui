@@ -16,7 +16,7 @@ const drive = defineProps({
     <CardHeader class="grid grid-cols-[minmax(0,1fr)_110px] items-start gap-4 space-y-0">
       <div class="space-y-1">
         <div class="flex flex-row space-x-1 mb-4">
-          <Box :stroke-width="1" />
+          <Box :stroke-width="1" class="stroke-cyan-500" />
           <CardTitle>{{ drive.resource.name }}</CardTitle>
         </div>
         <CardDescription> This is a space or storage box for your files. </CardDescription>
