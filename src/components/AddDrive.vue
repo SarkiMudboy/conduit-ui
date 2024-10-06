@@ -15,9 +15,10 @@ import { Label } from '@/components/ui/label'
 import SearchMembers from './SearchMembers.vue'
 import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
+import { type Drive } from '@/components/Drives.vue'
 
 const emit = defineEmits<{
-  (e: 'drive-created', drive: object): void
+  (e: 'drive-created', drive: Drive): void
 }>()
 
 const newDrive = ref<{ name: string; members: string[] }>({ name: '', members: [] })
@@ -29,7 +30,7 @@ const addDrive = async () => {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
   const params: reqOptions = {
-    data: null,
+    data: { name: newDrive.value.name, members: newDrive.value.members },
     headers: myHeaders,
     url: 'http://localhost:8000/api/v1/drives/',
     method: 'POST'

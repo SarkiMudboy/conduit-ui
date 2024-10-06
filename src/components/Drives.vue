@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, shallowRef, type Ref } from 'vue'
+import { computed, ref, shallowRef, type Ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
 import Objects from './Objects.vue'
@@ -13,7 +13,7 @@ type base = {
   used: number
 }
 
-type Drive = base & {
+export type Drive = base & {
   type: 'shared' | 'personal'
 }
 
@@ -30,7 +30,7 @@ type Object = base & {
 interface Resource {
   title: string
   component: object | string
-  objects: Drive[] | StorageObjects[] // change this to
+  objects: Drive[] | StorageObjects[]
   grid: string
 }
 
@@ -73,6 +73,12 @@ const getObject = async (uid: string, objtype: 'drive' | 'object') => {
   })
 }
 
+const appendNewDrive = (drive: Drive) => {
+  if (currentResource.value.component == DriveCard) {
+    ;(currentResource.value.objects as Drive[]).push(drive)
+  }
+}
+
 async function listDrives() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -91,19 +97,22 @@ await listDrives()
 <template>
   <div class="flex items-center justify-between">
     <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
-    <AddDrive v-if="currentResource.component == DriveCard" />
+    <AddDrive v-if="currentResource.component == DriveCard" @drive-created="appendNewDrive" />
   </div>
-  <ul v-if="currentResource.objects.length > 0" :class="currentResource.grid">
-    <component
-      :is="currentResource.component"
-      v-for="obj in currentResource.objects"
-      :resource="obj"
-      @selected-object="getObject"
-    />
-  </ul>
-  <div v-else class="flex flex-col items-center gap-1 text-center mt-9">
-    <h3 class="text-2xl font-bold tracking-tight">You have no files</h3>
-    <p class="text-sm text-muted-foreground">Share files with members by uploading a new file</p>
-    <Button class="mt-4">Add a file</Button>
+  <div>
+    <ul v-if="currentResource.objects.length > 0" :class="currentResource.grid">
+      <component
+        :is="currentResource.component"
+        v-for="(obj, index) in currentResource.objects"
+        :key="index"
+        :resource="obj"
+        @selected-object="getObject"
+      />
+    </ul>
+    <div v-else class="flex flex-col items-center gap-1 text-center mt-9">
+      <h3 class="text-2xl font-bold tracking-tight">You have no files</h3>
+      <p class="text-sm text-muted-foreground">Share files with members by uploading a new file</p>
+      <Button class="mt-4">Add a file</Button>
+    </div>
   </div>
 </template>

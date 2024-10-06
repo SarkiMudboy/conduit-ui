@@ -77,7 +77,7 @@ const filteredUsers = computed(() =>
         class="w-full"
       >
         <ComboboxAnchor as-child>
-          <ComboboxInput placeholder="Framework..." as-child>
+          <ComboboxInput placeholder="Search email or tag" as-child>
             <TagsInputInput
               class="w-full px-3"
               :class="selectedUsers.length > 0 ? 'mt-2' : ''"
