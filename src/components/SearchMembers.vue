@@ -30,6 +30,8 @@ const selectedUsers = ref<string[]>([])
 const open = ref(false)
 const searchTerm = ref('')
 
+const errorMessage = ref('')
+
 const emit = defineEmits<{
   (e: 'member-selected', uid: string): void
 }>()
@@ -37,6 +39,7 @@ const emit = defineEmits<{
 const handleSearchTerm = (e: Event) => {
   const target = e.target as HTMLInputElement
   searchTerm.value = target.value
+  errorMessage.value = errorMessage.value != '' ? '' : errorMessage.value
 }
 
 const searchUser = async () => {
@@ -104,7 +107,10 @@ const filteredUsers = computed(() =>
                       searchTerm = ''
                       notFound = false
                       open = false
-                      selectedUsers.push(user.tag)
+                      if (!selectedUsers.includes(user.tag)) selectedUsers.push(user.tag)
+                      else {
+                        errorMessage = 'User has already been selected'
+                      }
                       emit('member-selected', user.uid)
                     }
                     if (filteredUsers.length === 0) {
@@ -122,4 +128,7 @@ const filteredUsers = computed(() =>
     </TagsInput>
   </div>
   <Button variant="outline" @click="searchUser">Search</Button>
+  <p v-if="errorMessage != ''" class="col-span-4 ml-[90px] text-sm text-red-500">
+    {{ errorMessage }}
+  </p>
 </template>

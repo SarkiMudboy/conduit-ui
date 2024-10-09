@@ -60,7 +60,7 @@ const getObject = async (uid: string, objtype: 'drive' | 'object') => {
     method: 'GET'
   }
   await protectedReq(params).then((r) => {
-    let resource = {
+    let resource: Resource = {
       title: r.response.name,
       component: Objects,
       objects: [],
@@ -97,7 +97,11 @@ await listDrives()
 <template>
   <div class="flex items-center justify-between">
     <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
-    <AddDrive v-if="currentResource.component == DriveCard" @drive-created="appendNewDrive" />
+    <AddDrive
+      v-if="currentResource.component == DriveCard"
+      @drive-created="appendNewDrive"
+      :userDrives="currentResource.objects.map((drive) => drive.name)"
+    />
   </div>
   <div>
     <ul v-if="currentResource.objects.length > 0" :class="currentResource.grid">

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { Search } from 'lucide-vue-next'
 import {
   Dialog,
   DialogContent,
@@ -10,6 +9,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
+import DialogClose from './ui/dialog/DialogClose.vue'
+import { X } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import SearchMembers from './SearchMembers.vue'
@@ -20,6 +21,39 @@ import { type Drive } from '@/components/Drives.vue'
 const emit = defineEmits<{
   (e: 'drive-created', drive: Drive): void
 }>()
+
+const props = defineProps({
+  userDrives: {
+    type: Array,
+    required: true
+  }
+})
+
+const isOpen = ref(false)
+const hasError = ref(false)
+const errorMessage = ref('')
+
+const setIsOpen = (value: any) => {
+  isOpen.value = value
+}
+
+const openDialog = () => {
+  isOpen.value = true
+}
+
+const closeDialog = () => {
+  isOpen.value = false
+}
+
+const validateInput = () => {
+  if (props.userDrives.includes(newDrive.value.name)) {
+    hasError.value = true
+    errorMessage.value = 'Drive with that name already exists!'
+  } else {
+    hasError.value = false
+    errorMessage.value = ''
+  }
+}
 
 const newDrive = ref<{ name: string; members: string[] }>({ name: '', members: [] })
 const AddMember = (member: string) => {
@@ -36,32 +70,53 @@ const addDrive = async () => {
     method: 'POST'
   }
   await protectedReq(params).then((r) => {
-    if (r.status == 200) {
+    if (r.status == 201) {
       emit('drive-created', r.response)
+      closeDialog()
     }
   })
 }
 </script>
 
 <template>
-  <Dialog>
+  <Dialog :open="isOpen" @update:open="setIsOpen">
     <DialogTrigger as-child>
-      <Button class="mr-7"> New Drive </Button>
+      <Button class="mr-7" @click="openDialog"> New Drive </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-[500px]">
+      <DialogClose
+        class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+        @click="closeDialog"
+      >
+        <X class="w-4 h-4" />
+        <span class="sr-only">Close</span>
+      </DialogClose>
       <DialogHeader>
         <DialogTitle class="font-semibold text-lg md:text-2xl">Create a New Drive</DialogTitle>
         <DialogDescription> Set a name and add a friend </DialogDescription>
       </DialogHeader>
       <div class="grid gap-4 py-4">
-        <div class="flex flex-row items-center gap-4">
-          <Label for="name" class="text-right font-bold text-nowrap"> Drive Name </Label>
-          <Input
-            id="name"
-            placeholder="Ex: My Images"
-            class="col-span-3 w"
-            v-model="newDrive.name"
-          />
+        <div>
+          <div class="flex flex-row items-center gap-4">
+            <Label for="name" class="text-right font-bold text-nowrap"> Drive Name </Label>
+            <Input
+              id="name"
+              placeholder="Ex: My Images"
+              :class="[
+                'col-span-3',
+                {
+                  'border-red-500 ring-2 ring-red-500 focus:border-red-500 focus:ring-red-500':
+                    hasError
+                }
+              ]"
+              required
+              v-model="newDrive.name"
+              @input="validateInput"
+            />
+          </div>
+          <p v-if="hasError" class="ml-[100px] w-1/2 text-sm text-red-500">
+            {{ errorMessage }}
+          </p>
         </div>
 
         <div class="grid grid-cols-6 items-center gap-4">
