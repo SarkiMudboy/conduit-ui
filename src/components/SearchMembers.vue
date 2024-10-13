@@ -43,6 +43,10 @@ const handleSearchTerm = (e: Event) => {
 }
 
 const searchUser = async () => {
+  if (searchTerm.value == '') {
+    errorMessage.value = 'Please add a member!'
+    throw new Error()
+  }
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
   const params: reqOptions = {

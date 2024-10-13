@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 import { Bell, CircleUser, HardDrive, Menu, Search, Mail } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -118,6 +119,7 @@ const renderCurrentPage = computed(() => {
             </div>
           </form>
         </div>
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button variant="secondary" size="icon" class="rounded-full">

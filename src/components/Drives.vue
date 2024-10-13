@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, type Ref } from 'vue'
+import { computed, reactive, ref, shallowRef, type Ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
 import Objects from './Objects.vue'
 import Button from '@/components/ui/button/Button.vue'
 import AddDrive from './AddDrive.vue'
+
+import { useToast } from '@/components/ui/toast/use-toast'
+import { Toaster } from '@/components/ui/toast'
 
 type base = {
   name: string
@@ -22,25 +25,39 @@ type StorageObjects = base & {
   path: string | null
 }
 
-type Object = base & {
-  members: string[]
-  // storage_objects: StorageObjects[]
+// type Object = base & {
+//   members: string[]
+// }
+
+const objects: Ref<Drive[] | StorageObjects[]> = ref([])
+
+const configForComponents: {
+  [key: string]: {
+    component: object
+    grid: string
+  }
+} = {
+  drive: {
+    component: DriveCard,
+    grid: 'grid grid-cols-3 gap-4'
+  },
+  storageObject: {
+    component: Objects,
+    grid: 'grid grid-cols-7 gap-4'
+  }
 }
 
 interface Resource {
+  name: string
   title: string
-  component: object | string
-  objects: Drive[] | StorageObjects[]
-  grid: string
 }
 
-const currentResource: Ref<Resource> = shallowRef({
-  title: 'Your Drives',
-  component: DriveCard,
-  objects: [],
-  grid: 'grid grid-cols-3 gap-4'
-})
+const { toast } = useToast()
 
+const currentResource: Ref<Resource> = ref({
+  name: 'drive',
+  title: 'Your Drives'
+})
 const selectedDrive = ref('')
 
 const getObject = async (uid: string, objtype: 'drive' | 'object') => {
@@ -60,24 +77,36 @@ const getObject = async (uid: string, objtype: 'drive' | 'object') => {
     method: 'GET'
   }
   await protectedReq(params).then((r) => {
-    let resource: Resource = {
-      title: r.response.name,
-      component: Objects,
-      objects: [],
-      grid: 'grid grid-cols-7 gap-4'
+    if (r.status == 200) {
+      currentResource.value = {
+        name: 'storageObject',
+        title: r.response.name
+      }
+
+      objtype === 'drive'
+        ? (objects.value = r.response.storage_objects)
+        : (objects.value = r.response.content)
     }
-    objtype === 'drive'
-      ? (resource.objects = r.response.storage_objects)
-      : (resource.objects = r.response.content)
-    currentResource.value = resource
   })
 }
 
 const appendNewDrive = (drive: Drive) => {
-  if (currentResource.value.component == DriveCard) {
-    ;(currentResource.value.objects as Drive[]).push(drive)
+  if (currentResource.value.name == 'drive') {
+    ;(objects.value as Drive[]).push(drive)
+    toast({
+      title: 'Drive created',
+      description: `${drive.name} added!`
+    })
   }
 }
+
+const renderGrid = computed(() => {
+  return configForComponents[currentResource.value.name].grid
+})
+
+const renderComponent = computed(() => {
+  return configForComponents[currentResource.value.name].component
+})
 
 async function listDrives() {
   const myHeaders = new Headers()
@@ -89,7 +118,7 @@ async function listDrives() {
     method: 'GET'
   }
   await protectedReq(params).then((r) => {
-    currentResource.value.objects = r.response
+    objects.value = r.response
   })
 }
 await listDrives()
@@ -98,17 +127,17 @@ await listDrives()
   <div class="flex items-center justify-between">
     <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
     <AddDrive
-      v-if="currentResource.component == DriveCard"
+      v-if="currentResource.name == 'drive'"
       @drive-created="appendNewDrive"
-      :userDrives="currentResource.objects.map((drive) => drive.name)"
+      :userDrives="objects.map((drive) => drive.name)"
     />
   </div>
   <div>
-    <ul v-if="currentResource.objects.length > 0" :class="currentResource.grid">
+    <ul v-if="objects.length > 0" :class="renderGrid">
       <component
-        :is="currentResource.component"
-        v-for="(obj, index) in currentResource.objects"
-        :key="index"
+        :is="renderComponent"
+        v-for="obj in objects"
+        :key="obj.uid"
         :resource="obj"
         @selected-object="getObject"
       />
@@ -119,4 +148,5 @@ await listDrives()
       <Button class="mt-4">Add a file</Button>
     </div>
   </div>
+  <Toaster />
 </template>
