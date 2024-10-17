@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import { req, type reqOptions } from '@/lib/utils'
 
 type User =
-  | {}
   | {
       uid: string
       email: string
@@ -16,6 +15,7 @@ type User =
       }
       token: Token
     }
+  | {}
 
 type Token = {
   refresh: string

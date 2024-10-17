@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useTokenStore } from '@/stores/userStore'
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -73,4 +73,44 @@ export function validatePassword(password: string) {
   }
 
   return 'Password is valid.'
+}
+
+export function githubAuthURL(clientID: string, callbackURL: string, state: string): string {
+  const clientId = clientID
+  const redirectUri = callbackURL
+  const scope = 'read:user'
+  const allowSignup = 'false'
+
+  sessionStorage.setItem('oauth_state', state)
+
+  const githubAuthUrl = new URL('https://github.com/login/oauth/authorize')
+
+  githubAuthUrl.searchParams.append('client_id', clientId)
+  githubAuthUrl.searchParams.append('redirect_uri', redirectUri)
+  githubAuthUrl.searchParams.append('scope', scope)
+  githubAuthUrl.searchParams.append('state', state)
+  githubAuthUrl.searchParams.append('allow_signup', allowSignup)
+
+  return githubAuthUrl.toString()
+}
+
+export async function OAuthCallBack(data: { state: string; code: string }): Promise<boolean> {
+  const tokenStore = useTokenStore()
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/json')
+
+  const options: reqOptions = {
+    data: data,
+    headers: myHeaders,
+    url: 'http://localhost:8000/api/v1/users/oauth/github/callback/',
+    method: 'POST'
+  }
+  const response = await req(options)
+  if (response.status == 200) {
+    tokenStore.setTokens({
+      access: response.response.access,
+      refresh: response.response.refresh
+    })
+    return true
+  } else return false
 }

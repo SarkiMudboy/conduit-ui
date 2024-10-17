@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useTokenStore } from '@/stores/userStore'
+import { OAuthCallBack } from '@/lib/utils'
 // import HomeView from '@/views/HomeView.vue'
 
 const router = createRouter({
@@ -33,6 +34,11 @@ const router = createRouter({
       path: '/reset-password',
       name: 'password-reset',
       component: () => import('@/views/ResetPassword.vue')
+    },
+    {
+      path: '/github-oauth-callback/',
+      name: 'github-oauth-callback/',
+      component: () => import('@/components/Callback.vue')
     }
   ]
 })
