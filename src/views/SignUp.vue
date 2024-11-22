@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import CustomHeader from '@/components/CustomHeader.vue'
 import { reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCurrentUserStore, useTokenStore } from '@/stores/userStore'
+import { useCurrentUserStore } from '@/stores/userStore'
 import { githubAuthURL, req, type reqOptions } from '@/lib/utils'
 
 type registerData = {
@@ -22,7 +22,6 @@ const userData = reactive({
 })
 
 const userStore = useCurrentUserStore()
-const tokenStore = useTokenStore()
 const router = useRouter()
 
 async function register(data: registerData) {
@@ -37,16 +36,14 @@ async function register(data: registerData) {
     body: raw
   }
 
-  let { token: token, ...currentUser } = await fetch(
+  let { ...currentUser } = await fetch(
     'http://localhost:8000/api/v1/users/sign-up/',
     requestOptions
   )
     .then((response) => response.json())
     .catch((error) => console.error(error))
 
-  tokenStore.tokens = token
   userStore.currentUser = currentUser
-
   router.push('/files')
 }
 

@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { useTokenStore } from '@/stores/userStore'
 import { storeToRefs } from 'pinia'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -19,10 +18,12 @@ export async function req(options: reqOptions) {
   const requestOptions: {
     method: string
     headers: Headers
+    credentials?: 'include'
     body?: string
   } = {
     method: options.method,
-    headers: options.headers
+    headers: options.headers,
+    credentials: 'include'
   }
 
   if (options.method != 'GET') requestOptions.body = JSON.stringify(options.data)
@@ -42,17 +43,54 @@ export async function req(options: reqOptions) {
 
 export async function protectedReq(params: reqOptions) {
   const router = useRouter()
-  const tokenStore = useTokenStore()
 
-  params.headers.append('Authorization', `Bearer ${tokenStore.tokens.access}`)
-  const response = await req(params)
+  let response = await req(params)
 
   if (response.status == 401)
-    await tokenStore.refreshToken().then((r) => {
+    await refreshToken().then(async (r) => {
       if (!r) router.push('/login')
       // else block that makes the request again
+      else response = await req(params)
     })
   return response
+}
+
+// tokens
+
+// function that verifies tokens and
+export async function verify(): Promise<Boolean> {
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/json')
+
+  const params: reqOptions = {
+    data: null,
+    headers: myHeaders,
+    url: 'http://localhost:8000/api/token/verify/',
+    method: 'POST'
+  }
+
+  await req(params).then((r) => {
+    if (r.status == 200) return true
+  })
+  return false
+}
+
+// refresh tokens
+export async function refreshToken(): Promise<Boolean> {
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/json')
+
+  const params: reqOptions = {
+    data: null,
+    headers: myHeaders,
+    url: 'http://localhost:8000/api/token/refresh/',
+    method: 'POST'
+  }
+  await req(params).then((r) => {
+    if (r.status != 200) return false
+  })
+
+  return true
 }
 
 export function validatePassword(password: string) {
@@ -94,23 +132,24 @@ export function githubAuthURL(clientID: string, callbackURL: string, state: stri
   return githubAuthUrl.toString()
 }
 
-export async function OAuthCallBack(data: { state: string; code: string }): Promise<boolean> {
-  const tokenStore = useTokenStore()
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
+// export async function OAuthCallBack(data: { state: string; code: string }): Promise<boolean> {
+//   // const tokenStore = useTokenStore()
+//   const myHeaders = new Headers()
+//   myHeaders.append('Content-Type', 'application/json')
 
-  const options: reqOptions = {
-    data: data,
-    headers: myHeaders,
-    url: 'http://localhost:8000/api/v1/users/oauth/github/callback/',
-    method: 'POST'
-  }
-  const response = await req(options)
-  if (response.status == 200) {
-    tokenStore.setTokens({
-      access: response.response.access,
-      refresh: response.response.refresh
-    })
-    return true
-  } else return false
-}
+//   const options: reqOptions = {
+//     data: data,
+//     headers: myHeaders,
+//     url: 'http://localhost:8000/api/v1/users/oauth/github/callback/',
+//     method: 'POST'
+//   }
+//   const response = await req(options)
+//   if (response.status == 200) {
+//     console.log('happy')
+//     // tokenStore.setTokens({
+//     //   access: response.response.access,
+//     //   refresh: response.response.refresh
+//     // })
+//     return true
+//   } else return false
+// }
