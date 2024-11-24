@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label'
 import CustomHeader from '@/components/CustomHeader.vue'
 import { reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCurrentUserStore, useTokenStore } from '@/stores/userStore'
-import { githubAuthURL, req, type reqOptions } from '@/lib/utils'
+import { useCurrentUserStore } from '@/stores/userStore'
+import { authGitHub, parseGithubAuthURL, req, type reqOptions } from '@/lib/utils'
 
 type registerData = {
   email: string
@@ -22,7 +22,6 @@ const userData = reactive({
 })
 
 const userStore = useCurrentUserStore()
-const tokenStore = useTokenStore()
 const router = useRouter()
 
 async function register(data: registerData) {
@@ -37,38 +36,19 @@ async function register(data: registerData) {
     body: raw
   }
 
-  let { token: token, ...currentUser } = await fetch(
+  let { ...currentUser } = await fetch(
     'http://localhost:8000/api/v1/users/sign-up/',
     requestOptions
   )
     .then((response) => response.json())
     .catch((error) => console.error(error))
 
-  tokenStore.tokens = token
   userStore.currentUser = currentUser
-
   router.push('/files')
 }
 
 async function signUp() {
   await register(userData)
-}
-
-const authGitHub = async () => {
-  const options: reqOptions = {
-    data: null,
-    headers: new Headers(),
-    url: 'http://localhost:8000/api/v1/users/oauth/github',
-    method: 'GET'
-  }
-  const response = await req(options)
-  if (response.status == 200) {
-    const oauthCallbackURL = response.response.callback
-    const oauthClientID = response.response.client_id
-    const state = response.response.state
-    const authURL = githubAuthURL(oauthClientID, oauthCallbackURL, state)
-    window.location.href = authURL
-  } else console.log(response.response)
 }
 </script>
 

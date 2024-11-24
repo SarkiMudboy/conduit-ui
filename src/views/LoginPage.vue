@@ -5,9 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useTokenStore } from '@/stores/userStore'
 import CustomHeader from '@/components/CustomHeader.vue'
-import { storeToRefs } from 'pinia'
+import { authGitHub } from '@/lib/utils'
 
 const credentials: { email: string | undefined; tag: string | undefined; password: string } =
   reactive({
@@ -17,8 +16,6 @@ const credentials: { email: string | undefined; tag: string | undefined; passwor
   })
 
 const router = useRouter()
-const tokenStore = useTokenStore()
-let { setTokens } = tokenStore
 
 let identifier = ref('')
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -31,14 +28,16 @@ async function logIn(creds: { email?: string; tag?: string; password: string }) 
   const requestOptions = {
     method: 'POST',
     headers: myHeaders,
+    credentials: 'include',
     body: raw
   }
 
   await fetch('http://localhost:8000/api/v1/users/sign-in/', requestOptions)
     .then(async (response) => {
-      const r = await response.json()
-      setTokens({ access: r.token.access, refresh: r.token.refresh })
-      router.push('/files')
+      if (response.status == 200) {
+        const r = await response.json()
+        router.push('/files')
+      }
     })
     .catch((error) => console.error(error))
 }
@@ -82,7 +81,7 @@ async function signInUser() {
           <Input id="password" type="password" v-model="credentials.password" required />
         </div>
         <Button type="submit" class="w-full" @click="signInUser"> Login </Button>
-        <Button variant="outline" class="w-full"> Login with GitHub </Button>
+        <Button variant="outline" class="w-full" @click="authGitHub"> Login with GitHub </Button>
       </div>
       <div class="mt-4 text-center text-sm">
         Don't have an account?
