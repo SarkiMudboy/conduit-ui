@@ -7,7 +7,7 @@ import CustomHeader from '@/components/CustomHeader.vue'
 import { reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUserStore } from '@/stores/userStore'
-import { githubAuthURL, req, type reqOptions } from '@/lib/utils'
+import { authGitHub, parseGithubAuthURL, req, type reqOptions } from '@/lib/utils'
 
 type registerData = {
   email: string
@@ -49,23 +49,6 @@ async function register(data: registerData) {
 
 async function signUp() {
   await register(userData)
-}
-
-const authGitHub = async () => {
-  const options: reqOptions = {
-    data: null,
-    headers: new Headers(),
-    url: 'http://localhost:8000/api/v1/users/oauth/github',
-    method: 'GET'
-  }
-  const response = await req(options)
-  if (response.status == 200) {
-    const oauthCallbackURL = response.response.callback
-    const oauthClientID = response.response.client_id
-    const state = response.response.state
-    const authURL = githubAuthURL(oauthClientID, oauthCallbackURL, state)
-    window.location.href = authURL
-  } else console.log(response.response)
 }
 </script>
 

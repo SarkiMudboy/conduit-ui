@@ -48,6 +48,7 @@ export async function protectedReq(params: reqOptions) {
 
   if (response.status == 401)
     await refreshToken().then(async (r) => {
+      console.log(r)
       if (!r) router.push('/login')
       // else block that makes the request again
       else response = await req(params)
@@ -69,10 +70,9 @@ export async function verify(): Promise<Boolean> {
     method: 'POST'
   }
 
-  await req(params).then((r) => {
-    if (r.status == 200) return true
-  })
-  return false
+  const response = await req(params)
+  if (response.status == 200) return true
+  else return false
 }
 
 // refresh tokens
@@ -86,11 +86,10 @@ export async function refreshToken(): Promise<Boolean> {
     url: 'http://localhost:8000/api/token/refresh/',
     method: 'POST'
   }
-  await req(params).then((r) => {
-    if (r.status != 200) return false
-  })
 
-  return true
+  const response = await req(params)
+  if (response.status != 200) return false
+  else return true
 }
 
 export function validatePassword(password: string) {
@@ -113,7 +112,24 @@ export function validatePassword(password: string) {
   return 'Password is valid.'
 }
 
-export function githubAuthURL(clientID: string, callbackURL: string, state: string): string {
+export const authGitHub = async () => {
+  const options: reqOptions = {
+    data: null,
+    headers: new Headers(),
+    url: 'http://localhost:8000/api/v1/users/oauth/github',
+    method: 'GET'
+  }
+  const response = await req(options)
+  if (response.status == 200) {
+    const oauthCallbackURL = response.response.callback
+    const oauthClientID = response.response.client_id
+    const state = response.response.state
+    const authURL = parseGithubAuthURL(oauthClientID, oauthCallbackURL, state)
+    window.location.href = authURL
+  } else console.log(response.response)
+}
+
+export function parseGithubAuthURL(clientID: string, callbackURL: string, state: string): string {
   const clientId = clientID
   const redirectUri = callbackURL
   const scope = 'read:user'

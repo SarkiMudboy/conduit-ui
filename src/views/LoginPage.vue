@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CustomHeader from '@/components/CustomHeader.vue'
+import { authGitHub } from '@/lib/utils'
 
 const credentials: { email: string | undefined; tag: string | undefined; password: string } =
   reactive({
@@ -80,7 +81,7 @@ async function signInUser() {
           <Input id="password" type="password" v-model="credentials.password" required />
         </div>
         <Button type="submit" class="w-full" @click="signInUser"> Login </Button>
-        <Button variant="outline" class="w-full"> Login with GitHub </Button>
+        <Button variant="outline" class="w-full" @click="authGitHub"> Login with GitHub </Button>
       </div>
       <div class="mt-4 text-center text-sm">
         Don't have an account?

@@ -34,11 +34,6 @@ const router = createRouter({
       path: '/reset-password',
       name: 'password-reset',
       component: () => import('@/views/ResetPassword.vue')
-    },
-    {
-      path: '/github-oauth-callback/',
-      name: 'github-oauth-callback/',
-      component: () => import('@/components/Callback.vue')
     }
   ]
 })
