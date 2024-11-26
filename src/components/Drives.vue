@@ -8,6 +8,8 @@ import AddDrive from './AddDrive.vue'
 
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 type base = {
   name: string
@@ -144,8 +146,15 @@ await listDrives()
     </ul>
     <div v-else class="flex flex-col items-center gap-1 text-center mt-9">
       <h3 class="text-2xl font-bold tracking-tight">You have no files</h3>
-      <p class="text-sm text-muted-foreground">Share files with members by uploading a new file</p>
-      <Button class="mt-4">Add a file</Button>
+      <div class="grid w-full max-w-sm items-center gap-1.5">
+        <p class="text-sm text-muted-foreground">
+          Share files with members by uploading a new file
+        </p>
+      </div>
+      <form class="mt-5">
+        <Input id="file-upload" type="file" @change="handleFileChange" />
+        <Button class="mt-4">Add a file</Button>
+      </form>
     </div>
   </div>
   <Toaster />

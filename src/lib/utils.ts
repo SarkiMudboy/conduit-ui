@@ -147,25 +147,3 @@ export function parseGithubAuthURL(clientID: string, callbackURL: string, state:
 
   return githubAuthUrl.toString()
 }
-
-// export async function OAuthCallBack(data: { state: string; code: string }): Promise<boolean> {
-//   // const tokenStore = useTokenStore()
-//   const myHeaders = new Headers()
-//   myHeaders.append('Content-Type', 'application/json')
-
-//   const options: reqOptions = {
-//     data: data,
-//     headers: myHeaders,
-//     url: 'http://localhost:8000/api/v1/users/oauth/github/callback/',
-//     method: 'POST'
-//   }
-//   const response = await req(options)
-//   if (response.status == 200) {
-//     console.log('happy')
-//     // tokenStore.setTokens({
-//     //   access: response.response.access,
-//     //   refresh: response.response.refresh
-//     // })
-//     return true
-//   } else return false
-// }
