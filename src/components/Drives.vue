@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { metadata } from '@vueuse/core/metadata.cjs'
 
 type base = {
   name: string
@@ -50,6 +51,7 @@ const configForComponents: {
 }
 
 interface Resource {
+  uid?: string
   name: string
   title: string
 }
@@ -61,6 +63,9 @@ const currentResource: Ref<Resource> = ref({
   title: 'Your Drives'
 })
 const selectedDrive = ref('')
+
+const file: Ref<Blob | null> = ref(null)
+const fileURL = ref('')
 
 const getObject = async (uid: string, objtype: 'drive' | 'object') => {
   let path = 'http://localhost:8000/api/v1/drives/'
@@ -81,6 +86,7 @@ const getObject = async (uid: string, objtype: 'drive' | 'object') => {
   await protectedReq(params).then((r) => {
     if (r.status == 200) {
       currentResource.value = {
+        uid: uid,
         name: 'storageObject',
         title: r.response.name
       }
@@ -109,6 +115,46 @@ const renderGrid = computed(() => {
 const renderComponent = computed(() => {
   return configForComponents[currentResource.value.name].component
 })
+
+const handleFileChange = (e: any /* change to HTML Event */) => {
+  if (e.target.files) {
+    file.value = e.target.files[0]
+    fileURL.value = URL.createObjectURL(file.value as Blob)
+    console.log(fileURL.value)
+  }
+}
+
+const handleFileUpload = async () => {
+  const reqHeaders = new Headers()
+  reqHeaders.append('Content-Type', 'appllication/json')
+
+  let path = `http://localhost:8000/api/v1/drives/${selectedDrive.value}`
+  if (currentResource.value.name == 'drive') {
+    path += currentResource.value.uid
+  } else {
+    path += `/objects/${currentResource.value.uid}/share/get-upload-url/`
+  }
+
+  if (typeof file == 'object') {
+    const params: reqOptions = {
+      data: {
+        filename: file.value?.text,
+        metadata: {
+          link: fileURL.value
+        }
+      },
+      headers: reqHeaders,
+      url: path,
+      method: 'GET'
+    }
+
+    await protectedReq(params).then((r) => {
+      if ((r.status = 200)) {
+        // upload to AWS using the URL here...
+      }
+    })
+  }
+}
 
 async function listDrives() {
   const myHeaders = new Headers()
@@ -153,7 +199,7 @@ await listDrives()
       </div>
       <form class="mt-5">
         <Input id="file-upload" type="file" @change="handleFileChange" />
-        <Button class="mt-4">Add a file</Button>
+        <Button class="mt-4" @click="handleFileUpload">Add a file</Button>
       </form>
     </div>
   </div>
