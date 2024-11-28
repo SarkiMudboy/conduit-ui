@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, shallowRef, type Ref } from 'vue'
-import { protectedReq, type reqOptions } from '@/lib/utils'
+import { protectedReq, uploadFileToS3, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
 import Objects from './Objects.vue'
 import Button from '@/components/ui/button/Button.vue'
@@ -10,7 +10,6 @@ import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { metadata } from '@vueuse/core/metadata.cjs'
 
 type base = {
   name: string
@@ -26,6 +25,17 @@ export type Drive = base & {
 type StorageObjects = base & {
   metadata: object
   path: string | null
+}
+
+type FileData = {
+  filename: string
+  filesize: number
+  metadata: object
+}
+
+type FileResourceData = {
+  resource_uid?: string
+  file: FileData
 }
 
 // type Object = base & {
@@ -51,7 +61,8 @@ const configForComponents: {
 }
 
 interface Resource {
-  uid?: string
+  uid?: string /* if the resource is a storage object i.e folder , the uid of the object is attached else its omitted. 
+  This helps us to diff between when we are in a folder and drive root */
   name: string
   title: string
 }
@@ -127,32 +138,46 @@ const handleFileChange = (e: any /* change to HTML Event */) => {
 const handleFileUpload = async () => {
   const reqHeaders = new Headers()
   reqHeaders.append('Content-Type', 'appllication/json')
+  let presignedURL = new String()
 
-  let path = `http://localhost:8000/api/v1/drives/${selectedDrive.value}`
-  if (currentResource.value.name == 'drive') {
-    path += currentResource.value.uid
-  } else {
-    path += `/objects/${currentResource.value.uid}/share/get-upload-url/`
+  let path = `http://localhost:8000/api/v1/drives/${selectedDrive.value}/share/get-upload-url/`
+  let uploadData: FileResourceData = {
+    file: {
+      filename: file.value?.name,
+      filesize: file.value?.size as number,
+      metadata: {
+        link: fileURL.value
+      }
+    }
   }
 
   if (typeof file == 'object') {
     const params: reqOptions = {
-      data: {
-        filename: file.value?.text,
-        metadata: {
-          link: fileURL.value
-        }
-      },
+      data: uploadData,
       headers: reqHeaders,
       url: path,
       method: 'GET'
     }
 
     await protectedReq(params).then((r) => {
-      if ((r.status = 200)) {
-        // upload to AWS using the URL here...
-      }
+      if (r.status == 200) {
+        presignedURL = r.response.url
+      } // else error toast
     })
+    /*
+    /drives/drive_uid/share/get_upload_url/
+    /share/get_upload_url/
+
+    {
+      'uid': 'xxxxx' // if a uid is provided then its an object?
+      'file' {
+        'filename': 'bla bla',
+        'filesize': 23KB
+        ... 
+        }
+}
+    */
+    await uploadFileToS3(presignedURL as string, file.value as Blob)
   }
 }
 
