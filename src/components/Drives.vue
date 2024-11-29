@@ -8,9 +8,9 @@ import AddDrive from './AddDrive.vue'
 
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
-import { Label } from '@/components/ui/label'
+
 import { Input } from '@/components/ui/input'
-import { getAWSUploadPresignedURL, initiateUpload } from '@/lib/uploads/fileUpload'
+import { getAWSUploadPresignedURL, uploadFileToS3 } from '@/lib/uploads/fileUpload'
 
 type base = {
   name: string
@@ -79,11 +79,16 @@ const currentResource: Ref<Resource> = ref({
 })
 const selectedDrive = ref('')
 
-const fileUploadData = reactive({
+const fileUploadData: {
+  file: File
+  fileURL: string
+  uploadPresignedURL: string
+  eagerLoadUrlPromise: Promise<String> | null
+} = reactive({
   file: new File(['content'], 'example.txt', { type: 'text/plain' }),
   fileURL: '',
   uploadPresignedURL: '',
-  downloadPresignedURL: ''
+  eagerLoadUrlPromise: null
 })
 
 const getObject = async (uid: string, objtype: 'drive' | 'object') => {
@@ -142,12 +147,22 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
     console.log(fileUploadData.fileURL)
 
     if (fileUploadData.file) {
-      fileUploadData.uploadPresignedURL = (await getAWSUploadPresignedURL(
+      fileUploadData.eagerLoadUrlPromise = getAWSUploadPresignedURL(
         fileUploadData.file,
         selectedDrive.value,
         currentResource.value.uid
-      )) as string // might have to check to see how to resolve a promise
+      )
     }
+  }
+}
+
+export const initiateUpload = async () => {
+  if (fileUploadData.eagerLoadUrlPromise) {
+    const url = await fileUploadData.eagerLoadUrlPromise.then((url) => String(url))
+    await uploadFileToS3(url, fileUploadData.file)
+  } else {
+    // toast error here
+    console.log('Error getting URL')
   }
 }
 
@@ -194,11 +209,7 @@ await listDrives()
       </div>
       <form class="mt-5">
         <Input id="file-upload" type="file" @change="handleFileChange" />
-        <Button
-          class="mt-4"
-          @click="initiateUpload(fileUploadData.uploadPresignedURL, fileUploadData.file)"
-          >Add file</Button
-        >
+        <Button class="mt-4" @click="initiateUpload">Add file</Button>
       </form>
     </div>
   </div>

@@ -147,15 +147,3 @@ export function parseGithubAuthURL(clientID: string, callbackURL: string, state:
 
   return githubAuthUrl.toString()
 }
-
-export const uploadFileToS3 = async (presignedURL: string, file: Blob) => {
-  const headers = { 'Content-Type': '*' }
-  const params = {
-    method: 'PUT',
-    headers: headers,
-    body: file
-  }
-  await fetch(presignedURL, params).then((r) => {
-    // show toast with upload success or failed.
-  })
-}

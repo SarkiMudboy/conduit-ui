@@ -62,4 +62,14 @@ export const getAWSUploadPresignedURL = async (
   return presignedURL
 }
 
-export const initiateUpload = async (url: string, file: Blob) => {}
+export const uploadFileToS3 = async (presignedURL: string, file: Blob) => {
+  const headers = { 'Content-Type': '*' }
+  const params = {
+    method: 'PUT',
+    headers: headers,
+    body: file
+  }
+  await fetch(presignedURL, params).then((r) => {
+    // show toast with upload success or failed.
+  })
+}
