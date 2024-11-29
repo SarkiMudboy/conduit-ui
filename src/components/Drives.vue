@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, shallowRef, type Ref } from 'vue'
-import { protectedReq, uploadFileToS3, type reqOptions } from '@/lib/utils'
+import { protectedReq, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
 import Objects from './Objects.vue'
 import Button from '@/components/ui/button/Button.vue'
@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { getAWSUploadPresignedURL, initiateUpload } from '@/lib/uploads/fileUpload'
 
 type base = {
   name: string
@@ -61,7 +62,9 @@ const configForComponents: {
 }
 
 interface Resource {
-  uid?: string /* if the resource is a storage object i.e folder , the uid of the object is attached else its omitted. 
+  uid:
+    | string
+    | null /* if the resource is a storage object i.e folder , the uid of the object is attached else its set to null. 
   This helps us to diff between when we are in a folder and drive root */
   name: string
   title: string
@@ -70,13 +73,18 @@ interface Resource {
 const { toast } = useToast()
 
 const currentResource: Ref<Resource> = ref({
+  uid: null,
   name: 'drive',
   title: 'Your Drives'
 })
 const selectedDrive = ref('')
 
-const file: Ref<Blob | null> = ref(null)
-const fileURL = ref('')
+const fileUploadData = reactive({
+  file: new File(['content'], 'example.txt', { type: 'text/plain' }),
+  fileURL: '',
+  uploadPresignedURL: '',
+  downloadPresignedURL: ''
+})
 
 const getObject = async (uid: string, objtype: 'drive' | 'object') => {
   let path = 'http://localhost:8000/api/v1/drives/'
@@ -127,57 +135,19 @@ const renderComponent = computed(() => {
   return configForComponents[currentResource.value.name].component
 })
 
-const handleFileChange = (e: any /* change to HTML Event */) => {
+const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
-    file.value = e.target.files[0]
-    fileURL.value = URL.createObjectURL(file.value as Blob)
-    console.log(fileURL.value)
-  }
-}
+    fileUploadData.file = e.target.files[0]
+    fileUploadData.fileURL = URL.createObjectURL(fileUploadData.file as File)
+    console.log(fileUploadData.fileURL)
 
-const handleFileUpload = async () => {
-  const reqHeaders = new Headers()
-  reqHeaders.append('Content-Type', 'appllication/json')
-  let presignedURL = new String()
-
-  let path = `http://localhost:8000/api/v1/drives/${selectedDrive.value}/share/get-upload-url/`
-  let uploadData: FileResourceData = {
-    file: {
-      filename: file.value?.name,
-      filesize: file.value?.size as number,
-      metadata: {
-        link: fileURL.value
-      }
+    if (fileUploadData.file) {
+      fileUploadData.uploadPresignedURL = (await getAWSUploadPresignedURL(
+        fileUploadData.file,
+        selectedDrive.value,
+        currentResource.value.uid
+      )) as string // might have to check to see how to resolve a promise
     }
-  }
-
-  if (typeof file == 'object') {
-    const params: reqOptions = {
-      data: uploadData,
-      headers: reqHeaders,
-      url: path,
-      method: 'GET'
-    }
-
-    await protectedReq(params).then((r) => {
-      if (r.status == 200) {
-        presignedURL = r.response.url
-      } // else error toast
-    })
-    /*
-    /drives/drive_uid/share/get_upload_url/
-    /share/get_upload_url/
-
-    {
-      'uid': 'xxxxx' // if a uid is provided then its an object?
-      'file' {
-        'filename': 'bla bla',
-        'filesize': 23KB
-        ... 
-        }
-}
-    */
-    await uploadFileToS3(presignedURL as string, file.value as Blob)
   }
 }
 
@@ -224,7 +194,11 @@ await listDrives()
       </div>
       <form class="mt-5">
         <Input id="file-upload" type="file" @change="handleFileChange" />
-        <Button class="mt-4" @click="handleFileUpload">Add a file</Button>
+        <Button
+          class="mt-4"
+          @click="initiateUpload(fileUploadData.uploadPresignedURL, fileUploadData.file)"
+          >Add file</Button
+        >
       </form>
     </div>
   </div>
