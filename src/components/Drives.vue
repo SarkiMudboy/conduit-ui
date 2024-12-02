@@ -144,7 +144,7 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
     fileUploadData.file = e.target.files[0]
     fileUploadData.fileURL = URL.createObjectURL(fileUploadData.file as File)
-    console.log(fileUploadData.fileURL)
+    console.log(fileUploadData.file.size)
 
     if (fileUploadData.file) {
       fileUploadData.eagerLoadUrlPromise = getAWSUploadPresignedURL(
@@ -156,7 +156,7 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
   }
 }
 
-export const initiateUpload = async () => {
+const initiateUpload = async () => {
   if (fileUploadData.eagerLoadUrlPromise) {
     const url = await fileUploadData.eagerLoadUrlPromise.then((url) => String(url))
     await uploadFileToS3(url, fileUploadData.file)

@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { storeToRefs } from 'pinia'
+import { useCSRFTokenStore } from '@/stores/tokenStore'
 import { useRouter, useRoute } from 'vue-router'
 
 export function cn(...inputs: ClassValue[]) {
@@ -26,7 +27,13 @@ export async function req(options: reqOptions) {
     credentials: 'include'
   }
 
-  if (options.method != 'GET') requestOptions.body = JSON.stringify(options.data)
+  if (options.method != 'GET') {
+    requestOptions.body = JSON.stringify(options.data)
+  }
+  if (options.method == 'POST') {
+    const tokenStore = useCSRFTokenStore()
+    requestOptions.headers.append('X-CSRFToken', tokenStore.csrfToken)
+  }
 
   const responseData = await fetch(options.url, requestOptions)
     .then(async (response) => {

@@ -4,12 +4,12 @@ import { protectedReq, type reqOptions } from '../utils'
 type FileData = {
   filename: string
   filesize: number
-  metadata: object
+  // metadata: object
 }
 
 type FileResourceData = {
   resource_uid?: string
-  file: FileData
+  file: FileData[]
 }
 
 export const getAWSUploadPresignedURL = async (
@@ -18,16 +18,18 @@ export const getAWSUploadPresignedURL = async (
   resourceUid: string | null
 ) => {
   const reqHeaders = new Headers()
-  reqHeaders.append('Content-Type', 'appllication/json')
+  reqHeaders.append('Content-Type', 'application/json')
   let presignedURL = new String()
 
   let path = `http://localhost:8000/api/v1/drives/${driveUid}/share/get-upload-url/`
   let uploadData: FileResourceData = {
-    file: {
-      filename: file.name,
-      filesize: file.size,
-      metadata: {}
-    }
+    file: [
+      {
+        filename: file.name,
+        filesize: file.size
+        // metadata: {}
+      }
+    ]
   }
 
   if (resourceUid) {
@@ -38,12 +40,13 @@ export const getAWSUploadPresignedURL = async (
     data: uploadData,
     headers: reqHeaders,
     url: path,
-    method: 'GET'
+    method: 'POST'
   }
 
   await protectedReq(params).then((r) => {
     if (r.status == 200) {
       presignedURL = r.response.url
+      console.log(presignedURL)
     } // else error toast
   })
   /*
