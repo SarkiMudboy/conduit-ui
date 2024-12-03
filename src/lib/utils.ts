@@ -30,7 +30,7 @@ export async function req(options: reqOptions) {
   if (options.method != 'GET') {
     requestOptions.body = JSON.stringify(options.data)
   }
-  if (options.method == 'POST') {
+  if (options.method == 'POST' || options.method == 'PUT') {
     const tokenStore = useCSRFTokenStore()
     requestOptions.headers.append('X-CSRFToken', tokenStore.csrfToken)
   }
