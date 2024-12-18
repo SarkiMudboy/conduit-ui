@@ -121,13 +121,16 @@ const renderComponent = computed(() => {
 
 const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
-    console.log(e.target.files)
+    const fileList: File[] = Array.from(e.target.files)
+    fileUploadStore.addFiles(fileList)
+    // TODO: add the path as the name or additional field...
 
-    fileUploadStore.addFiles(e.target.files)
+    const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
+
     if (fileUploadStore.fileData) {
       eagerLoadUrlPromise = getAWSUploadPresignedURL(
         fileUploadStore.fileData,
-        false,
+        isBulk,
         selectedDrive.value,
         currentResource.value.uid
       )

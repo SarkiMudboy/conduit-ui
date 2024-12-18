@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 
 export type FileData = {
   filename: string
+  path: string | null
   filesize: number
   id: string
   metadata?: object
@@ -30,7 +31,12 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
         uploadPresignedURL: ''
       }
 
-      fileData.push({ filename: file.name, filesize: file.size, id: id })
+      fileData.push({
+        filename: file.name,
+        path: file.webkitRelativePath,
+        filesize: file.size,
+        id: id
+      })
     })
   }
 
