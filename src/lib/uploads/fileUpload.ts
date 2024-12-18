@@ -1,35 +1,35 @@
 import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '../utils'
-
-type FileData = {
-  filename: string
-  filesize: number
-  // metadata: object
-}
+import { type FileData } from '@/stores/uploadFileStore'
 
 type FileResourceData = {
   resource_uid?: string
-  file: FileData[]
+  files: FileData[]
+  bulk: boolean
+}
+
+export type FileUploadPresignedURL = {
+  id: string
+  url: string
 }
 
 export const getAWSUploadPresignedURL = async (
-  file: File,
+  files: FileData[],
+  bulk: boolean,
   driveUid: string,
   resourceUid: string | null
-) => {
+): Promise<FileUploadPresignedURL[]> => {
   const reqHeaders = new Headers()
   reqHeaders.append('Content-Type', 'application/json')
-  let presignedURL = new String()
+
+  let presignedURLs: FileUploadPresignedURL[] = []
 
   let path = `http://localhost:8000/api/v1/drives/${driveUid}/share/get-upload-url/`
   let uploadData: FileResourceData = {
-    file: [
-      {
-        filename: file.name,
-        filesize: file.size
-        // metadata: {}
-      }
-    ]
+    files: files,
+    bulk: bulk /* true: its bulk file upload, for directory uploads the flag is set to false,
+    false: single file or directory
+    */
   }
 
   if (resourceUid) {
@@ -45,24 +45,12 @@ export const getAWSUploadPresignedURL = async (
 
   await protectedReq(params).then((r) => {
     if (r.status == 200) {
-      presignedURL = r.response.url
-      console.log(presignedURL)
+      presignedURLs = r.response
+      console.log(presignedURLs)
     } // else error toast
   })
-  /*
-    /drives/drive_uid/share/get_upload_url/
-    /share/get_upload_url/
-  
-    {
-      'uid': 'xxxxx' // if a uid is provided then its an object?
-      'file' {
-        'filename': 'bla bla',
-        'filesize': 23KB
-        ... 
-        }
-  }
-    */
-  return presignedURL
+
+  return presignedURLs
 }
 
 export const uploadFileToS3 = async (presignedURL: string, file: Blob) => {

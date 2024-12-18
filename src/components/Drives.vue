@@ -10,7 +10,15 @@ import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 
 import { Input } from '@/components/ui/input'
-import { getAWSUploadPresignedURL, uploadFileToS3 } from '@/lib/uploads/fileUpload'
+import {
+  getAWSUploadPresignedURL,
+  uploadFileToS3,
+  type FileUploadPresignedURL
+} from '@/lib/uploads/fileUpload'
+import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
+
+const { toast } = useToast()
+const fileUploadStore = useUploadFileStore()
 
 type base = {
   name: string
@@ -28,22 +36,23 @@ type StorageObjects = base & {
   path: string | null
 }
 
-type FileData = {
-  filename: string
-  filesize: number
-  metadata: object
+interface Resource {
+  uid: string | null /* if the resource is a storage object i.e folder , 
+  the uid of the object is set else its set to null. 
+  This helps us to differentiate between when we are in a folder and drive root */
+  name: string
+  title: string
 }
 
-type FileResourceData = {
-  resource_uid?: string
-  file: FileData
-}
-
-// type Object = base & {
-//   members: string[]
-// }
+const currentResource: Ref<Resource> = ref({
+  uid: null,
+  name: 'drive',
+  title: 'Your Drives'
+})
 
 const objects: Ref<Drive[] | StorageObjects[]> = ref([])
+const selectedDrive = ref('')
+let eagerLoadUrlPromise: Promise<FileUploadPresignedURL[]> | null = null
 
 const configForComponents: {
   [key: string]: {
@@ -60,36 +69,6 @@ const configForComponents: {
     grid: 'grid grid-cols-7 gap-4'
   }
 }
-
-interface Resource {
-  uid:
-    | string
-    | null /* if the resource is a storage object i.e folder , the uid of the object is attached else its set to null. 
-  This helps us to diff between when we are in a folder and drive root */
-  name: string
-  title: string
-}
-
-const { toast } = useToast()
-
-const currentResource: Ref<Resource> = ref({
-  uid: null,
-  name: 'drive',
-  title: 'Your Drives'
-})
-const selectedDrive = ref('')
-
-const fileUploadData: {
-  file: File
-  fileURL: string
-  uploadPresignedURL: string
-  eagerLoadUrlPromise: Promise<String> | null
-} = reactive({
-  file: new File(['content'], 'example.txt', { type: 'text/plain' }),
-  fileURL: '',
-  uploadPresignedURL: '',
-  eagerLoadUrlPromise: null
-})
 
 const getObject = async (uid: string, objtype: 'drive' | 'object') => {
   let path = 'http://localhost:8000/api/v1/drives/'
@@ -142,13 +121,13 @@ const renderComponent = computed(() => {
 
 const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
-    fileUploadData.file = e.target.files[0]
-    fileUploadData.fileURL = URL.createObjectURL(fileUploadData.file as File)
-    console.log(fileUploadData.file.size)
+    console.log(e.target.files)
 
-    if (fileUploadData.file) {
-      fileUploadData.eagerLoadUrlPromise = getAWSUploadPresignedURL(
-        fileUploadData.file,
+    fileUploadStore.addFiles(e.target.files)
+    if (fileUploadStore.fileData) {
+      eagerLoadUrlPromise = getAWSUploadPresignedURL(
+        fileUploadStore.fileData,
+        false,
         selectedDrive.value,
         currentResource.value.uid
       )
@@ -157,12 +136,15 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
 }
 
 const initiateUpload = async () => {
-  if (fileUploadData.eagerLoadUrlPromise) {
-    const url = await fileUploadData.eagerLoadUrlPromise.then((url) => String(url))
-    await uploadFileToS3(url, fileUploadData.file)
-  } else {
-    // toast error here
-    console.log('Error getting URL')
+  if (eagerLoadUrlPromise) {
+    const presignedUrls = await eagerLoadUrlPromise.then((urls) => urls)
+    presignedUrls.forEach(async (url) => {
+      fileUploadStore.setUploadURL(url.id, url.url)
+      await uploadFileToS3(url.url, fileUploadStore.getFile(url.id))
+    })
+    // } else {
+    //   // toast error here
+    //   console.log('Error getting URL')
   }
 }
 
@@ -181,6 +163,7 @@ async function listDrives() {
 }
 await listDrives()
 </script>
+
 <template>
   <div class="flex items-center justify-between">
     <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
@@ -208,7 +191,7 @@ await listDrives()
         </p>
       </div>
       <form class="mt-5">
-        <Input id="file-upload" type="file" @change="handleFileChange" />
+        <Input id="file-upload" type="file" multiple webkitdirectory @change="handleFileChange" />
         <Button class="mt-4" @click="initiateUpload">Add file</Button>
       </form>
     </div>
