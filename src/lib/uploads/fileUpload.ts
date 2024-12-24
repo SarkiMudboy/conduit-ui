@@ -24,8 +24,8 @@ export const getAWSUploadPresignedURL = async (
 
   let presignedURLs: FileUploadPresignedURL[] = []
 
-  let path = `http://localhost:8000/api/v1/drives/${driveUid}/share/get-upload-url/`
-  let uploadData: FileResourceData = {
+  const path = `http://localhost:8000/api/v1/drives/${driveUid}/share/get-upload-url/`
+  const uploadData: FileResourceData = {
     files: files,
     bulk: bulk /* true: its bulk file upload, for directory uploads the flag is set to false,
     false: single file or directory
@@ -43,12 +43,12 @@ export const getAWSUploadPresignedURL = async (
     method: 'POST'
   }
 
-  await protectedReq(params).then((r) => {
-    if (r.status == 200) {
-      presignedURLs = r.response
-      console.log(presignedURLs)
-    } // else error toast
-  })
+   await protectedReq(params).then((r) => {
+     if (r.status == 200) {
+       presignedURLs = r.response
+       console.log(presignedURLs)
+     } // else error toast
+   })
 
   return presignedURLs
 }

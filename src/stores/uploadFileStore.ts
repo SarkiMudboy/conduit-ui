@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { ref, type Ref } from 'vue'
 
 export type FileData = {
   filename: string
@@ -17,21 +17,21 @@ export type FileObject = {
 }
 
 export const useUploadFileStore = defineStore('useUploadFileStore', () => {
-  const fileUploadData: Record<string, FileObject> = reactive({})
-  const fileData: FileData[] = reactive([])
+  const fileUploadData: Ref<{ [key: string]: FileObject }> = ref({})
+  const fileData: Ref<FileData[]> = ref([])
 
   const addFiles = (files: File[]) => {
     files.forEach((file) => {
       const id = crypto.randomUUID() as string
 
-      fileUploadData[id] = {
+      fileUploadData.value[id] = {
         file: file,
         fileURL: URL.createObjectURL(file),
         id: id, // id to identify each file through out the process **required by the API**
         uploadPresignedURL: ''
       }
 
-      fileData.push({
+      fileData.value.push({
         filename: file.name,
         path: file.webkitRelativePath,
         filesize: file.size,
@@ -41,11 +41,16 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
   }
 
   const setUploadURL = (id: string, url: string) => {
-    fileUploadData[id].uploadPresignedURL = url
+    fileUploadData.value[id].uploadPresignedURL = url
   }
 
   const getFile = (id: string) => {
-    return fileUploadData[id].file
+    return fileUploadData.value[id].file
+  }
+
+  const clearFiles = () => {
+    fileUploadData.value = {}
+    fileData.value = []
   }
 
   return {
@@ -53,6 +58,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     fileData,
     addFiles,
     getFile,
-    setUploadURL
+    setUploadURL,
+    clearFiles
   }
 })
