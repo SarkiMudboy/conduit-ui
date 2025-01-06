@@ -103,7 +103,7 @@ const getObject = async (uid: string, objtype: 'drive' | 'object') => {
 
 const appendNewDrive = (drive: Drive) => {
   if (currentResource.value.name == 'drive') {
-    ;(objects.value as Drive[]).push(drive)
+    ; (objects.value as Drive[]).push(drive)
     toast({
       title: 'Drive created',
       description: `${drive.name} added!`
@@ -127,7 +127,6 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
     fileUploadStore.addFiles(fileList)
 
     const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
-    console.log(fileUploadStore.fileData)
     if (fileUploadStore.fileData) {
       eagerLoadUrlPromise = await getAWSUploadPresignedURL(
         fileUploadStore.fileData,
@@ -139,19 +138,31 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
   }
 }
 
-const initiateUpload = async () => {
+const initiateUpload = async (e: MouseEvent) => {
+  e.preventDefault()
   if (eagerLoadUrlPromise) {
-    const presignedUrls = await eagerLoadUrlPromise.then((urls) => urls)
-    presignedUrls.forEach(async (url) => {
-      fileUploadStore.setUploadURL(url.id, url.url)
-      await uploadFileToS3(url.url, fileUploadStore.getFile(url.id))
-    })
-    // } else {
-    //   // toast error here
-    //   console.log('Error getting URL')
-  }
-}
+    try {
+      const presignedUrls = await eagerLoadUrlPromise;
 
+      if (presignedUrls?.length) {
+        console.log(presignedUrls);
+
+        for (const url of presignedUrls) {
+          fileUploadStore.setUploadURL(url.id, url.url);
+          const fileObj = fileUploadStore.getFile(url.id);
+          await uploadFileToS3(url.url, fileObj);
+        }
+      } else {
+        console.error('Error: No presigned URLs received.');
+        // Trigger toast notification for error here
+      }
+    } catch (error) {
+      console.error('Error getting presigned URLs:', error);
+      // Trigger toast notification for error here
+    }
+  }
+
+}
 async function listDrives() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -171,21 +182,13 @@ await listDrives()
 <template>
   <div class="flex items-center justify-between">
     <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
-    <AddDrive
-      v-if="currentResource.name == 'drive'"
-      @drive-created="appendNewDrive"
-      :userDrives="objects.map((drive) => drive.name)"
-    />
+    <AddDrive v-if="currentResource.name == 'drive'" @drive-created="appendNewDrive"
+      :userDrives="objects.map((drive) => drive.name)" />
   </div>
   <div>
     <ul v-if="objects.length > 0" :class="renderGrid">
-      <component
-        :is="renderComponent"
-        v-for="obj in objects"
-        :key="obj.uid"
-        :resource="obj"
-        @selected-object="getObject"
-      />
+      <component :is="renderComponent" v-for="obj in objects" :key="obj.uid" :resource="obj"
+        @selected-object="getObject" />
     </ul>
     <div v-else class="flex flex-col items-center gap-1 text-center mt-9">
       <h3 class="text-2xl font-bold tracking-tight">You have no files</h3>

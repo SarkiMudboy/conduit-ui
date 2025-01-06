@@ -33,7 +33,7 @@ const isOpen = ref(false)
 const hasError = ref(false)
 const errorMessage = ref('')
 
-const setIsOpen = (value: any) => {
+const setIsOpen = (value: boolean) => {
   isOpen.value = value
 }
 
@@ -86,8 +86,7 @@ const addDrive = async () => {
     <DialogContent class="sm:max-w-[500px]">
       <DialogClose
         class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-        @click="closeDialog"
-      >
+        @click="closeDialog">
         <X class="w-4 h-4" />
         <span class="sr-only">Close</span>
       </DialogClose>
@@ -99,20 +98,13 @@ const addDrive = async () => {
         <div>
           <div class="flex flex-row items-center gap-4">
             <Label for="name" class="text-right font-bold text-nowrap"> Drive Name </Label>
-            <Input
-              id="name"
-              placeholder="Ex: My Images"
-              :class="[
-                'col-span-3',
-                {
-                  'border-red-500 ring-2 ring-red-500 focus:border-red-500 focus:ring-red-500':
-                    hasError
-                }
-              ]"
-              required
-              v-model="newDrive.name"
-              @input="validateInput"
-            />
+            <Input id="name" placeholder="Ex: My Images" :class="[
+              'col-span-3',
+              {
+                'border-red-500 ring-2 ring-red-500 focus:border-red-500 focus:ring-red-500':
+                  hasError
+              }
+            ]" required v-model="newDrive.name" @input="validateInput" />
           </div>
           <p v-if="hasError" class="ml-[100px] w-1/2 text-sm text-red-500">
             {{ errorMessage }}

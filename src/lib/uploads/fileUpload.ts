@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '../utils'
 import { type FileData } from '@/stores/uploadFileStore'
+import { useToast } from '@/components/ui/toast/use-toast'
 
 type FileResourceData = {
   resource_uid?: string
@@ -43,17 +44,18 @@ export const getAWSUploadPresignedURL = async (
     method: 'POST'
   }
 
-   await protectedReq(params).then((r) => {
-     if (r.status == 200) {
-       presignedURLs = r.response
-       console.log(presignedURLs)
-     } // else error toast
-   })
+  await protectedReq(params).then((r) => {
+    if (r.status == 200) {
+      presignedURLs = r.response
+      console.log(presignedURLs)
+    } // else error toast
+  })
 
   return presignedURLs
 }
-
-export const uploadFileToS3 = async (presignedURL: string, file: Blob) => {
+// may need to move this to workers...
+export const uploadFileToS3 = async (presignedURL: string, file: File) => {
+  const { toast } = useToast()
   const headers = { 'Content-Type': '*' }
   const params = {
     method: 'PUT',
@@ -61,6 +63,13 @@ export const uploadFileToS3 = async (presignedURL: string, file: Blob) => {
     body: file
   }
   await fetch(presignedURL, params).then((r) => {
-    // show toast with upload success or failed.
+    if (r.status == 200) {
+      toast({ title: 'File uploaded', description: `${file.name} has been uploaded sucessfully` })
+    } else
+      toast({
+        title: 'Failed upload',
+        description: `Failed to upload ${file.name}`,
+        variant: 'destructive'
+      })
   })
 }
