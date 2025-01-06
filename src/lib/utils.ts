@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { storeToRefs } from 'pinia'
+import { useCSRFTokenStore } from '@/stores/tokenStore'
 import { useRouter, useRoute } from 'vue-router'
 
 export function cn(...inputs: ClassValue[]) {
@@ -26,7 +27,13 @@ export async function req(options: reqOptions) {
     credentials: 'include'
   }
 
-  if (options.method != 'GET') requestOptions.body = JSON.stringify(options.data)
+  if (options.method != 'GET') {
+    requestOptions.body = JSON.stringify(options.data)
+  }
+  if (options.method == 'POST' || options.method == 'PUT') {
+    const tokenStore = useCSRFTokenStore()
+    requestOptions.headers.append('X-CSRFToken', tokenStore.csrfToken)
+  }
 
   const responseData = await fetch(options.url, requestOptions)
     .then(async (response) => {
@@ -147,25 +154,3 @@ export function parseGithubAuthURL(clientID: string, callbackURL: string, state:
 
   return githubAuthUrl.toString()
 }
-
-// export async function OAuthCallBack(data: { state: string; code: string }): Promise<boolean> {
-//   // const tokenStore = useTokenStore()
-//   const myHeaders = new Headers()
-//   myHeaders.append('Content-Type', 'application/json')
-
-//   const options: reqOptions = {
-//     data: data,
-//     headers: myHeaders,
-//     url: 'http://localhost:8000/api/v1/users/oauth/github/callback/',
-//     method: 'POST'
-//   }
-//   const response = await req(options)
-//   if (response.status == 200) {
-//     console.log('happy')
-//     // tokenStore.setTokens({
-//     //   access: response.response.access,
-//     //   refresh: response.response.refresh
-//     // })
-//     return true
-//   } else return false
-// }

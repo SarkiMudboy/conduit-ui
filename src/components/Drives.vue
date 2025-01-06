@@ -9,6 +9,17 @@ import AddDrive from './AddDrive.vue'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 
+import { Input } from '@/components/ui/input'
+import {
+  getAWSUploadPresignedURL,
+  uploadFileToS3,
+  type FileUploadPresignedURL
+} from '@/lib/uploads/fileUpload'
+import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
+
+const { toast } = useToast()
+const fileUploadStore = useUploadFileStore()
+
 type base = {
   name: string
   size: number
@@ -25,11 +36,23 @@ type StorageObjects = base & {
   path: string | null
 }
 
-// type Object = base & {
-//   members: string[]
-// }
+interface Resource {
+  uid: string | null /* if the resource is a storage object i.e folder , 
+  the uid of the object is set else its set to null. 
+  This helps us to differentiate between when we are in a folder and drive root */
+  name: string
+  title: string
+}
+
+const currentResource: Ref<Resource> = ref({
+  uid: null,
+  name: 'drive',
+  title: 'Your Drives'
+})
 
 const objects: Ref<Drive[] | StorageObjects[]> = ref([])
+const selectedDrive = ref('')
+let eagerLoadUrlPromise: Promise<FileUploadPresignedURL[]> | null = null
 
 const configForComponents: {
   [key: string]: {
@@ -46,19 +69,6 @@ const configForComponents: {
     grid: 'grid grid-cols-7 gap-4'
   }
 }
-
-interface Resource {
-  name: string
-  title: string
-}
-
-const { toast } = useToast()
-
-const currentResource: Ref<Resource> = ref({
-  name: 'drive',
-  title: 'Your Drives'
-})
-const selectedDrive = ref('')
 
 const getObject = async (uid: string, objtype: 'drive' | 'object') => {
   let path = 'http://localhost:8000/api/v1/drives/'
@@ -79,6 +89,7 @@ const getObject = async (uid: string, objtype: 'drive' | 'object') => {
   await protectedReq(params).then((r) => {
     if (r.status == 200) {
       currentResource.value = {
+        uid: uid,
         name: 'storageObject',
         title: r.response.name
       }
@@ -92,7 +103,7 @@ const getObject = async (uid: string, objtype: 'drive' | 'object') => {
 
 const appendNewDrive = (drive: Drive) => {
   if (currentResource.value.name == 'drive') {
-    ;(objects.value as Drive[]).push(drive)
+    ; (objects.value as Drive[]).push(drive)
     toast({
       title: 'Drive created',
       description: `${drive.name} added!`
@@ -108,6 +119,50 @@ const renderComponent = computed(() => {
   return configForComponents[currentResource.value.name].component
 })
 
+const handleFileChange = async (e: any /* change to HTML Event */) => {
+  if (e.target.files) {
+    const fileList: File[] = Array.from(e.target.files)
+
+    fileUploadStore.clearFiles()
+    fileUploadStore.addFiles(fileList)
+
+    const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
+    if (fileUploadStore.fileData) {
+      eagerLoadUrlPromise = await getAWSUploadPresignedURL(
+        fileUploadStore.fileData,
+        isBulk,
+        selectedDrive.value,
+        currentResource.value.uid
+      )
+    }
+  }
+}
+
+const initiateUpload = async (e: MouseEvent) => {
+  e.preventDefault()
+  if (eagerLoadUrlPromise) {
+    try {
+      const presignedUrls = await eagerLoadUrlPromise;
+
+      if (presignedUrls?.length) {
+        console.log(presignedUrls);
+
+        for (const url of presignedUrls) {
+          fileUploadStore.setUploadURL(url.id, url.url);
+          const fileObj = fileUploadStore.getFile(url.id);
+          await uploadFileToS3(url.url, fileObj);
+        }
+      } else {
+        console.error('Error: No presigned URLs received.');
+        // Trigger toast notification for error here
+      }
+    } catch (error) {
+      console.error('Error getting presigned URLs:', error);
+      // Trigger toast notification for error here
+    }
+  }
+
+}
 async function listDrives() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -123,29 +178,29 @@ async function listDrives() {
 }
 await listDrives()
 </script>
+
 <template>
   <div class="flex items-center justify-between">
     <h1 class="text-lg font-semibold md:text-2xl">{{ currentResource.title }}</h1>
-    <AddDrive
-      v-if="currentResource.name == 'drive'"
-      @drive-created="appendNewDrive"
-      :userDrives="objects.map((drive) => drive.name)"
-    />
+    <AddDrive v-if="currentResource.name == 'drive'" @drive-created="appendNewDrive"
+      :userDrives="objects.map((drive) => drive.name)" />
   </div>
   <div>
     <ul v-if="objects.length > 0" :class="renderGrid">
-      <component
-        :is="renderComponent"
-        v-for="obj in objects"
-        :key="obj.uid"
-        :resource="obj"
-        @selected-object="getObject"
-      />
+      <component :is="renderComponent" v-for="obj in objects" :key="obj.uid" :resource="obj"
+        @selected-object="getObject" />
     </ul>
     <div v-else class="flex flex-col items-center gap-1 text-center mt-9">
       <h3 class="text-2xl font-bold tracking-tight">You have no files</h3>
-      <p class="text-sm text-muted-foreground">Share files with members by uploading a new file</p>
-      <Button class="mt-4">Add a file</Button>
+      <div class="grid w-full max-w-sm items-center gap-1.5">
+        <p class="text-sm text-muted-foreground">
+          Share files with members by uploading a new file
+        </p>
+      </div>
+      <form class="mt-5">
+        <Input id="file-upload" type="file" multiple webkitdirectory @change="handleFileChange" />
+        <Button class="mt-4" @click="initiateUpload">Add file</Button>
+      </form>
     </div>
   </div>
   <Toaster />
