@@ -17,8 +17,18 @@ type User =
   | {}
 
 export const useCurrentUserStore = defineStore('useCurrentUserStore', () => {
-  const currentUser: User = reactive({})
+  const currentUser: Ref<User> = ref({})
+
+  const setUser = (user: User) => {
+    currentUser.value = user
+  }
+
+  const getUser = (): User => {
+    return currentUser.value
+  }
+
   return {
-    currentUser
+    getUser,
+    setUser
   }
 })

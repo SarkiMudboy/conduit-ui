@@ -43,7 +43,7 @@ async function register(data: registerData) {
     .then((response) => response.json())
     .catch((error) => console.error(error))
 
-  userStore.currentUser = currentUser
+  userStore.setUser(currentUser)
   router.push('/files')
 }
 
@@ -65,13 +65,7 @@ async function signUp() {
       <div class="grid gap-4">
         <div class="grid gap-2">
           <Label for="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="m@example.com"
-            v-model="userData.email"
-            required
-          />
+          <Input id="email" type="email" placeholder="m@example.com" v-model="userData.email" required />
         </div>
         <div class="grid gap-2">
           <Label for="tag">Tag (Username)</Label>
@@ -91,13 +85,10 @@ async function signUp() {
       <div class="pt-5">
         <p class="text-xs text-foreground-lighter sm:mx-auto sm:max-w-sm">
           By continuing, you agree to Conduit's
-          <a class="underline hover:text-foreground-light" href="https://supabase.com/terms"
-            >Terms of Service</a
-          >
+          <a class="underline hover:text-foreground-light" href="https://supabase.com/terms">Terms of Service</a>
           and
-          <a class="underline hover:text-foreground-light" href="https://supabase.com/privacy"
-            >Privacy Policy</a
-          >, and to receive periodic emails with updates.
+          <a class="underline hover:text-foreground-light" href="https://supabase.com/privacy">Privacy Policy</a>, and
+          to receive periodic emails with updates.
         </p>
       </div>
     </CardContent>

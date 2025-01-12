@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import {
   getAWSUploadPresignedURL,
   uploadFileToS3,
-  type FileUploadPresignedURL
+  type FileUploadPresignedURLData
 } from '@/lib/uploads/fileUpload'
 import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
 
@@ -52,7 +52,7 @@ const currentResource: Ref<Resource> = ref({
 
 const objects: Ref<Drive[] | StorageObjects[]> = ref([])
 const selectedDrive = ref('')
-let eagerLoadUrlPromise: Promise<FileUploadPresignedURL[]> | null = null
+let eagerLoadUrlPromise: Promise<FileUploadPresignedURLData>
 
 const configForComponents: {
   [key: string]: {
@@ -138,19 +138,26 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
   }
 }
 
-const initiateUpload = async (e: MouseEvent) => {
+const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
   e.preventDefault()
   if (eagerLoadUrlPromise) {
     try {
-      const presignedUrls = await eagerLoadUrlPromise;
+      const presignedUrlData = await eagerLoadUrlPromise;
+      console.log(presignedUrlData)
+      const presignedUrls = presignedUrlData.presigned_urls
 
       if (presignedUrls?.length) {
-        console.log(presignedUrls);
+        //console.log(presignedUrls);
 
         for (const url of presignedUrls) {
           fileUploadStore.setUploadURL(url.id, url.url);
           const fileObj = fileUploadStore.getFile(url.id);
-          await uploadFileToS3(url.url, fileObj);
+
+          // set the file path for the upload metadata
+          const metadata = presignedUrlData.metadata
+          metadata['x-amz-meta-file_path'] = fileObj.webkitRelativePath
+          console.log(metadata)
+          await uploadFileToS3(url.url, fileObj, metadata);
         }
       } else {
         console.error('Error: No presigned URLs received.');
