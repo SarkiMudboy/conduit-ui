@@ -2,6 +2,8 @@ import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '../utils'
 import { type FileData } from '@/stores/uploadFileStore'
 import { useToast } from '@/components/ui/toast/use-toast'
+import { useCurrentUserStore } from '@/stores/userStore'
+import { metadata } from '@vueuse/core/metadata.cjs'
 
 type FileResourceData = {
   resource_uid?: string
@@ -9,9 +11,14 @@ type FileResourceData = {
   bulk: boolean
 }
 
-export type FileUploadPresignedURL = {
+type FileUploadPresignedURL = {
   id: string
   url: string
+}
+
+export type FileUploadPresignedURLData = {
+  presigned_urls: FileUploadPresignedURL[]
+  metadata: { [key: string]: string }
 }
 
 export const getAWSUploadPresignedURL = async (
@@ -19,11 +26,10 @@ export const getAWSUploadPresignedURL = async (
   bulk: boolean,
   driveUid: string,
   resourceUid: string | null
-): Promise<FileUploadPresignedURL[]> => {
+) /* Promise<FileUploadPresignedURL[]>*/ => {
+  const { toast } = useToast()
   const reqHeaders = new Headers()
   reqHeaders.append('Content-Type', 'application/json')
-
-  let presignedURLs: FileUploadPresignedURL[] = []
 
   const path = `http://localhost:8000/api/v1/drives/${driveUid}/share/get-upload-url/`
   const uploadData: FileResourceData = {
@@ -44,19 +50,27 @@ export const getAWSUploadPresignedURL = async (
     method: 'POST'
   }
 
-  await protectedReq(params).then((r) => {
+  const presignedURLData = await protectedReq(params).then((r) => {
     if (r.status == 200) {
-      presignedURLs = r.response
-      console.log(presignedURLs)
-    } // else error toast
+      //console.log(presignedURLs)
+      return r.response
+    } else {
+      toast({
+        title: 'Failed to upload',
+        description: `Something went wrong`,
+        variant: 'destructive'
+      })
+      return []
+    }
   })
 
-  return presignedURLs
+  return presignedURLData
 }
+
 // may need to move this to workers...
-export const uploadFileToS3 = async (presignedURL: string, file: File) => {
+export const uploadFileToS3 = async (presignedURL: string, file: File, metadata: object) => {
   const { toast } = useToast()
-  const headers = { 'Content-Type': '*' }
+  const headers = { ...metadata, 'Content-Type': '*' }
   const params = {
     method: 'PUT',
     headers: headers,

@@ -77,52 +77,35 @@ const filteredUsers = computed(() =>
         </TagsInputItem>
       </div>
 
-      <ComboboxRoot
-        v-model="selectedUsers"
-        v-model:open="open"
-        :searchTerm="searchTerm"
-        class="w-full"
-      >
+      <ComboboxRoot v-model="selectedUsers" v-model:open="open" :searchTerm="searchTerm" class="w-full">
         <ComboboxAnchor as-child>
           <ComboboxInput placeholder="Search email or tag" as-child>
-            <TagsInputInput
-              class="w-full px-3"
-              :class="selectedUsers.length > 0 ? 'mt-2' : ''"
-              @keydown.enter.prevent
-              @input="handleSearchTerm"
-            />
+            <TagsInputInput class="w-full px-3" :class="selectedUsers.length > 0 ? 'mt-2' : ''" @keydown.enter.prevent
+              @input="handleSearchTerm" />
           </ComboboxInput>
         </ComboboxAnchor>
 
         <ComboboxContent>
-          <CommandList
-            position="popper"
-            class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
-          >
+          <CommandList position="popper"
+            class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
             <CommandEmpty v-if="notFound"> User not found </CommandEmpty>
             <CommandGroup>
-              <CommandItem
-                v-for="user in filteredUsers"
-                :key="user.uid"
-                :value="user.tag"
-                @select.prevent="
-                  (ev) => {
-                    if (typeof ev.detail.value === 'string') {
-                      searchTerm = ''
-                      notFound = false
-                      open = false
-                      if (!selectedUsers.includes(user.tag)) selectedUsers.push(user.tag)
-                      else {
-                        errorMessage = 'User has already been selected'
-                      }
-                      emit('member-selected', user.uid)
-                    }
-                    if (filteredUsers.length === 0) {
-                      open = false
-                    }
+              <CommandItem v-for="user in filteredUsers" :key="user.uid" :value="user.tag" @select.prevent="(ev) => {
+                if (typeof ev.detail.value === 'string') {
+                  searchTerm = ''
+                  notFound = false
+                  open = false
+                  if (!selectedUsers.includes(user.tag)) selectedUsers.push(user.tag)
+                  else {
+                    errorMessage = 'User has already been selected'
                   }
-                "
-              >
+                  emit('member-selected', user.uid)
+                }
+                if (filteredUsers.length === 0) {
+                  open = false
+                }
+              }
+                ">
                 {{ user.tag }}
               </CommandItem>
             </CommandGroup>
@@ -132,7 +115,7 @@ const filteredUsers = computed(() =>
     </TagsInput>
   </div>
   <Button variant="outline" @click="searchUser">Search</Button>
-  <p v-if="errorMessage != ''" class="col-span-4 ml-[90px] text-sm text-red-500">
+  <p v-if="errorMessage != ''" class="col-span-4 ml-[80px] mb-4 text-sm text-red-500">
     {{ errorMessage }}
   </p>
 </template>
