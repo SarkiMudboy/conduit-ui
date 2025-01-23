@@ -19,6 +19,7 @@ export type FileObject = {
 export const useUploadFileStore = defineStore('useUploadFileStore', () => {
   const fileUploadData: Ref<{ [key: string]: FileObject }> = ref({})
   const fileData: Ref<FileData[]> = ref([])
+  const selectedFiles: Ref<{ id: string; file: File }[]> = ref([])
 
   const addFiles = (files: File[]) => {
     files.forEach((file) => {
@@ -37,6 +38,8 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
         filesize: file.size,
         id: id
       })
+
+      selectedFiles.value.push({ id: id, file: file })
     })
   }
 
@@ -59,6 +62,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     addFiles,
     getFile,
     setUploadURL,
+    selectedFiles,
     clearFiles
   }
 })

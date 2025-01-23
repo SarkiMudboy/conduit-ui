@@ -67,36 +67,6 @@ export const getAWSUploadPresignedURL = async (
   return presignedURLData
 }
 
-//export const setupMetaData = (metadata {[key: string]: string }, file: File) => {
-//  const { toast } = useToast()
-//
-//  const fileMeta: { [key: string]: string } = {
-//    'x-amz-meta-owner_email': metadata['owner_email'],
-//    'x-amz-meta-file_path': file.webkitRelativePath,
-//    'x-amz-meta-drive_id': metadata['drive_id']
-//  }
-//
-//  if (metadata['resource_id']) {
-//    fileMeta['x-amz-meta-resource_id'] = metadata['resource_id']
-//  }
-//
-//  try {
-//    if (owner && 'email' in owner && owner.email != undefined) {
-//      fileMeta['x-amz-meta-owner_email'] = owner.email
-//    } else {
-//      console.error('Failed to Upload')
-//    }
-//  } catch (error) {
-//    toast({
-//      title: 'Failed upload',
-//      description: `Failed to upload ${file.name}`,
-//      variant: 'destructive'
-//    })
-//  }
-//
-//  return fileMeta
-//}
-
 // may need to move this to workers...
 export const uploadFileToS3 = async (presignedURL: string, file: File, metadata: object) => {
   const { toast } = useToast()

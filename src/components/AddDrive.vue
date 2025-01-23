@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
+//import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import SearchMembers from './SearchMembers.vue'
 import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
 import { type Drive } from '@/components/Drives.vue'
+import Button from '@/components/ui/button/Button.vue'
 
 const emit = defineEmits<{
   (e: 'drive-created', drive: Drive): void
@@ -106,7 +107,7 @@ const addDrive = async () => {
               }
             ]" required v-model="newDrive.name" @input="validateInput" />
           </div>
-          <p v-if="hasError" class="ml-[100px] w-1/2 text-sm text-red-500">
+          <p v-if="hasError" class="ml-[100px] mt-2 w-1/2 text-sm text-red-500">
             {{ errorMessage }}
           </p>
         </div>
