@@ -21,7 +21,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
-//import { Input } from '@/components/ui/input'
 import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
 import {
   getAWSUploadPresignedURL,
@@ -47,22 +46,11 @@ const props = defineProps({
 let eagerLoadUrlPromise: Promise<FileUploadPresignedURLData>
 const fileUploadStore = useUploadFileStore()
 
-const fileSelected: Ref<{ id: string, file: File, dockElement?: Element }[]> = ref([]); // also toggles file input selected state
-
-//const fileDockRefs = ref<{ [key: string]: Element }>({})
+const fileSelected: Ref<boolean> = ref(false)
 const inputRef: Ref<HTMLInputElement | null> = ref(null);
 
 const isFolderUpload = ref(false);
 const isOpen = ref(false)
-
-const setFileDockRef = (el: Element | null, id: string) => {
-  if (el) {
-    const file = fileSelected.value.find((f) => f.id === id);
-    if (file) {
-      file.dockElement = el;
-    }
-  }
-};
 
 const setIsOpen = (value: boolean) => {
   isOpen.value = value
@@ -75,8 +63,8 @@ const openFileUploadDialog = () => {
 const closeFileUploadDialog = () => {
   setIsOpen(false);
 }
-const setFileSelected = (files: { id: string, file: File }[]) => {
-  fileSelected.value = files;
+const setFileSelected = (selected: boolean) => {
+  fileSelected.value = selected;
 }
 const toggleUploadType = () => {
   isFolderUpload.value = isFolderUpload.value ? false : true;
@@ -85,7 +73,6 @@ const toggleUploadType = () => {
 const handleUploadInputClick = (e: MouseEvent | KeyboardEvent) => {
   e.preventDefault()
   inputRef.value ? inputRef.value.click() : null;
-  //console.log(inputRef.value)
 }
 
 const formSchema = toTypedSchema(z.object({
@@ -112,7 +99,7 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
 
     fileUploadStore.clearFiles()
     fileUploadStore.addFiles(fileList)
-    setFileSelected(fileUploadStore.selectedFiles)
+    setFileSelected(true)
 
     const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
     if (fileUploadStore.fileData) {
@@ -123,7 +110,7 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
         props.currentResource
       )
     }
-  } else setFileSelected([]);
+  } else setFileSelected(false);
 }
 
 const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
@@ -186,7 +173,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-if="!fileSelected" v-slot="{ componentField }" name="files">
+        <FormField v-slot="{ componentField }" name="files">
           <FormItem class="mt-10">
             <FormLabel class="font-bold">Upload File
             </FormLabel>
@@ -195,11 +182,12 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
                 webkitdirectory @change="handleFileChange" />
               <input v-else style="display: none;" id="file-upload" type="file" ref="inputRef" multiple
                 @change="handleFileChange" />
-              <Button
-                class="flex flex-col items-center justify-items-center w-full h-36 text-black bg-white border border-black border-dashed hover:bg-white"
+              <Button v-if="!fileSelected"
+                class="flex flex-col items-center justify-items-center w-full h-36 text-black bg-white border border-gray-400 border-dashed hover:bg-white"
                 @click="handleUploadInputClick"><span>
                   <UploadIcon />
                 </span>Upload</Button>
+              <FileDock v-else />
             </FormControl>
             <FormDescription>
               Add files or folder
@@ -207,10 +195,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <div v-else>
-          <FileDock v-for="file in fileSelected" :file="file.file" :key="file.id"
-            :ref="(el) => setFileDockRef(el, file.id)" @remove-file="ClearFile" />
-        </div>
+
         <div class="flex flex-row mt-5 space-x-4">
           <p class="font-medium">Folder upload</p>
           <Switch :checked="isFolderUpload" @update:checked="toggleUploadType" />

@@ -7,6 +7,7 @@ export type FileData = {
   filesize: number
   id: string
   metadata?: object
+  uploaded: boolean
 }
 
 export type FileObject = {
@@ -36,7 +37,8 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
         filename: file.name,
         path: file.webkitRelativePath,
         filesize: file.size,
-        id: id
+        id: id,
+        uploaded: false
       })
 
       selectedFiles.value.push({ id: id, file: file })

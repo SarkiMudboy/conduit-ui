@@ -1,34 +1,19 @@
 <script setup lang="ts">
-import { Card } from '@/components/ui/card';
+import Button from '@/components/ui/button/Button.vue';
 import FileIcon from '@/components/icons/FileIcon.vue';
-import { Progress } from '@/components/ui/progress'
-import { ref } from 'vue';
-import { X } from 'lucide-vue-next';
+import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
 
-const props = defineProps({
-  file: {
-    type: File,
-    required: true
-  }
-})
-const progress = ref(0);
+const fileStore = useUploadFileStore();
+const fileNames = fileStore.selectedFiles.map(file => file.file.name).join(", ")
+console.log(fileNames);
 
-const emit = defineEmits<{ (e: 'remove-file', name: string): void }>();
-
+//const emit = defineEmits<{ (e: 'remove-file', name: string): void }>();
 </script>
 
 <template>
-  <Card class="flex flex-row h-18 mt-5 items-center">
-    <div class="m-4 w-5/6 space-y-2">
-      <p class="flex flex-row gap-x-2">
-        <span>
-          <FileIcon :stroke-width="1" />
-        </span> {{ props.file.name }}
-      </p>
-      <Progress v-model="progress" class="[&>*]:bg-green-600 h-2 w-full" />
-    </div>
-    <span class="opacity-70 border border-gray-500 rounded-sm hover:bg-accent hover:ring-2">
-      <X @click="emit('remove-file', props.file.name)" class="w-4 h-4  " />
-    </span>
-  </Card>
+  <Button
+    class="flex flex-col items-center justify-items-center w-full h-36 text-black bg-white border border-gray-400 border-solid hover:bg-white">
+    <FileIcon />
+    <p class="w-1/2 truncate">{{ fileNames }}</p>
+  </Button>
 </template>
