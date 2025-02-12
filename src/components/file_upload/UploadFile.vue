@@ -84,17 +84,19 @@ useForm({
   validationSchema: formSchema,
 })
 
+
+const clearFiles = () => {
+  setFileSelected(false);
+}
+
 //const onSubmit = form.handleSubmit((values) => {
 //  console.log(values)
 //})
 
-const ClearFile = (id: string) => {
-  const file = fileSelected.value?.find((f) => { f.id == id }) // find and remove from index
-}
 
 const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
-
+    console.log("How far")
     const fileList: File[] = Array.from(e.target.files)
 
     fileUploadStore.clearFiles()
@@ -183,11 +185,11 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
               <input v-else style="display: none;" id="file-upload" type="file" ref="inputRef" multiple
                 @change="handleFileChange" />
               <Button v-if="!fileSelected"
-                class="flex flex-col items-center justify-items-center w-full h-36 text-black bg-white border border-gray-400 border-dashed hover:bg-white"
-                @click="handleUploadInputClick"><span>
+                class="flex flex-col items-center justify-items-center w-full max-w-md h-36 text-black dark:text-white bg-transparent border border-gray-400 border-dashed hover:bg-transparent"
+                @click="handleUploadInputClick"><span class="dark:text-white">
                   <UploadIcon />
                 </span>Upload</Button>
-              <FileDock v-else />
+              <FileDock v-else @clear-files="clearFiles" />
             </FormControl>
             <FormDescription>
               Add files or folder
@@ -195,7 +197,6 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
             <FormMessage />
           </FormItem>
         </FormField>
-
         <div class="flex flex-row mt-5 space-x-4">
           <p class="font-medium">Folder upload</p>
           <Switch :checked="isFolderUpload" @update:checked="toggleUploadType" />

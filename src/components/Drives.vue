@@ -3,24 +3,13 @@ import { computed, ref, type Ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
 import DriveCard from './DriveCard.vue'
 import Objects from './Objects.vue'
-//import Button from '@/components/ui/button/Button.vue'
 import AddDrive from './AddDrive.vue'
 
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
-//import { Input } from '@/components/ui/input'
 import UploadFile from '@/components/file_upload/UploadFile.vue'
 
-import {
-  //getAWSUploadPresignedURL,
-  //uploadFileToS3,
-  //type FileUploadPresignedURLData
-} from '@/lib/uploads/fileUpload'
-//import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
-
-
 const { toast } = useToast()
-//const fileUploadStore = useUploadFileStore()
 
 type base = {
   name: string
@@ -54,7 +43,6 @@ const currentResource: Ref<Resource> = ref({
 
 const objects: Ref<Drive[] | StorageObjects[]> = ref([])
 const selectedDrive = ref('')
-//let eagerLoadUrlPromise: Promise<FileUploadPresignedURLData>
 
 const configForComponents: {
   [key: string]: {
@@ -121,57 +109,6 @@ const renderComponent = computed(() => {
   return configForComponents[currentResource.value.name].component
 })
 
-//const handleFileChange = async (e: any /* change to HTML Event */) => {
-//  if (e.target.files) {
-//    const fileList: File[] = Array.from(e.target.files)
-//
-//    fileUploadStore.clearFiles()
-//    fileUploadStore.addFiles(fileList)
-//
-//    const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
-//    if (fileUploadStore.fileData) {
-//      eagerLoadUrlPromise = await getAWSUploadPresignedURL(
-//        fileUploadStore.fileData,
-//        isBulk,
-//        selectedDrive.value,
-//        currentResource.value.uid
-//      )
-//    }
-//  }
-//}
-
-//const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
-//  e.preventDefault()
-//  if (eagerLoadUrlPromise) {
-//    try {
-//      const presignedUrlData = await eagerLoadUrlPromise;
-//      console.log(presignedUrlData)
-//      const presignedUrls = presignedUrlData.presigned_urls
-//
-//      if (presignedUrls?.length) {
-//        //console.log(presignedUrls);
-//
-//        for (const url of presignedUrls) {
-//          fileUploadStore.setUploadURL(url.id, url.url);
-//          const fileObj = fileUploadStore.getFile(url.id);
-//
-//          // set the file path for the upload metadata
-//          const metadata = presignedUrlData.metadata
-//          metadata['x-amz-meta-file_path'] = fileObj.webkitRelativePath
-//          console.log(metadata)
-//          await uploadFileToS3(url.url, fileObj, metadata);
-//        }
-//      } else {
-//        console.error('Error: No presigned URLs received.');
-//        // Trigger toast notification for error here
-//      }
-//    } catch (error) {
-//      console.error('Error getting presigned URLs:', error);
-//      // Trigger toast notification for error here
-//    }
-//  }
-//
-//}
 async function listDrives() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
