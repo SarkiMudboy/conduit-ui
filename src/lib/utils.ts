@@ -154,3 +154,17 @@ export function parseGithubAuthURL(clientID: string, callbackURL: string, state:
 
   return githubAuthUrl.toString()
 }
+
+export const calculateFileSize = (size: number) => {
+  let fileSize = ''
+
+  if (1024 <= size && size <= 1024 * 1024) {
+    fileSize = (size / 1024).toFixed(2) + 'KB'
+  } else if (1024 * 1024 <= size && size <= 1024 * 1024 * 1024) {
+    fileSize = (size / (1024 * 1024)).toFixed(2) + 'MB'
+  } else if (size > 1024 * 1024 * 1024) {
+    fileSize = (size / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
+  }
+
+  return fileSize
+}
