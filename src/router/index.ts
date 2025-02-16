@@ -1,6 +1,6 @@
 import { verify } from '@/lib/utils'
 import { createRouter, createWebHistory } from 'vue-router'
-// import HomeView from '@/views/HomeView.vue'
+import Storage from '@/views/Storage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,13 +22,16 @@ const router = createRouter({
     },
     {
       path: '/files',
-      name: 'storage',
-      component: () => import('@/views/Storage.vue'),
-      beforeEnter: async (to, from) => {
-        await verify().then((authorized) => {
-          if (!authorized) return { name: 'login' }
-        })
-      }
+      name: 'fileManager',
+      component: () => import('@/views/FileManager.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          component: Storage,
+          meta: { requiresAuth: true }
+        }
+      ]
     },
     {
       path: '/reset-password',
@@ -36,6 +39,19 @@ const router = createRouter({
       component: () => import('@/views/ResetPassword.vue')
     }
   ]
+})
+
+router.beforeEach(async (to, from) => {
+  if (to.meta.requiresAuth) {
+    const authorized = await verify()
+
+    if (!authorized) {
+      return {
+        name: 'login',
+        query: { redirect: to.fullPath }
+      }
+    }
+  }
 })
 
 export default router
