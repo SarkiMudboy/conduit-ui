@@ -43,7 +43,7 @@ const props = defineProps({
   }
 })
 
-let eagerLoadUrlPromise: Promise<FileUploadPresignedURLData>
+let preloadFilesPresignedURLPromise: Promise<FileUploadPresignedURLData>
 const fileUploadStore = useUploadFileStore()
 
 const fileSelected: Ref<boolean> = ref(false)
@@ -96,7 +96,6 @@ const clearFiles = () => {
 
 const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
-    console.log("How far")
     const fileList: File[] = Array.from(e.target.files)
 
     fileUploadStore.clearFiles()
@@ -105,7 +104,7 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
 
     const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
     if (fileUploadStore.fileData) {
-      eagerLoadUrlPromise = await getAWSUploadPresignedURL(
+      preloadFilesPresignedURLPromise = await getAWSUploadPresignedURL(
         fileUploadStore.fileData,
         isBulk,
         props.selectedDrive,
@@ -117,9 +116,9 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
 
 const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
   e.preventDefault()
-  if (eagerLoadUrlPromise) {
+  if (preloadFilesPresignedURLPromise) {
     try {
-      const presignedUrlData = await eagerLoadUrlPromise;
+      const presignedUrlData = await preloadFilesPresignedURLPromise;
       const presignedUrls = presignedUrlData.presigned_urls
 
       if (presignedUrls?.length) {

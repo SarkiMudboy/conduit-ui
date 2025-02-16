@@ -10,7 +10,8 @@ import { calculateFileSize } from '@/lib/utils';
 
 
 const fileStore = useUploadFileStore();
-const selectedFiles = ref(fileStore.selectedFiles)
+const f = fileStore.selectedFiles
+const selectedFiles = ref(f)
 const emit = defineEmits<{ (e: 'clear-files'): void }>();
 
 const openfileList = ref(false)
@@ -26,8 +27,8 @@ const ClearFile = (id?: string) => {
   } else {
     selectedFiles.value = []
     fileStore.clearFiles()
+    emit('clear-files')
   }
-  emit('clear-files')
 }
 
 </script>
@@ -38,7 +39,7 @@ const ClearFile = (id?: string) => {
     <PopoverTrigger as-child>
       <Button
         class="flex flex-col items-center justify-items-center h-36 w-full max-w-md text-black dark:text-white bg-transparent border border-gray-400 border-solid hover:bg-transparent"
-        @mouseover="openfileList = true">
+        @mouseenter="openfileList = true">
         <span>
           <FileIcon class=" fill-black dark:fill-white" />
         </span>
@@ -46,10 +47,10 @@ const ClearFile = (id?: string) => {
       </Button>
     </PopoverTrigger>
     <PopoverContent side="right" align="start">
-      <ScrollArea class="max-h-72 h-72">
+      <ScrollArea :class="['max-h-72', { 'h-72': selectedFiles.length > 7 }]">
         <div v-for="file in selectedFiles" :key="file.id">
           <div class="grid grid-cols-5">
-            <div class="text-sm truncate col-span-3">
+            <div class="text-sm font-bold truncate col-span-3">
               {{ file.file.name }}
             </div>
             <span class="text-sm">{{ calculateFileSize(file.file.size) }}</span>

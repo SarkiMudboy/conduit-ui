@@ -56,8 +56,14 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
   const clearFiles = (id?: string) => {
     if (id) {
       delete fileUploadData.value[id]
-      fileData.value.splice(fileData.value.findIndex((file) => file.id === id))
-      selectedFiles.value.splice(selectedFiles.value.findIndex((file) => file.id === id))
+      fileData.value.splice(
+        fileData.value.findIndex((file) => file.id === id),
+        1
+      )
+      selectedFiles.value.splice(
+        selectedFiles.value.findIndex((file) => file.id === id),
+        1
+      )
     } else {
       selectedFiles.value = []
       fileUploadData.value = {}
