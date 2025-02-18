@@ -6,6 +6,9 @@ import { calculateDiskUsage, cn } from '@/lib/utils';
 import { calculateFileSize } from '@/lib/utils';
 
 const drive = defineProps<Drive>();
+const emit = defineEmits<{
+  (e: 'drive-selected', uid: string): void
+}>()
 
 const statusConfig = {
   personal: {
@@ -25,7 +28,6 @@ const getDriveCreatedDate = (dateString: string) => {
   const date = new Date(dateString)
   return `${date.toDateString()}`
 }
-
 </script>
 
 <template>
@@ -74,12 +76,11 @@ const getDriveCreatedDate = (dateString: string) => {
     <div class="mt-auto border-t border-zinc-100 dark:border-zinc-800">
       <button :class="cn('w-full flex items-center justify-center gap-2', 'py-2.5 px-3', 'text-xs font-medium'
         , 'text-zinc-600 dark:text-zinc-400', 'hover:text-zinc-900 dark:hover:text-zinc-100'
-        , 'hover:bg-zinc-100 dark:hover:bg-zinc-800/50', 'transition-colors duration-200')">
+        , 'hover:bg-zinc-100 dark:hover:bg-zinc-800/50', 'transition-colors duration-200')"
+        @click="emit('drive-selected', drive.uid)">
         View
         <ArrowRight class="w-3.5 h-3.5" />
       </button>
     </div>
   </div>
-
-
 </template>

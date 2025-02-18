@@ -1,5 +1,4 @@
 <script setup lang="ts">
-//import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,26 +8,21 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import DialogClose from './ui/dialog/DialogClose.vue'
-import { X } from 'lucide-vue-next'
+import DialogClose from '@/components/ui/dialog/DialogClose.vue'
+import { X, Plus } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import SearchMembers from './SearchMembers.vue'
+import SearchMembers from '@/components/SearchMembers.vue'
 import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
-import { type Drive } from '@/components/Drives.vue'
+import { type Drive } from './types'
 import Button from '@/components/ui/button/Button.vue'
 
 const emit = defineEmits<{
   (e: 'drive-created', drive: Drive): void
 }>()
 
-const props = defineProps({
-  userDrives: {
-    type: Array,
-    required: true
-  }
-})
+const props = defineProps<{ userDrives: string[] }>()
 
 const isOpen = ref(false)
 const hasError = ref(false)
@@ -82,7 +76,10 @@ const addDrive = async () => {
 <template>
   <Dialog :open="isOpen" @update:open="setIsOpen">
     <DialogTrigger as-child>
-      <Button class="mr-7" @click="openDialog"> New Drive </Button>
+      <Button class="gap-2" @click="openDialog">
+        <Plus class="h-4 w-4" />
+        New Drive
+      </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-[500px]">
       <DialogClose
