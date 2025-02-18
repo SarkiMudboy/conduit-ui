@@ -12,7 +12,7 @@ app.use(createPinia())
 app.use(router)
 
 async function setCSRFToken() {
-  const response = await fetch('http://localhost:8000/api/set-csrf-token/', {
+  await fetch('http://localhost:8000/api/set-csrf-token/', {
     method: 'GET',
     credentials: 'include'
   })
