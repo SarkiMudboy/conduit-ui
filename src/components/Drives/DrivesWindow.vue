@@ -75,7 +75,6 @@ const getDriveAssets = async (uid: string) => {
 
   })
 
-
 }
 
 async function listDrives() {
@@ -136,7 +135,7 @@ await listDrives()
     </div>
     <div :class="cn('w-full overflow-x-auto scrollbar-none')">
       <div v-if="selectedDrive">
-        <FileObjects :assets="setDriveFileObjects" />
+        <FileObjects :assets="setDriveFileObjects" :driveUid="selectedDrive.uid" />
       </div>
       <div v-else class=" flex gap-3 min-w-full p-1">
         <DriveCard v-for="drive in drives" :key="drive.uid" v-bind="drive" @drive-selected="getDriveAssets" />

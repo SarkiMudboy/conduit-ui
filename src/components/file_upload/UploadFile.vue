@@ -116,6 +116,9 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
 
 const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
   e.preventDefault()
+
+  closeFileUploadDialog() // may remove?
+
   if (preloadFilesPresignedURLPromise) {
     try {
       const presignedUrlData = await preloadFilesPresignedURLPromise;

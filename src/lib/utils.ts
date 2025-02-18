@@ -158,8 +158,7 @@ export const calculateFileSize = (size: number) => {
   let fileSize = ''
 
   if (size == 0.0) return '0.0KB'
-
-  if (1024 <= size && size <= 1024 * 1024) {
+  else if ((1024 <= size && size <= 1024 * 1024) || size < 1024) {
     fileSize = (size / 1024).toFixed(2) + 'KB'
   } else if (1024 * 1024 < size && size < 1024 * 1024 * 1024) {
     fileSize = (size / (1024 * 1024)).toFixed(2) + 'MB'
