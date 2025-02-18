@@ -21,37 +21,6 @@ const setDriveFileObjects = computed(() => {
 })
 
 
-//const getObject = async (uid: string, objtype: 'drive' | 'object') => {
-//  let path = 'http://localhost:8000/api/v1/drives/'
-//
-//  if (objtype === 'drive') {
-//    selectedDrive.value = uid
-//    path += uid
-//  } else path += `${selectedDrive.value}/objects/${uid}`
-//
-//  const myHeaders = new Headers()
-//  myHeaders.append('Content-Type', 'application/json')
-//  const params: reqOptions = {
-//    data: null,
-//    headers: myHeaders,
-//    url: path,
-//    method: 'GET'
-//  }
-//  await protectedReq(params).then((r) => {
-//    if (r.status == 200) {
-//      currentResource.value = {
-//        uid: uid,
-//        name: 'storageObject',
-//        title: r.response.name
-//      }
-//
-//      objtype === 'drive'
-//        ? (objects.value = r.response.storage_objects)
-//        : (objects.value = r.response.content)
-//    }
-//  })
-//}
-
 const getDriveAssets = async (uid: string) => {
 
   const url = 'http://localhost:8000/api/v1/drives/' + uid
