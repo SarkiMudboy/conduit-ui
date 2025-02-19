@@ -3,8 +3,9 @@ import Folder from './icons/Folder.vue'
 import File from './icons/File.vue'
 import { type FileObject } from './Drives/types'
 import { calculateFileSize, protectedReq, type reqOptions } from '@/lib/utils';
-import { computed, ref, type Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import UploadFile from '@/components/file_upload/UploadFile.vue';
+import FilePathNav from './FilePathNav.vue';
 
 const props = defineProps<{ assets: FileObject[], driveUid: string }>()
 
@@ -53,7 +54,10 @@ const loadFolderAssets = async (uid: string) => {
 </script>
 
 <template>
-  <div v-if="assets.length > 0" class="flex gap-3 min-w-full p-1">
+  <FilePathNav>
+    <UploadFile :selectedDrive="driveUid" :currentResource="parent" />
+  </FilePathNav>
+  <div v-if="assets.length > 0" class="flex mt-5 gap-3 min-w-full p-1">
     <div v-for="obj in assets" :key="obj.uid">
       <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
         <component :is="objType(obj)" @click="selectObject(obj)" />

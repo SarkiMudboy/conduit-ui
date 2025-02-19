@@ -7,7 +7,7 @@ import NavItem from './NavItem.vue';
 
   <div class="w-64 border-r">
     <div class="p-4">
-      <h1 class="text-xl font-bold">Conduit</h1>
+      <h1 class="text-xl font-bold">conduit</h1>
     </div>
     <nav class="space-y-1 px-2">
       <div class="py-3 px-3 mt-3 text-xs font-medium uppercase text-gray-500">File Manager</div>

@@ -151,7 +151,14 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
 <template>
   <Dialog :open="isOpen" @update:open="setIsOpen">
     <DialogTrigger as-child>
-      <Button class="mt-5" @click="openFileUploadDialog">Add File</Button>
+      <Button variant="outline" class="gap-2 bg-gray-800 hover:bg-gray-500 text-white hover:text-white"
+        @click="openFileUploadDialog">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Add File
+      </Button>
     </DialogTrigger>
     <DialogContent class="px-8">
       <DialogClose @click="closeFileUploadDialog"
