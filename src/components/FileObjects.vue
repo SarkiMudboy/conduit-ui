@@ -44,8 +44,7 @@ const loadFolderAssets = async (uid: string) => {
 
       assets.value = r.response.content
       parent.value = uid
-      console.log(r.response)
-
+      //console.log(r.response)
     }
 
   })
@@ -58,7 +57,7 @@ const loadFolderAssets = async (uid: string) => {
     <div v-for="obj in assets" :key="obj.uid">
       <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
         <component :is="objType(obj)" @click="selectObject(obj)" />
-        <p class="text-lg font-mono font-light">{{ obj.name }}</p>
+        <p class="text-lg font-mono font-light w-40 text-center truncate">{{ obj.name }}</p>
         <p class="font-light font-mono text-gray-300">{{ calculateFileSize(obj.size) }}</p>
       </div>
     </div>

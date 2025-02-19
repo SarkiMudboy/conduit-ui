@@ -22,7 +22,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
   const fileData: Ref<FileData[]> = ref([])
   const selectedFiles: Ref<{ id: string; file: File }[]> = ref([])
 
-  const addFiles = (files: File[]) => {
+  const addFiles = (files: File[], isDriveRoot: boolean) => {
     files.forEach((file) => {
       const id = crypto.randomUUID() as string
 
@@ -35,7 +35,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
 
       fileData.value.push({
         filename: file.name,
-        path: file.webkitRelativePath,
+        path: isDriveRoot ? file.name : file.webkitRelativePath,
         filesize: file.size,
         id: id,
         uploaded: false
@@ -51,6 +51,11 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
 
   const getFile = (id: string) => {
     return fileUploadData.value[id].file
+  }
+
+  const getFilePath = (id: string) => {
+    const file = fileData.value.find((file) => file.id == id)
+    return file?.path
   }
 
   const clearFiles = (id?: string) => {
@@ -78,6 +83,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     getFile,
     setUploadURL,
     selectedFiles,
-    clearFiles
+    clearFiles,
+    getFilePath
   }
 })

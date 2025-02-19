@@ -89,20 +89,16 @@ const clearFiles = () => {
   setFileSelected(false);
 }
 
-//const onSubmit = form.handleSubmit((values) => {
-//  console.log(values)
-//})
-
-
 const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
     const fileList: File[] = Array.from(e.target.files)
 
     fileUploadStore.clearFiles()
-    fileUploadStore.addFiles(fileList)
+    fileUploadStore.addFiles(fileList, (props.currentResource == props.selectedDrive))
     setFileSelected(true)
 
     const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
+
     if (fileUploadStore.fileData) {
       preloadFilesPresignedURLPromise = await getAWSUploadPresignedURL(
         fileUploadStore.fileData,
@@ -127,12 +123,16 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
       if (presignedUrls?.length) {
 
         for (const url of presignedUrls) {
+
           fileUploadStore.setUploadURL(url.id, url.url);
           const fileObj = fileUploadStore.getFile(url.id);
 
-          // set the file path for the upload metadata
           const metadata = presignedUrlData.metadata
-          metadata['x-amz-meta-file_path'] = fileObj.webkitRelativePath
+          const filepath = fileUploadStore.getFilePath(url.id)
+
+          if (filepath) metadata['x-amz-meta-file_path'] = filepath
+          else throw new Error('Invalid File')
+
           await uploadFileToS3(url.url, fileObj, metadata);
         }
       } else {
