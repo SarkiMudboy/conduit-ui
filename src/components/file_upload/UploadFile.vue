@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
 import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
+import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import {
   getAWSUploadPresignedURL,
   uploadFileToS3,
@@ -32,16 +33,22 @@ import Button from '@/components/ui/button/Button.vue';
 import UploadIcon from '@/components/icons/UploadIcon.vue';
 import FileDock from './FileDock.vue';
 
-const props = defineProps({
-  selectedDrive: {
-    type: String,
-    required: true
-  },
-  currentResource: {
-    type: String,
-    required: true
-  }
-})
+
+const filePathNav = useFileTreeContextStore()
+
+const selectedDrive = filePathNav.filePath[0]
+const currentResource = filePathNav.filePath[filePathNav.filePath.length - 1]
+
+//const  = defineProps({
+//  selectedDrive: {
+//    type: String,
+//    required: true
+//  },
+//  currentResource: {
+//    type: String,
+//    required: true
+//  }
+//})
 
 let preloadFilesPresignedURLPromise: Promise<FileUploadPresignedURLData>
 const fileUploadStore = useUploadFileStore()
@@ -94,17 +101,17 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
     const fileList: File[] = Array.from(e.target.files)
 
     fileUploadStore.clearFiles()
-    fileUploadStore.addFiles(fileList, (props.currentResource == props.selectedDrive))
-    setFileSelected(true)
-
     const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
+
+    fileUploadStore.addFiles(fileList, (currentResource.uid == selectedDrive.uid), isBulk)
+    setFileSelected(true)
 
     if (fileUploadStore.fileData) {
       preloadFilesPresignedURLPromise = await getAWSUploadPresignedURL(
         fileUploadStore.fileData,
         isBulk,
-        props.selectedDrive,
-        props.currentResource
+        selectedDrive.uid,
+        currentResource.uid
       )
     }
   } else setFileSelected(false);

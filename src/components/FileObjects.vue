@@ -5,9 +5,13 @@ import { type FileObject } from './Drives/types'
 import { calculateFileSize, protectedReq, type reqOptions } from '@/lib/utils';
 import { ref, type Ref } from 'vue';
 import UploadFile from '@/components/file_upload/UploadFile.vue';
-import FilePathNav from './FilePathNav.vue';
+import FolderNav from '@/components/FolderNav.vue';
+import { useFileTreeContextStore, type ObjectNode } from '@/stores/fileTreeContextStore';
+
 
 const props = defineProps<{ assets: FileObject[], driveUid: string }>()
+const filePathNavStore = useFileTreeContextStore()
+const emit = defineEmits<{(e: 'drive-selected', uid: string): void}>() 
 
 const objType = (fileObject: FileObject) => {
   if (!fileObject.is_directory) return File
@@ -17,17 +21,20 @@ const objType = (fileObject: FileObject) => {
 const assets: Ref<FileObject[]> = ref(props.assets)
 const parent = ref(props.driveUid)
 
-//const readObjectAssets = computed(() => {
-//  return assets
-//})
-
 const selectObject = (obj: FileObject) => {
-  if (obj.is_directory) loadFolderAssets(obj.uid)
+  if (obj.is_directory) loadFolderAssets({ uid: obj.uid, name: obj.name })
 }
 
-const loadFolderAssets = async (uid: string) => {
+function checkAsset(source: string | FileObject) {
+  if (typeof source == "string") {
+    emit('drive-selected', source)
 
-  const url = 'http://localhost:8000/api/v1/drives/' + `${props.driveUid}/objects/${uid}`
+  } else loadFolderAssets(source)
+}
+
+const loadFolderAssets = async (folder: ObjectNode) => {
+
+  const url = 'http://localhost:8000/api/v1/drives/' + `${props.driveUid}/objects/${folder.uid}`
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -44,19 +51,18 @@ const loadFolderAssets = async (uid: string) => {
     if (r.status == 200) {
 
       assets.value = r.response.content
-      parent.value = uid
-      //console.log(r.response)
+      parent.value = folder.uid
+      filePathNavStore.setNode(folder)
     }
-
   })
 }
 
 </script>
 
 <template>
-  <FilePathNav>
-    <UploadFile :selectedDrive="driveUid" :currentResource="parent" />
-  </FilePathNav>
+  <FolderNav @node-selected="checkAsset">
+    <UploadFile />
+  </FolderNav>
   <div v-if="assets.length > 0" class="flex mt-5 gap-3 min-w-full p-1">
     <div v-for="obj in assets" :key="obj.uid">
       <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
@@ -73,7 +79,7 @@ const loadFolderAssets = async (uid: string) => {
         Share files with members by uploading a new file
       </p>
     </div>
-    <UploadFile class="mt-5" :selectedDrive="driveUid" :currentResource="parent" />
+    <UploadFile class="mt-5" />
   </div>
 
 </template>

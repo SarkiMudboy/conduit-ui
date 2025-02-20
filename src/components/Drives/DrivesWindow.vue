@@ -9,10 +9,13 @@ import { useToast } from '@/components/ui/toast';
 import Toaster from '@/components/ui/toast/Toaster.vue';
 import FileObjects from '@/components/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
+import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
+
 
 const { toast } = useToast()
-const drives: Ref<Drive[]> = ref([])
+const filePathNavStore = useFileTreeContextStore()
 
+const drives: Ref<Drive[]> = ref([])
 const selectedDrive: Ref<DriveDetail | null> = ref(null)
 
 const setDriveFileObjects = computed(() => {
@@ -39,11 +42,13 @@ const getDriveAssets = async (uid: string) => {
 
     if (r.status == 200) {
       selectedDrive.value = r.response
-      console.log(r.response)
+
+      // for the path up top
+      if (selectedDrive.value) {
+        filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
+      }
     }
-
   })
-
 }
 
 async function listDrives() {
@@ -80,7 +85,7 @@ await listDrives()
   <div class="p-6">
     <div :class="cn('w-full overflow-x-auto scrollbar-none')">
       <div v-if="selectedDrive">
-        <FileObjects :assets="setDriveFileObjects" :driveUid="selectedDrive.uid" />
+        <FileObjects :assets="setDriveFileObjects" :driveUid="selectedDrive.uid" @drive-selected="getDriveAssets"/>
       </div>
       <div v-else>
         <DriveActions>

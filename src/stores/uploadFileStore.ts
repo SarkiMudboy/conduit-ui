@@ -22,7 +22,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
   const fileData: Ref<FileData[]> = ref([])
   const selectedFiles: Ref<{ id: string; file: File }[]> = ref([])
 
-  const addFiles = (files: File[], isDriveRoot: boolean) => {
+  const addFiles = (files: File[], isDriveRoot: boolean, isBulk: boolean) => {
     files.forEach((file) => {
       const id = crypto.randomUUID() as string
 
@@ -33,9 +33,13 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
         uploadPresignedURL: ''
       }
 
+      let filepath = file.webkitRelativePath
+
+      if (isDriveRoot && isBulk) filepath = file.name
+
       fileData.value.push({
         filename: file.name,
-        path: isDriveRoot ? file.name : file.webkitRelativePath,
+        path: filepath,
         filesize: file.size,
         id: id,
         uploaded: false
