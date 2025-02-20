@@ -21,8 +21,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
-//import { Input } from '@/components/ui/input'
 import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
+import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import {
   getAWSUploadPresignedURL,
   uploadFileToS3,
@@ -33,36 +33,31 @@ import Button from '@/components/ui/button/Button.vue';
 import UploadIcon from '@/components/icons/UploadIcon.vue';
 import FileDock from './FileDock.vue';
 
-const props = defineProps({
-  selectedDrive: {
-    type: String,
-    required: true
-  },
-  currentResource: {
-    type: String,
-    required: true
-  }
-})
 
-let eagerLoadUrlPromise: Promise<FileUploadPresignedURLData>
+const filePathNav = useFileTreeContextStore()
+
+const selectedDrive = filePathNav.filePath[0]
+const currentResource = filePathNav.filePath[filePathNav.filePath.length - 1]
+
+//const  = defineProps({
+//  selectedDrive: {
+//    type: String,
+//    required: true
+//  },
+//  currentResource: {
+//    type: String,
+//    required: true
+//  }
+//})
+
+let preloadFilesPresignedURLPromise: Promise<FileUploadPresignedURLData>
 const fileUploadStore = useUploadFileStore()
 
-const fileSelected: Ref<{ id: string, file: File, dockElement?: Element }[]> = ref([]); // also toggles file input selected state
-
-//const fileDockRefs = ref<{ [key: string]: Element }>({})
+const fileSelected: Ref<boolean> = ref(false)
 const inputRef: Ref<HTMLInputElement | null> = ref(null);
 
 const isFolderUpload = ref(false);
 const isOpen = ref(false)
-
-const setFileDockRef = (el: Element | null, id: string) => {
-  if (el) {
-    const file = fileSelected.value.find((f) => f.id === id);
-    if (file) {
-      file.dockElement = el;
-    }
-  }
-};
 
 const setIsOpen = (value: boolean) => {
   isOpen.value = value
@@ -75,8 +70,8 @@ const openFileUploadDialog = () => {
 const closeFileUploadDialog = () => {
   setIsOpen(false);
 }
-const setFileSelected = (files: { id: string, file: File }[]) => {
-  fileSelected.value = files;
+const setFileSelected = (selected: boolean) => {
+  fileSelected.value = selected;
 }
 const toggleUploadType = () => {
   isFolderUpload.value = isFolderUpload.value ? false : true;
@@ -85,7 +80,6 @@ const toggleUploadType = () => {
 const handleUploadInputClick = (e: MouseEvent | KeyboardEvent) => {
   e.preventDefault()
   inputRef.value ? inputRef.value.click() : null;
-  //console.log(inputRef.value)
 }
 
 const formSchema = toTypedSchema(z.object({
@@ -97,51 +91,55 @@ useForm({
   validationSchema: formSchema,
 })
 
-//const onSubmit = form.handleSubmit((values) => {
-//  console.log(values)
-//})
 
-const ClearFile = (id: string) => {
-  const file = fileSelected.value?.find((f) => { f.id == id }) // find and remove from index
+const clearFiles = () => {
+  setFileSelected(false);
 }
 
 const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
-
     const fileList: File[] = Array.from(e.target.files)
 
     fileUploadStore.clearFiles()
-    fileUploadStore.addFiles(fileList)
-    setFileSelected(fileUploadStore.selectedFiles)
-
     const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
+
+    fileUploadStore.addFiles(fileList, (currentResource.uid == selectedDrive.uid), isBulk)
+    setFileSelected(true)
+
     if (fileUploadStore.fileData) {
-      eagerLoadUrlPromise = await getAWSUploadPresignedURL(
+      preloadFilesPresignedURLPromise = await getAWSUploadPresignedURL(
         fileUploadStore.fileData,
         isBulk,
-        props.selectedDrive,
-        props.currentResource
+        selectedDrive.uid,
+        currentResource.uid
       )
     }
-  } else setFileSelected([]);
+  } else setFileSelected(false);
 }
 
 const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
   e.preventDefault()
-  if (eagerLoadUrlPromise) {
+
+  closeFileUploadDialog() // may remove?
+
+  if (preloadFilesPresignedURLPromise) {
     try {
-      const presignedUrlData = await eagerLoadUrlPromise;
+      const presignedUrlData = await preloadFilesPresignedURLPromise;
       const presignedUrls = presignedUrlData.presigned_urls
 
       if (presignedUrls?.length) {
 
         for (const url of presignedUrls) {
+
           fileUploadStore.setUploadURL(url.id, url.url);
           const fileObj = fileUploadStore.getFile(url.id);
 
-          // set the file path for the upload metadata
           const metadata = presignedUrlData.metadata
-          metadata['x-amz-meta-file_path'] = fileObj.webkitRelativePath
+          const filepath = fileUploadStore.getFilePath(url.id)
+
+          if (filepath) metadata['x-amz-meta-file_path'] = filepath
+          else throw new Error('Invalid File')
+
           await uploadFileToS3(url.url, fileObj, metadata);
         }
       } else {
@@ -160,7 +158,14 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
 <template>
   <Dialog :open="isOpen" @update:open="setIsOpen">
     <DialogTrigger as-child>
-      <Button class="mt-5" @click="openFileUploadDialog">Add File</Button>
+      <Button variant="outline" class="gap-2 bg-gray-800 hover:bg-gray-500 text-white hover:text-white"
+        @click="openFileUploadDialog">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Add File
+      </Button>
     </DialogTrigger>
     <DialogContent class="px-8">
       <DialogClose @click="closeFileUploadDialog"
@@ -186,7 +191,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-if="!fileSelected" v-slot="{ componentField }" name="files">
+        <FormField v-slot="{ componentField }" name="files">
           <FormItem class="mt-10">
             <FormLabel class="font-bold">Upload File
             </FormLabel>
@@ -195,11 +200,12 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
                 webkitdirectory @change="handleFileChange" />
               <input v-else style="display: none;" id="file-upload" type="file" ref="inputRef" multiple
                 @change="handleFileChange" />
-              <Button
-                class="flex flex-col items-center justify-items-center w-full h-36 text-black bg-white border border-black border-dashed hover:bg-white"
-                @click="handleUploadInputClick"><span>
+              <Button v-if="!fileSelected"
+                class="flex flex-col items-center justify-items-center w-full max-w-md h-36 text-black dark:text-white bg-transparent border border-gray-400 border-dashed hover:bg-transparent"
+                @click="handleUploadInputClick"><span class="dark:text-white">
                   <UploadIcon />
                 </span>Upload</Button>
+              <FileDock v-else @clear-files="clearFiles" />
             </FormControl>
             <FormDescription>
               Add files or folder
@@ -207,10 +213,6 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <div v-else>
-          <FileDock v-for="file in fileSelected" :file="file.file" :key="file.id"
-            :ref="(el) => setFileDockRef(el, file.id)" @remove-file="ClearFile" />
-        </div>
         <div class="flex flex-row mt-5 space-x-4">
           <p class="font-medium">Folder upload</p>
           <Switch :checked="isFolderUpload" @update:checked="toggleUploadType" />

@@ -1,93 +1,20 @@
-<!-- <a href="https://iconscout.com/icons/file" class="text-underline font-size-sm" target="_blank">File</a> by <a href="https://iconscout.com/contributors/twitter-inc" class="text-underline font-size-sm">Twitter Emoji</a> on <a href="https://iconscout.com" class="text-underline font-size-sm">IconScout</a> -->
 <template>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-    version="1.1"
-    width="256"
-    height="256"
-    viewBox="0 0 256 256"
-    xml:space="preserve"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+    viewBox="0 0 1080 1080" xml:space="preserve" class="w-32 h-32">
+    <desc>Created with Fabric.js 5.2.4</desc>
     <defs></defs>
-    <g
-      style="
-        stroke: none;
-        stroke-width: 0;
-        stroke-dasharray: none;
-        stroke-linecap: butt;
-        stroke-linejoin: miter;
-        stroke-miterlimit: 10;
-        fill: none;
-        fill-rule: nonzero;
-        opacity: 1;
-      "
-      transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)"
-    >
+    <g transform="matrix(1 0 0 1 540 540)" id="cf958d47-4964-46be-ab48-cd9706f614fa">
+      <rect
+        style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1; visibility: hidden;"
+        vector-effect="non-scaling-stroke" x="-540" y="-540" rx="0" ry="0" width="1080" height="1080" />
+    </g>
+    <g transform="matrix(1 0 0 1 540 540)" id="882b81c6-7ad3-4c8c-8b04-fc8058a6b7a8"></g>
+    <g transform="matrix(10.8 0 0 14.73 523.52 483.01)">
       <path
-        d="M 3.649 80.444 h 82.703 c 2.015 0 3.649 -1.634 3.649 -3.649 v -56.12 c 0 -2.015 -1.634 -3.649 -3.649 -3.649 H 35.525 c -1.909 0 -3.706 -0.903 -4.846 -2.435 l -2.457 -3.301 c -0.812 -1.092 -2.093 -1.735 -3.454 -1.735 H 3.649 C 1.634 9.556 0 11.19 0 13.205 v 63.591 C 0 78.81 1.634 80.444 3.649 80.444 z"
-        style="
-          stroke: none;
-          stroke-width: 1;
-          stroke-dasharray: none;
-          stroke-linecap: butt;
-          stroke-linejoin: miter;
-          stroke-miterlimit: 10;
-          fill: rgb(146, 220, 255);
-          fill-rule: nonzero;
-          opacity: 1;
-        "
-        transform=" matrix(1 0 0 1 0 0) "
-        stroke-linecap="round"
-      />
-      <path
-        d="M 86.351 80.444 H 3.649 C 1.634 80.444 0 78.81 0 76.795 V 29.11 c 0 -2.015 1.634 -3.649 3.649 -3.649 h 82.703 c 2.015 0 3.649 1.634 3.649 3.649 v 47.685 C 90 78.81 88.366 80.444 86.351 80.444 z"
-        style="
-          stroke: none;
-          stroke-width: 1;
-          stroke-dasharray: none;
-          stroke-linecap: butt;
-          stroke-linejoin: miter;
-          stroke-miterlimit: 10;
-          fill: rgb(101, 202, 248);
-          fill-rule: nonzero;
-          opacity: 1;
-        "
-        transform=" matrix(1 0 0 1 0 0) "
-        stroke-linecap="round"
-      />
-      <path
-        d="M 85.106 76.854 H 4.894 c -0.276 0 -0.5 -0.224 -0.5 -0.5 s 0.224 -0.5 0.5 -0.5 h 80.213 c 0.276 0 0.5 0.224 0.5 0.5 S 85.383 76.854 85.106 76.854 z"
-        style="
-          stroke: none;
-          stroke-width: 1;
-          stroke-dasharray: none;
-          stroke-linecap: butt;
-          stroke-linejoin: miter;
-          stroke-miterlimit: 10;
-          fill: rgb(146, 220, 255);
-          fill-rule: nonzero;
-          opacity: 1;
-        "
-        transform=" matrix(1 0 0 1 0 0) "
-        stroke-linecap="round"
-      />
-      <path
-        d="M 85.106 72.762 H 4.894 c -0.276 0 -0.5 -0.224 -0.5 -0.5 s 0.224 -0.5 0.5 -0.5 h 80.213 c 0.276 0 0.5 0.224 0.5 0.5 S 85.383 72.762 85.106 72.762 z"
-        style="
-          stroke: none;
-          stroke-width: 1;
-          stroke-dasharray: none;
-          stroke-linecap: butt;
-          stroke-linejoin: miter;
-          stroke-miterlimit: 10;
-          fill: rgb(146, 220, 255);
-          fill-rule: nonzero;
-          opacity: 1;
-        "
-        transform=" matrix(1 0 0 1 0 0) "
-        stroke-linecap="round"
-      />
+        style="stroke: rgb(128,128,128); stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: round; stroke-miterlimit: 4; fill: rgb(222,208,113); fill-rule: nonzero; opacity: 1;"
+        transform="translate(-50, -38)"
+        d="M 10 10 L 35 10 L 43 18 L 90 18 C 91.65685424949238 18 93 19.34314575050762 93 21 L 93 63 C 93 64.65685424949238 91.65685424949238 66 90 66 L 10 66 C 8.34314575050762 66 7 64.65685424949238 7 63 L 7 13 C 7 11.34314575050762 8.34314575050762 10 10 10 z"
+        stroke-linecap="round" />
     </g>
   </svg>
 </template>

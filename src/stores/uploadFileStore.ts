@@ -7,6 +7,7 @@ export type FileData = {
   filesize: number
   id: string
   metadata?: object
+  uploaded: boolean
 }
 
 export type FileObject = {
@@ -21,7 +22,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
   const fileData: Ref<FileData[]> = ref([])
   const selectedFiles: Ref<{ id: string; file: File }[]> = ref([])
 
-  const addFiles = (files: File[]) => {
+  const addFiles = (files: File[], isDriveRoot: boolean, isBulk: boolean) => {
     files.forEach((file) => {
       const id = crypto.randomUUID() as string
 
@@ -32,11 +33,16 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
         uploadPresignedURL: ''
       }
 
+      let filepath = file.webkitRelativePath
+
+      if (isDriveRoot && isBulk) filepath = file.name
+
       fileData.value.push({
         filename: file.name,
-        path: file.webkitRelativePath,
+        path: filepath,
         filesize: file.size,
-        id: id
+        id: id,
+        uploaded: false
       })
 
       selectedFiles.value.push({ id: id, file: file })
@@ -51,9 +57,27 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     return fileUploadData.value[id].file
   }
 
-  const clearFiles = () => {
-    fileUploadData.value = {}
-    fileData.value = []
+  const getFilePath = (id: string) => {
+    const file = fileData.value.find((file) => file.id == id)
+    return file?.path
+  }
+
+  const clearFiles = (id?: string) => {
+    if (id) {
+      delete fileUploadData.value[id]
+      fileData.value.splice(
+        fileData.value.findIndex((file) => file.id === id),
+        1
+      )
+      selectedFiles.value.splice(
+        selectedFiles.value.findIndex((file) => file.id === id),
+        1
+      )
+    } else {
+      selectedFiles.value = []
+      fileUploadData.value = {}
+      fileData.value = []
+    }
   }
 
   return {
@@ -63,6 +87,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     getFile,
     setUploadURL,
     selectedFiles,
-    clearFiles
+    clearFiles,
+    getFilePath
   }
 })

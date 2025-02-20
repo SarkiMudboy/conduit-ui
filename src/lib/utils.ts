@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { storeToRefs } from 'pinia'
 import { useCSRFTokenStore } from '@/stores/tokenStore'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -153,4 +152,23 @@ export function parseGithubAuthURL(clientID: string, callbackURL: string, state:
   githubAuthUrl.searchParams.append('allow_signup', allowSignup)
 
   return githubAuthUrl.toString()
+}
+
+export const calculateFileSize = (size: number) => {
+  let fileSize = ''
+
+  if (size == 0.0) return '0.0KB'
+  else if ((1024 <= size && size <= 1024 * 1024) || size < 1024) {
+    fileSize = (size / 1024).toFixed(2) + 'KB'
+  } else if (1024 * 1024 < size && size < 1024 * 1024 * 1024) {
+    fileSize = (size / (1024 * 1024)).toFixed(2) + 'MB'
+  } else if (size >= 1024 * 1024 * 1024) {
+    fileSize = (size / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
+  }
+
+  return fileSize
+}
+
+export const calculateDiskUsage = (used: number, totalAvailableSpace: number) => {
+  return (used / totalAvailableSpace) * 100
 }
