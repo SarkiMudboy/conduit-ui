@@ -10,7 +10,7 @@ import Toaster from '@/components/ui/toast/Toaster.vue';
 import FileObjects from '@/components/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
-
+import { driveAssetsQuery } from './utils';
 
 const { toast } = useToast()
 const filePathNavStore = useFileTreeContextStore()
@@ -26,23 +26,9 @@ const setDriveFileObjects = computed(() => {
 
 const getDriveAssets = async (uid: string) => {
 
-  const url = 'http://localhost:8000/api/v1/drives/' + uid
-
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-
-  const params: reqOptions = {
-    data: null,
-    headers: myHeaders,
-    url: url,
-    method: 'GET'
-  }
-
-  await protectedReq(params).then((r) => {
-
-    if (r.status == 200) {
-      selectedDrive.value = r.response
-
+  await driveAssetsQuery(uid).then((response) => {
+    if (response.status == 200) {
+      selectedDrive.value = response.response
       // for the path up top
       if (selectedDrive.value) {
         filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
@@ -50,6 +36,34 @@ const getDriveAssets = async (uid: string) => {
     }
   })
 }
+
+
+//const getDriveAssets = async (uid: string) => {
+//
+//  const url = 'http://localhost:8000/api/v1/drives/' + uid
+//
+//  const myHeaders = new Headers()
+//  myHeaders.append('Content-Type', 'application/json')
+//
+//  const params: reqOptions = {
+//    data: null,
+//    headers: myHeaders,
+//    url: url,
+//    method: 'GET'
+//  }
+//
+//  await protectedReq(params).then((r) => {
+//
+//    if (r.status == 200) {
+//      selectedDrive.value = r.response
+//
+//      // for the path up top
+//      if (selectedDrive.value) {
+//        filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
+//      }
+//    }
+//  })
+//}
 
 async function listDrives() {
 
@@ -85,7 +99,7 @@ await listDrives()
   <div class="p-6">
     <div :class="cn('w-full overflow-x-auto scrollbar-none')">
       <div v-if="selectedDrive">
-        <FileObjects :assets="setDriveFileObjects" :driveUid="selectedDrive.uid" @drive-selected="getDriveAssets"/>
+        <FileObjects :assets="setDriveFileObjects" />
       </div>
       <div v-else>
         <DriveActions>

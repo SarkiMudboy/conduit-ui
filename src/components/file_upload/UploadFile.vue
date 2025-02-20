@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Switch } from '@/components/ui/switch';
-import { useUploadFileStore, type FileObject } from '@/stores/uploadFileStore'
+import { useUploadFileStore } from '@/stores/uploadFileStore'
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import {
   getAWSUploadPresignedURL,
@@ -169,7 +169,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
     </DialogTrigger>
     <DialogContent class="px-8">
       <DialogClose @click="closeFileUploadDialog"
-        class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none hover:ring-2 hover:ring-ring hover:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
         <X class="w-4 h-4" />
         <span class="sr-only">Close</span>
       </DialogClose>

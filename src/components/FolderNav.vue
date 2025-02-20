@@ -17,7 +17,7 @@ const fileTreeContext = computed(() => {
   return filePathNav.filePath
 })
 
-const emit = defineEmits<{(e: 'node-selected', node: string | ObjectNode): void}>();
+const emit = defineEmits<{ (e: 'node-selected', node: string | ObjectNode): void }>();
 
 const verifyNode = (node: ObjectNode) => {
   const source = fileTreeContext.value.indexOf(node) == 0 ? node.uid : node
@@ -30,15 +30,16 @@ const verifyNode = (node: ObjectNode) => {
   <div class="flex flex-row justify-between">
     <Breadcrumb class="my-5">
       <BreadcrumbList>
-          <BreadcrumbItem v-for="file in fileTreeContext" :key="file.uid">
-            <BreadcrumbLink v-if="fileTreeContext.indexOf(file) !== fileTreeContext.length - 1" class="font-bold font-mono text-lg" @click="verifyNode(file)">
-              {{ file.name }}
-            </BreadcrumbLink>
-            <BreadcrumbPage v-else class="font-bold font-mono text-lg">{{ file.name }}</BreadcrumbPage>
-            <BreadcrumbSeparator v-if="fileTreeContext.indexOf(file) !== fileTreeContext.length - 1" >
-              <Slash />
-            </BreadcrumbSeparator>
-          </BreadcrumbItem>
+        <BreadcrumbItem v-for="file in fileTreeContext" :key="file.uid" class="cursor-pointer">
+          <BreadcrumbLink v-if="fileTreeContext.indexOf(file) !== fileTreeContext.length - 1"
+            class="font-bold font-mono text-lg" @click="verifyNode(file)">
+            {{ file.name }}
+          </BreadcrumbLink>
+          <BreadcrumbPage v-else class="font-bold font-mono text-lg">{{ file.name }}</BreadcrumbPage>
+          <BreadcrumbSeparator v-if="fileTreeContext.indexOf(file) !== fileTreeContext.length - 1">
+            <Slash />
+          </BreadcrumbSeparator>
+        </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
     <slot />

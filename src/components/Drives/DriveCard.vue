@@ -32,7 +32,7 @@ const getDriveCreatedDate = (dateString: string) => {
 
 <template>
   <div :class="cn('flex flex-col', 'w-[280px] shrink-0', 'bg-white dark:bg-zinc-900/70', 'rounded-xl'
-    , 'border border-zinc-100 dark:border-zinc-800', 'hover:border-zinc-200 dark:hover:border-zinc-700'
+    , 'border border-zinc-300 dark:border-zinc-800', 'hover:border-zinc-200 dark:hover:border-zinc-700'
     , 'transition-all duration-200', 'shadow-sm backdrop-blur-xl')">
     <div class="p-4 space-y-3">
       <div class="flex items-start justify-between">
