@@ -28,7 +28,7 @@ import {
   uploadFileToS3,
   type FileUploadPresignedURLData
 } from '@/lib/uploads/fileUpload'
-import { ref, type Ref } from 'vue';
+import { ref, toRaw, type Ref } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import UploadIcon from '@/components/icons/UploadIcon.vue';
 import FileDock from './FileDock.vue';
@@ -36,8 +36,6 @@ import FileDock from './FileDock.vue';
 
 const filePathNav = useFileTreeContextStore()
 
-const selectedDrive = filePathNav.filePath[0]
-const currentResource = filePathNav.filePath[filePathNav.filePath.length - 1]
 
 //const  = defineProps({
 //  selectedDrive: {
@@ -96,24 +94,33 @@ const clearFiles = () => {
   setFileSelected(false);
 }
 
+const preloadFilesPresignedURLs = async (fileList: File[]) => {
+
+  const selectedDrive = filePathNav.filePath[0]
+  const currentResource = toRaw(filePathNav.filePath)[filePathNav.filePath.length - 1]
+
+  fileUploadStore.clearFiles()
+  const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
+
+  fileUploadStore.addFiles(fileList, (currentResource.uid == selectedDrive.uid))
+  setFileSelected(true)
+
+  if (fileUploadStore.fileData) {
+    preloadFilesPresignedURLPromise = await getAWSUploadPresignedURL(
+      fileUploadStore.fileData,
+      isBulk,
+      selectedDrive.uid,
+      currentResource.uid
+    )
+  }
+}
+
 const handleFileChange = async (e: any /* change to HTML Event */) => {
   if (e.target.files) {
-    const fileList: File[] = Array.from(e.target.files)
 
-    fileUploadStore.clearFiles()
-    const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))
+    const files: File[] = Array.from(e.target.files)
+    await preloadFilesPresignedURLs(files)
 
-    fileUploadStore.addFiles(fileList, (currentResource.uid == selectedDrive.uid), isBulk)
-    setFileSelected(true)
-
-    if (fileUploadStore.fileData) {
-      preloadFilesPresignedURLPromise = await getAWSUploadPresignedURL(
-        fileUploadStore.fileData,
-        isBulk,
-        selectedDrive.uid,
-        currentResource.uid
-      )
-    }
   } else setFileSelected(false);
 }
 
@@ -154,6 +161,34 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
 
 }
 
+// drag files event handlers 
+
+const handleFileDrop = (event: DragEvent) => {
+
+  event.preventDefault()
+  let files: File[] = []
+
+  if (event.dataTransfer?.files) {
+    files = [...event.dataTransfer.files]
+
+  } else if (event.dataTransfer?.items) {
+
+    [...event.dataTransfer.items].forEach((item) => {
+
+      if (item.kind === "file") {
+        const file = item.getAsFile() as File;
+        files.push(file)
+      }
+    })
+  }
+  preloadFilesPresignedURLs(files)
+}
+
+const handleFileDragOver = (event: DragEvent) => {
+  console.log("AH")
+  event.preventDefault()
+}
+
 </script>
 <template>
   <Dialog :open="isOpen" @update:open="setIsOpen">
@@ -177,7 +212,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
         <DialogTitle class="font-semibold text-lg md:text-2xl">Upload Files</DialogTitle>
       </DialogHeader>
       <form>
-        <FormField v-slot="{ componentField }" name="note">
+        <FormField name="note">
           <FormItem>
             <FormLabel class="font-bold mt-5">Note
             </FormLabel>
@@ -191,7 +226,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField }" name="files">
+        <FormField name="files">
           <FormItem class="mt-10">
             <FormLabel class="font-bold">Upload File
             </FormLabel>
@@ -202,7 +237,8 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
                 @change="handleFileChange" />
               <Button v-if="!fileSelected"
                 class="flex flex-col items-center justify-items-center w-full max-w-md h-36 text-black dark:text-white bg-transparent border border-gray-400 border-dashed hover:bg-transparent"
-                @click="handleUploadInputClick"><span class="dark:text-white">
+                @click="handleUploadInputClick" @ondrop="handleFileDrop" @ondragover="handleFileDragOver"><span
+                  class="dark:text-white">
                   <UploadIcon />
                 </span>Upload</Button>
               <FileDock v-else @clear-files="clearFiles" />

@@ -1,12 +1,9 @@
-import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '../utils'
 import { type FileData } from '@/stores/uploadFileStore'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { useCurrentUserStore } from '@/stores/userStore'
-import { metadata } from '@vueuse/core/metadata.cjs'
 
 type FileResourceData = {
-  resource_uid?: string
+  resource?: string
   files: FileData[]
   bulk: boolean
 }
@@ -40,7 +37,7 @@ export const getAWSUploadPresignedURL = async (
   }
 
   if (resourceUid) {
-    uploadData.resource_uid = resourceUid
+    uploadData.resource = resourceUid
   }
 
   const params: reqOptions = {
@@ -52,7 +49,6 @@ export const getAWSUploadPresignedURL = async (
 
   const presignedURLData = await protectedReq(params).then((r) => {
     if (r.status == 200) {
-      //console.log(presignedURLs)
       return r.response
     } else {
       toast({
@@ -67,7 +63,6 @@ export const getAWSUploadPresignedURL = async (
   return presignedURLData
 }
 
-// may need to move this to workers...
 export const uploadFileToS3 = async (presignedURL: string, file: File, metadata: object) => {
   const { toast } = useToast()
   const headers = { ...metadata, 'Content-Type': '*' }
