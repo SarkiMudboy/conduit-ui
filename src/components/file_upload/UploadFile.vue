@@ -28,12 +28,12 @@ import {
   uploadFileToS3,
   type FileUploadPresignedURLData
 } from '@/lib/uploads/fileUpload'
-import { ref, toRaw, type Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import UploadIcon from '@/components/icons/UploadIcon.vue';
 import FileDock from './FileDock.vue';
 
-
+const fileDropActive = ref(false)
 const filePathNav = useFileTreeContextStore()
 
 let preloadFilesPresignedURLPromise: Promise<FileUploadPresignedURLData>
@@ -154,6 +154,8 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
 const handleFileDrop = (event: DragEvent) => {
 
   event.preventDefault()
+  fileDropActive.value = false
+
   let files: File[] = []
 
   if (event.dataTransfer?.files) {
@@ -172,10 +174,7 @@ const handleFileDrop = (event: DragEvent) => {
   preloadFilesPresignedURLs(files)
 }
 
-const handleFileDragOver = (event: DragEvent) => {
-  console.log("AH")
-  event.preventDefault()
-}
+const toggleFileDropActive = () => fileDropActive.value = !fileDropActive.value
 
 </script>
 <template>
@@ -224,9 +223,9 @@ const handleFileDragOver = (event: DragEvent) => {
               <input v-else style="display: none;" id="file-upload" type="file" ref="inputRef" multiple
                 @change="handleFileChange" />
               <Button v-if="!fileSelected"
-                class="flex flex-col items-center justify-items-center w-full max-w-md h-36 text-black dark:text-white bg-transparent border border-gray-400 border-dashed hover:bg-transparent"
-                @click="handleUploadInputClick" @ondrop="handleFileDrop" @ondragover="handleFileDragOver"><span
-                  class="dark:text-white">
+                :class="['flex', 'flex-col', 'items-center', 'justify-items-center', 'w-full', 'max-w-md', 'h-36', 'text-black', 'dark:text-white', 'bg-transparent', 'border', 'border-gray-400', 'border-dashed', 'hover:bg-transparent]', { 'border-solid border-green-400': fileDropActive }]"
+                @click="handleUploadInputClick" @drop="handleFileDrop" @dragover.prevent
+                @dragenter="toggleFileDropActive" @dragleave="toggleFileDropActive"><span class="dark:text-white">
                   <UploadIcon />
                 </span>Upload</Button>
               <FileDock v-else @clear-files="clearFiles" />
