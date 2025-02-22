@@ -36,18 +36,6 @@ import FileDock from './FileDock.vue';
 
 const filePathNav = useFileTreeContextStore()
 
-
-//const  = defineProps({
-//  selectedDrive: {
-//    type: String,
-//    required: true
-//  },
-//  currentResource: {
-//    type: String,
-//    required: true
-//  }
-//})
-
 let preloadFilesPresignedURLPromise: Promise<FileUploadPresignedURLData>
 const fileUploadStore = useUploadFileStore()
 
@@ -97,7 +85,7 @@ const clearFiles = () => {
 const preloadFilesPresignedURLs = async (fileList: File[]) => {
 
   const selectedDrive = filePathNav.filePath[0]
-  const currentResource = toRaw(filePathNav.filePath)[filePathNav.filePath.length - 1]
+  const currentResource = filePathNav.filePath.length > 1 ? filePathNav.filePath[filePathNav.filePath.length - 1] : { uid: null }
 
   fileUploadStore.clearFiles()
   const isBulk = !fileList.every((f) => f.webkitRelativePath.includes('/'))

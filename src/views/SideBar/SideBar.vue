@@ -5,7 +5,7 @@ import NavItem from './NavItem.vue';
 
 <template>
 
-  <div class="w-64 border-r">
+  <div class="w-64 min-w-64 border-r">
     <div class="p-4">
       <h1 class="text-xl font-bold">conduit</h1>
     </div>

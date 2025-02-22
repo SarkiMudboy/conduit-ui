@@ -57,7 +57,6 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
   }
 
   const getFilePath = (id: string) => {
-    console.log(id)
     const file = fileData.value.find((file) => file.id == id)
     return file?.path
   }

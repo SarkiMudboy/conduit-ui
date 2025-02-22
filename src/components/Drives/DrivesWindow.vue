@@ -38,33 +38,6 @@ const getDriveAssets = async (uid: string) => {
 }
 
 
-//const getDriveAssets = async (uid: string) => {
-//
-//  const url = 'http://localhost:8000/api/v1/drives/' + uid
-//
-//  const myHeaders = new Headers()
-//  myHeaders.append('Content-Type', 'application/json')
-//
-//  const params: reqOptions = {
-//    data: null,
-//    headers: myHeaders,
-//    url: url,
-//    method: 'GET'
-//  }
-//
-//  await protectedReq(params).then((r) => {
-//
-//    if (r.status == 200) {
-//      selectedDrive.value = r.response
-//
-//      // for the path up top
-//      if (selectedDrive.value) {
-//        filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
-//      }
-//    }
-//  })
-//}
-
 async function listDrives() {
 
   const myHeaders = new Headers()

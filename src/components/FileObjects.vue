@@ -69,7 +69,7 @@ const loadFolderAssets = async (folder: ObjectNode) => {
   <FolderNav @node-selected="checkAsset">
     <UploadFile />
   </FolderNav>
-  <div v-if="assets.length > 0" class="flex mt-5 gap-3 min-w-full p-1">
+  <div v-if="assets.length > 0" class="flex flex-wrap mt-5 gap-3 min-w-full p-1">
     <div v-for="obj in assets" :key="obj.uid">
       <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
         <component :is="objType(obj)" @click="selectObject(obj)" />
