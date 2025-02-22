@@ -223,9 +223,10 @@ const toggleFileDropActive = () => fileDropActive.value = !fileDropActive.value
               <input v-else style="display: none;" id="file-upload" type="file" ref="inputRef" multiple
                 @change="handleFileChange" />
               <Button v-if="!fileSelected"
-                :class="['flex', 'flex-col', 'items-center', 'justify-items-center', 'w-full', 'max-w-md', 'h-36', 'text-black', 'dark:text-white', 'bg-transparent', 'border', 'border-gray-400', 'border-dashed', 'hover:bg-transparent]', { 'border-solid border-green-400': fileDropActive }]"
+                :class="['flex', 'flex-col', 'items-center', 'justify-items-center', 'w-full', 'max-w-md', 'h-36', 'text-black', 'dark:text-white', 'bg-transparent', 'border', 'border-gray-400', 'border-dashed', 'hover:bg-transparent]', { 'border-solid border-green-400 border-4': fileDropActive }]"
                 @click="handleUploadInputClick" @drop="handleFileDrop" @dragover.prevent
-                @dragenter="toggleFileDropActive" @dragleave="toggleFileDropActive"><span class="dark:text-white">
+                @dragenter="toggleFileDropActive" @dragleave="toggleFileDropActive">
+                <span class="dark:text-white">
                   <UploadIcon />
                 </span>Upload</Button>
               <FileDock v-else @clear-files="clearFiles" />

@@ -22,7 +22,6 @@ const selectedFileNames = computed(() => {
 
 const ClearFile = (id?: string) => {
   if (id) {
-    selectedFiles.value.splice(selectedFiles.value.findIndex((file) => file.id === id), 1)
     fileStore.clearFiles(id)
   } else {
     selectedFiles.value = []
