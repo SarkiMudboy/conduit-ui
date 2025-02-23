@@ -54,7 +54,6 @@ export async function protectedReq(params: reqOptions) {
 
   if (response.status == 401)
     await refreshToken().then(async (r) => {
-      console.log(r)
       if (!r) router.push('/login')
       // else block that makes the request again
       else response = await req(params)
