@@ -147,6 +147,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
     }
   }
 
+  fileUploadStore.clearFiles()
 }
 
 // drag files event handlers 

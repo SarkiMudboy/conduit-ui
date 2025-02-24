@@ -1,6 +1,11 @@
 import { protectedReq, type reqOptions } from '../utils'
 import { type FileData } from '@/stores/uploadFileStore'
 import { useToast } from '@/components/ui/toast/use-toast'
+import axios from 'axios'
+import { h } from 'vue'
+import Progress from '@/components/ui/progress/Progress.vue'
+
+const { toast } = useToast()
 
 type FileResourceData = {
   resource?: string
@@ -64,21 +69,33 @@ export const getAWSUploadPresignedURL = async (
 }
 
 export const uploadFileToS3 = async (presignedURL: string, file: File, metadata: object) => {
-  const { toast } = useToast()
-  const headers = { ...metadata, 'Content-Type': '*' }
-  const params = {
-    method: 'PUT',
-    headers: headers,
-    body: file
-  }
-  await fetch(presignedURL, params).then((r) => {
-    if (r.status == 200) {
+  try {
+    const response = await axios.put(presignedURL, file, {
+      headers: { ...metadata, 'Content-Type': '*' },
+      onUploadProgress: (event) => {
+        if (event.lengthComputable && event.total) {
+          toast({
+            title: 'File Upload',
+            description: h('div', {}, [
+              h('p', {}, `Uploading ${file.name}`),
+              h(Progress, {
+                progress: Math.floor((event.loaded / event.total) * 100),
+                class: 'mt-2'
+              })
+            ])
+          })
+        }
+      }
+    })
+
+    if (response.status != 200) throw new Error('Failed')
+    else
       toast({ title: 'File uploaded', description: `${file.name} has been uploaded sucessfully` })
-    } else
-      toast({
-        title: 'Failed upload',
-        description: `Failed to upload ${file.name}`,
-        variant: 'destructive'
-      })
-  })
+  } catch (error) {
+    toast({
+      title: 'Failed upload',
+      description: `Failed to upload ${file.name}`,
+      variant: 'destructive'
+    })
+  }
 }
