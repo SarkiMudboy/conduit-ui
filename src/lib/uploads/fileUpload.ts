@@ -2,8 +2,9 @@ import { protectedReq, type reqOptions } from '../utils'
 import { type FileData } from '@/stores/uploadFileStore'
 import { useToast } from '@/components/ui/toast/use-toast'
 import axios from 'axios'
-import { h } from 'vue'
+import { h, markRaw, ref } from 'vue'
 import Progress from '@/components/ui/progress/Progress.vue'
+import ToastProgress from '@/components/ui/ToastProgress/ToastProgress.vue'
 
 const { toast } = useToast()
 
@@ -69,21 +70,25 @@ export const getAWSUploadPresignedURL = async (
 }
 
 export const uploadFileToS3 = async (presignedURL: string, file: File, metadata: object) => {
+  const fileUploadCompleted = ref(20)
+
+  toast({
+    title: 'File Upload',
+    description: h('div', { class: 'w-full' }, [
+      h('p', {}, `Uploading ${file.name}...`),
+      h(ToastProgress, {
+        progress: fileUploadCompleted,
+        class: 'mt-2'
+      })
+    ])
+  })
+
   try {
     const response = await axios.put(presignedURL, file, {
       headers: { ...metadata, 'Content-Type': '*' },
       onUploadProgress: (event) => {
         if (event.lengthComputable && event.total) {
-          toast({
-            title: 'File Upload',
-            description: h('div', {}, [
-              h('p', {}, `Uploading ${file.name}`),
-              h(Progress, {
-                progress: Math.floor((event.loaded / event.total) * 100),
-                class: 'mt-2'
-              })
-            ])
-          })
+          fileUploadCompleted.value = Math.floor((event.loaded / event.total) * 100)
         }
       }
     })
