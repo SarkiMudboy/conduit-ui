@@ -3,7 +3,6 @@ import { type FileData } from '@/stores/uploadFileStore'
 import { useToast } from '@/components/ui/toast/use-toast'
 import axios from 'axios'
 import { h, markRaw, ref } from 'vue'
-import Progress from '@/components/ui/progress/Progress.vue'
 import ToastProgress from '@/components/ui/ToastProgress/ToastProgress.vue'
 
 const { toast } = useToast()
@@ -70,17 +69,18 @@ export const getAWSUploadPresignedURL = async (
 }
 
 export const uploadFileToS3 = async (presignedURL: string, file: File, metadata: object) => {
-  const fileUploadCompleted = ref(20)
+  const fileUploadCompleted = ref(0)
 
-  toast({
+  const uploadToast = toast({
     title: 'File Upload',
-    description: h('div', { class: 'w-full' }, [
-      h('p', {}, `Uploading ${file.name}...`),
-      h(ToastProgress, {
+    description: h('div', { class: 'min-w-[20rem]' }, [
+      h('p', { class: 'w-full' }, `Uploading ${file.name}...`),
+      h(markRaw(ToastProgress), {
         progress: fileUploadCompleted,
-        class: 'mt-2'
+        class: 'mt-2 h-[10px]'
       })
-    ])
+    ]),
+    duration: Infinity
   })
 
   try {
@@ -94,8 +94,10 @@ export const uploadFileToS3 = async (presignedURL: string, file: File, metadata:
     })
 
     if (response.status != 200) throw new Error('Failed')
-    else
+    else {
+      uploadToast.dismiss()
       toast({ title: 'File uploaded', description: `${file.name} has been uploaded sucessfully` })
+    }
   } catch (error) {
     toast({
       title: 'Failed upload',
