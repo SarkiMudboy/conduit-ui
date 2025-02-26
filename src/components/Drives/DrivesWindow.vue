@@ -59,13 +59,13 @@ const getDriveAssets = async (uid: string) => {
 //}
 
 const addNewDrive = (drive: Drive) => {
-  drives.value.push(drive);
+  //drives.value.push(drive);
   toast({
     title: 'Drive created',
     description: `${drive.name} added!`
   })
 }
-
+// @drive-created="addNewDrive"
 //await listDrives()
 
 </script>

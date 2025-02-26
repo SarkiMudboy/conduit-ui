@@ -17,12 +17,15 @@ import { ref } from 'vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
 import { type Drive } from './types'
 import Button from '@/components/ui/button/Button.vue'
+import type { InputCreateDrive } from '@/services/drives/types'
+import { useDriveStore } from '@/stores/drives'
 
 const emit = defineEmits<{
   (e: 'drive-created', drive: Drive): void
 }>()
 
 const props = defineProps<{ userDrives: string[] }>()
+const driveStore = useDriveStore()
 
 const isOpen = ref(false)
 const hasError = ref(false)
@@ -50,26 +53,17 @@ const validateInput = () => {
   }
 }
 
-const newDrive = ref<{ name: string; members: string[] }>({ name: '', members: [] })
+const newDrive = ref<InputCreateDrive>({ name: '', members: [] })
 const AddMember = (member: string) => {
   newDrive.value.members.push(member)
 }
 
 const addDrive = async () => {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-  const params: reqOptions = {
-    data: { name: newDrive.value.name, members: newDrive.value.members },
-    headers: myHeaders,
-    url: 'http://localhost:8000/api/v1/drives/',
-    method: 'POST'
-  }
-  await protectedReq(params).then((r) => {
-    if (r.status == 201) {
-      emit('drive-created', r.response)
-      closeDialog()
-    }
-  })
+
+  const r = await driveStore.dispatchCreateDrive(newDrive.value)
+  if (r.body) emit('drive-created', r.body)
+  closeDialog()
+
 }
 </script>
 

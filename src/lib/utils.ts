@@ -8,80 +8,88 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-//export type reqOptions = {
-//  data: any
-//  headers: Headers
-//  url: string
-//  method: 'POST' | 'GET' | 'PUT'
-//}
+export type reqOptions = {
+  data: any
+  headers: Headers
+  url: string
+  method: 'POST' | 'GET' | 'PUT'
+}
+
+export async function req(options: reqOptions) {
+  const requestOptions: {
+    method: string
+    headers: Headers
+    credentials?: 'include'
+    body?: string
+  } = {
+    method: options.method,
+    headers: options.headers,
+    credentials: 'include'
+  }
+
+  if (options.method != 'GET') {
+    requestOptions.body = JSON.stringify(options.data)
+  }
+  if (options.method == 'POST' || options.method == 'PUT') {
+    const tokenStore = useCSRFTokenStore()
+    requestOptions.headers.append('X-CSRFToken', tokenStore.csrfToken)
+  }
+
+  const responseData = await fetch(options.url, requestOptions)
+    .then(async (response) => {
+      const data = Number(response.headers.get('content-length'))
+      const json = data > 0 ? await response.json() : {}
+      return { status: response.status, response: json }
+    })
+    .catch((error) => {
+      return { status: 0, response: error }
+    })
+
+  return responseData
+}
 //
-//export async function req(options: reqOptions) {
-//  const requestOptions: {
-//    method: string
-//    headers: Headers
-//    credentials?: 'include'
-//    body?: string
-//  } = {
-//    method: options.method,
-//    headers: options.headers,
-//    credentials: 'include'
-//  }
-//
-//  if (options.method != 'GET') {
-//    requestOptions.body = JSON.stringify(options.data)
-//  }
-//  if (options.method == 'POST' || options.method == 'PUT') {
-//    const tokenStore = useCSRFTokenStore()
-//    requestOptions.headers.append('X-CSRFToken', tokenStore.csrfToken)
-//  }
-//
-//  const responseData = await fetch(options.url, requestOptions)
-//    .then(async (response) => {
-//      const data = Number(response.headers.get('content-length'))
-//      const json = data > 0 ? await response.json() : {}
-//      return { status: response.status, response: json }
-//    })
-//    .catch((error) => {
-//      return { status: 0, response: error }
-//    })
-//
-//  return responseData
-//}
-//
-//export async function protectedReq(params: reqOptions) {
-//  const router = useRouter()
-//
-//  let response = await req(params)
-//
-//  if (response.status == 401)
-//    await refreshToken().then(async (r) => {
-//      if (!r) router.push('/login')
-//      // else block that makes the request again
-//      else response = await req(params)
-//    })
-//  return response
-//}
+export async function protectedReq(params: reqOptions) {
+  const router = useRouter()
+
+  let response = await req(params)
+
+  if (response.status == 401)
+    await refreshToken().then(async (r) => {
+      if (!r) router.push('/login')
+      // else block that makes the request again
+      else response = await req(params)
+    })
+  return response
+}
 
 // tokens
 
 // function that verifies tokens and
 export async function verify(): Promise<Boolean> {
-  const config = { root: true }
+  const config = { withAuth: true, root: true }
 
   const http = getClient(config)
-  const { status } = await http.post('token/verify/')
-  if (status != 200) return false
-  else return true
+  try {
+    const { status } = await http.post('token/verify/')
+    if (status != 200) return false
+    else return true
+  } catch (error) {
+    return false
+  }
 }
 
 // refresh tokens
 export async function refreshToken(): Promise<Boolean> {
-  const config = { root: true }
+  const config = { withAuth: true, root: true }
 
   const http = getClient(config)
-  const { status } = await http.post('token/refresh/')
-  if (status != 200) return false
-  else return true
+  try {
+    const { status } = await http.post('token/refresh/')
+    if (status != 200) return false
+    else return true
+  } catch (error) {
+    return false
+  }
 }
 
 export function validatePassword(password: string) {
