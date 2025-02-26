@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { protectedReq, type reqOptions } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { computed, ref, type Ref } from 'vue';
 import { type Drive, type DriveDetail } from "./types"
@@ -11,11 +10,14 @@ import FileObjects from '@/components/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import { driveAssetsQuery } from './utils';
+import { useDriveStore } from '@/stores/drives';
 
 const { toast } = useToast()
 const filePathNavStore = useFileTreeContextStore()
+const driveStore = useDriveStore()
 
-const drives: Ref<Drive[]> = ref([])
+await driveStore.dispatchGetDrives()
+const drives: Ref<Drive[]> = ref(driveStore.drives)
 const selectedDrive: Ref<DriveDetail | null> = ref(null)
 
 const setDriveFileObjects = computed(() => {
@@ -38,23 +40,23 @@ const getDriveAssets = async (uid: string) => {
 }
 
 
-async function listDrives() {
-
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-
-  const params: reqOptions = {
-    data: null,
-    headers: myHeaders,
-    url: 'http://localhost:8000/api/v1/drives/',
-    method: 'GET'
-  }
-
-  await protectedReq(params).then((r) => {
-    drives.value = r.response
-  })
-
-}
+//async function listDrives() {
+//
+//  const myHeaders = new Headers()
+//  myHeaders.append('Content-Type', 'application/json')
+//
+//  const params: reqOptions = {
+//    data: null,
+//    headers: myHeaders,
+//    url: 'http://localhost:8000/api/v1/drives/',
+//    method: 'GET'
+//  }
+//
+//  await protectedReq(params).then((r) => {
+//    drives.value = r.response
+//  })
+//
+//}
 
 const addNewDrive = (drive: Drive) => {
   drives.value.push(drive);
@@ -64,7 +66,7 @@ const addNewDrive = (drive: Drive) => {
   })
 }
 
-await listDrives()
+//await listDrives()
 
 </script>
 

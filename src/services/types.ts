@@ -1,5 +1,9 @@
 export type APIResponse<T> = {
-  success: boolean
   body: T
   status?: number
+}
+
+export type RequestConfig = {
+  root?: boolean
+  withAuth?: boolean
 }
