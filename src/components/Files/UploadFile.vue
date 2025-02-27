@@ -24,19 +24,20 @@ import { Switch } from '@/components/ui/switch';
 import { useUploadFileStore } from '@/stores/uploadFileStore'
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import {
-  getAWSUploadPresignedURL,
+  //getAWSUploadPresignedURL,
   uploadFileToS3,
-  type FileUploadPresignedURLData
+  //type FileUploadPresignedURLData
 } from '@/lib/uploads/fileUpload'
 import { ref, type Ref } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import UploadIcon from '@/components/icons/UploadIcon.vue';
 import FileDock from './FileDock.vue';
+import { useToast } from '@/components/ui/toast';
 
 const fileDropActive = ref(false)
 const filePathNav = useFileTreeContextStore()
 
-let preloadFilesPresignedURLPromise: Promise<FileUploadPresignedURLData>
+const { toast } = useToast()
 const fileUploadStore = useUploadFileStore()
 
 const fileSelected: Ref<boolean> = ref(false)
@@ -93,13 +94,20 @@ const preloadFilesPresignedURLs = async (fileList: File[]) => {
   fileUploadStore.addFiles(fileList, (currentResource.uid == selectedDrive.uid))
   setFileSelected(true)
 
-  if (fileUploadStore.fileData) {
-    preloadFilesPresignedURLPromise = await getAWSUploadPresignedURL(
-      fileUploadStore.fileData,
-      isBulk,
+  if (fileUploadStore.files) {
+    const response = await fileUploadStore.dispatchGetPresignedURLS(
       selectedDrive.uid,
+      isBulk,
       currentResource.uid
     )
+
+    if (!response.body)
+      toast({
+        title: 'Failed to upload',
+        description: `Something went wrong`,
+        variant: 'destructive'
+      })
+
   }
 }
 
@@ -115,39 +123,60 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
 const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
   e.preventDefault()
 
-  closeFileUploadDialog() // may remove?
+  closeFileUploadDialog()
 
-  if (preloadFilesPresignedURLPromise) {
-    try {
-      const presignedUrlData = await preloadFilesPresignedURLPromise;
-      const presignedUrls = presignedUrlData.presigned_urls
+  fileUploadStore.files.forEach(async (file) => {
 
-      if (presignedUrls?.length) {
-
-        for (const url of presignedUrls) {
-
-          fileUploadStore.setUploadURL(url.id, url.url);
-          const fileObj = fileUploadStore.getFile(url.id);
-
-          const metadata = presignedUrlData.metadata
-          const filepath = fileUploadStore.getFilePath(url.id)
-
-          if (filepath) metadata['x-amz-meta-file_path'] = filepath
-          else throw new Error('Invalid File')
-
-          await uploadFileToS3(url.url, fileObj, metadata);
-        }
-      } else {
-        console.error('Error: No presigned URLs received.');
-        // Trigger toast notification for error here
-      }
-    } catch (error) {
-      console.error('Error getting presigned URLs:', error);
-      // Trigger toast notification for error here
+    if (file.data.metadata) {
+      file.data.metadata['x-amz-meta-file_path'] = file.data.path as string
     }
-  }
+    const uploaded = await fileUploadStore.dispatchUploadFiles(file)
+
+    if (uploaded) {
+      toast(
+        {
+          title: 'File uploaded',
+          description: `${file.file.name} has been uploaded sucessfully`
+        })
+    } else {
+      toast({
+        title: 'Failed upload',
+        description: `Failed to upload ${file.file.name}`,
+        variant: 'destructive'
+      })
+    }
+  })
 
   fileUploadStore.clearFiles()
+  //if (preloadFilesPresignedURLPromise) {
+  //  try {
+  //    const presignedUrlData = await preloadFilesPresignedURLPromise;
+  //    const presignedUrls = presignedUrlData.presigned_urls
+  //
+  //    if (presignedUrls?.length) {
+  //
+  //      for (const url of presignedUrls) {
+  //
+  //        //fileUploadStore.setUploadURL(url.id, url.url);
+  //        const fileObj = fileUploadStore.getFile(url.id);
+  //
+  //        const metadata = presignedUrlData.metadata
+  //        const filepath = fileUploadStore.getFilePath(url.id)
+  //
+  //        if (filepath) metadata['x-amz-meta-file_path'] = filepath
+  //        else throw new Error('Invalid File')
+  //
+  //        await uploadFileToS3(url.url, fileObj, metadata);
+  //      }
+  //    } else {
+  //      console.error('Error: No presigned URLs received.');
+  //      // Trigger toast notification for error here
+  //    }
+  //  } catch (error) {
+  //    console.error('Error getting presigned URLs:', error);
+  //    // Trigger toast notification for error here
+  //  }
+  //}
 }
 
 // drag files event handlers 

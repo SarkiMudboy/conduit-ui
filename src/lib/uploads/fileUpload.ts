@@ -23,50 +23,45 @@ export type FileUploadPresignedURLData = {
   metadata: { [key: string]: string }
 }
 
-export const getAWSUploadPresignedURL = async (
-  files: FileData[],
-  bulk: boolean,
-  driveUid: string,
-  resourceUid: string | null
-) /* Promise<FileUploadPresignedURL[]>*/ => {
-  const { toast } = useToast()
-  const reqHeaders = new Headers()
-  reqHeaders.append('Content-Type', 'application/json')
-
-  const path = `http://localhost:8000/api/v1/drives/${driveUid}/share/get-upload-url/`
-  const uploadData: FileResourceData = {
-    files: files,
-    bulk: bulk /* true: its bulk file upload, for directory uploads the flag is set to false,
-    false: single file or directory
-    */
-  }
-
-  if (resourceUid) {
-    uploadData.resource = resourceUid
-  }
-
-  const params: reqOptions = {
-    data: uploadData,
-    headers: reqHeaders,
-    url: path,
-    method: 'POST'
-  }
-
-  const presignedURLData = await protectedReq(params).then((r) => {
-    if (r.status == 200) {
-      return r.response
-    } else {
-      toast({
-        title: 'Failed to upload',
-        description: `Something went wrong`,
-        variant: 'destructive'
-      })
-      return []
-    }
-  })
-
-  return presignedURLData
-}
+//export const getAWSUploadPresignedURL = async (
+//  files: FileData[],
+//  bulk: boolean,
+//  driveUid: string,
+//  resourceUid: string | null
+//) /* Promise<FileUploadPresignedURL[]>*/ => {
+//  const { toast } = useToast()
+//  const reqHeaders = new Headers()
+//  reqHeaders.append('Content-Type', 'application/json')
+//
+//  const path = `http://localhost:8000/api/v1/drives/${driveUid}/share/get-upload-url/`
+//  const uploadData: FileResourceData = {
+//    files: files,
+//    bulk: bulk /* true: its bulk file upload, for directory uploads the flag is set to false,
+//    false: single file or directory
+//    */
+//  }
+//
+//  if (resourceUid) {
+//    uploadData.resource = resourceUid
+//  }
+//
+//  const params: reqOptions = {
+//    data: uploadData,
+//    headers: reqHeaders,
+//    url: path,
+//    method: 'POST'
+//  }
+//
+//  const presignedURLData = await protectedReq(params).then((r) => {
+//    if (r.status == 200) {
+//      return r.response
+//    } else {
+//      return []
+//    }
+//  })
+//
+//  return presignedURLData
+//}
 
 export const uploadFileToS3 = async (presignedURL: string, file: File, metadata: object) => {
   const fileUploadCompleted = ref(0)

@@ -1,92 +1,131 @@
 import { defineStore } from 'pinia'
 import { ref, type Ref } from 'vue'
-
-export type FileData = {
-  filename: string
-  path: string | null
-  filesize: number
-  id: string
-  metadata?: object
-  uploaded: boolean
-}
-
-export type FileObject = {
-  file: File
-  fileURL: string
-  id: string
-  uploadPresignedURL: string
-}
+import {
+  type FileData,
+  type FileMetaData,
+  type GetPresignedURLData,
+  type PresignedURLS,
+  type UploadFile
+} from '@/services/files/types'
+import type { APIResponse } from '@/services/types'
+import type { AxiosError } from 'axios'
+import { API } from '@/services'
 
 export const useUploadFileStore = defineStore('useUploadFileStore', () => {
-  const fileUploadData: Ref<{ [key: string]: FileObject }> = ref({})
-  const fileData: Ref<FileData[]> = ref([])
-  const selectedFiles: Ref<{ id: string; file: File }[]> = ref([])
+  const files: Ref<UploadFile[]> = ref([])
+  const presignedFiles: Ref<GetPresignedURLData> = ref({
+    files: [] as FileData[],
+    bulk: false
+  })
 
-  const addFiles = (files: File[], isDriveRoot: boolean) => {
-    files.forEach((file) => {
+  const addFiles = (fileObjects: File[], isDriveRoot: boolean) => {
+    fileObjects.forEach((file) => {
       const id = crypto.randomUUID() as string
-
-      fileUploadData.value[id] = {
-        file: file,
-        fileURL: URL.createObjectURL(file),
-        id: id, // id to identify each file through out the process **required by the API**
-        uploadPresignedURL: ''
-      }
 
       let filepath = file.webkitRelativePath
       if (isDriveRoot || !filepath) filepath = file.name
 
-      fileData.value.push({
+      const f = {
+        id: id,
         filename: file.name,
         path: filepath,
-        filesize: file.size,
-        id: id,
+        filesize: file.size
+      }
+      files.value.push({
+        data: f,
+        file: file,
+        fileURL: '',
+        uploadPresignedURL: '',
         uploaded: false
       })
 
-      selectedFiles.value.push({ id: id, file: file })
+      presignedFiles.value.files.push(f)
     })
   }
 
-  const setUploadURL = (id: string, url: string) => {
-    fileUploadData.value[id].uploadPresignedURL = url
+  const setUploadMeta = (id: string, url: string, metadata: FileMetaData) => {
+    const file = files.value.find((file) => file.data.id == id)
+    if (file) {
+      file.uploadPresignedURL = url
+      file.data.metadata = metadata
+    }
   }
 
   const getFile = (id: string) => {
-    return fileUploadData.value[id].file
+    const file = files.value.find((file) => file.data.id == id)
+    return file ? file.file : null
   }
 
   const getFilePath = (id: string) => {
-    const file = fileData.value.find((file) => file.id == id)
-    return file?.path
+    const file = files.value.find((file) => file.data.id == id)
+    return file ? file.data.path : ''
   }
 
   const clearFiles = (id?: string) => {
     if (id) {
-      delete fileUploadData.value[id]
-      fileData.value.splice(
-        fileData.value.findIndex((file) => file.id === id),
+      files.value.splice(
+        files.value.findIndex((file) => file.data.id === id),
         1
       )
-      selectedFiles.value.splice(
-        selectedFiles.value.findIndex((file) => file.id === id),
+      presignedFiles.value.files.splice(
+        presignedFiles.value.files.findIndex((file) => file.id === id),
         1
       )
     } else {
-      selectedFiles.value = []
-      fileUploadData.value = {}
-      fileData.value = []
+      files.value = []
+    }
+  }
+
+  const dispatchGetPresignedURLS = async (
+    drive: string,
+    isBulk: boolean,
+    resource: string | null
+  ): Promise<APIResponse<PresignedURLS | null>> => {
+    // set presignedURL data here first
+    if (resource) presignedFiles.value.resource = resource
+    presignedFiles.value.bulk = isBulk
+
+    try {
+      const { status, data } = await API.files.getObjectPresignedURL(presignedFiles.value, drive)
+      if (status === 200) {
+        data.presigned_urls.forEach((url) => setUploadMeta(url.id, url.url, data.metadata))
+        return {
+          body: data
+        }
+      }
+    } catch (error) {
+      const _error = error as AxiosError<string>
+      return {
+        status: _error.response ? _error.response.status : 400,
+        body: null
+      }
+    }
+    return {
+      body: null,
+      status: 400
+    }
+  }
+
+  const dispatchUploadFiles = async (file: UploadFile): Promise<APIResponse<boolean>> => {
+    try {
+      const uploaded = await API.files.uploadFile(
+        file.uploadPresignedURL,
+        file.file,
+        file.data.metadata as FileMetaData
+      )
+      return { body: uploaded }
+    } catch (error) {
+      return { body: false }
     }
   }
 
   return {
-    fileUploadData,
-    fileData,
+    files,
     addFiles,
     getFile,
-    setUploadURL,
-    selectedFiles,
     clearFiles,
-    getFilePath
+    getFilePath,
+    dispatchGetPresignedURLS,
+    dispatchUploadFiles
   }
 })
