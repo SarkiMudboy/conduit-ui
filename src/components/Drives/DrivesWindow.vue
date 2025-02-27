@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
 import { computed, ref, type Ref } from 'vue';
-import { type Drive, type DriveDetail } from "./types"
+import type { Drive, DriveDetail } from '@/services/drives/types';
 import DriveCard from './DriveCard.vue';
 import AddDrive from './AddDrive.vue';
 import { useToast } from '@/components/ui/toast';
 import Toaster from '@/components/ui/toast/Toaster.vue';
-import FileObjects from '@/components/FileObjects.vue';
+import FileObjects from '@/components//Files/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
-import { driveAssetsQuery } from './utils';
 import { useDriveStore } from '@/stores/drives';
 
 const { toast } = useToast()
@@ -17,7 +16,9 @@ const filePathNavStore = useFileTreeContextStore()
 const driveStore = useDriveStore()
 
 await driveStore.dispatchGetDrives()
-const drives: Ref<Drive[]> = ref(driveStore.drives)
+const drives = computed<Drive[]>(() => {
+  return driveStore.drives
+})
 const selectedDrive: Ref<DriveDetail | null> = ref(null)
 
 const setDriveFileObjects = computed(() => {
@@ -28,45 +29,29 @@ const setDriveFileObjects = computed(() => {
 
 const getDriveAssets = async (uid: string) => {
 
-  await driveAssetsQuery(uid).then((response) => {
-    if (response.status == 200) {
-      selectedDrive.value = response.response
-      // for the path up top
-      if (selectedDrive.value) {
-        filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
-      }
+  const response = await driveStore.dispatchGetDriveAssets(uid)
+  if (response.body) {
+    selectedDrive.value = response.body
+    // for the path up top
+    if (selectedDrive.value) {
+      filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
     }
-  })
+  } else {
+    toast({
+      title: "Get Drive Failed",
+      description: "Couldn't fetch that drive",
+      variant: "destructive"
+    })
+  }
 }
 
 
-//async function listDrives() {
-//
-//  const myHeaders = new Headers()
-//  myHeaders.append('Content-Type', 'application/json')
-//
-//  const params: reqOptions = {
-//    data: null,
-//    headers: myHeaders,
-//    url: 'http://localhost:8000/api/v1/drives/',
-//    method: 'GET'
-//  }
-//
-//  await protectedReq(params).then((r) => {
-//    drives.value = r.response
-//  })
-//
-//}
-
 const addNewDrive = (drive: Drive) => {
-  //drives.value.push(drive);
   toast({
     title: 'Drive created',
     description: `${drive.name} added!`
   })
 }
-// @drive-created="addNewDrive"
-//await listDrives()
 
 </script>
 

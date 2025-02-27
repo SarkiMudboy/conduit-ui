@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { type Drive, type InputCreateDrive } from '@/services/drives/types'
+import { type Drive, type DriveDetail, type InputCreateDrive } from '@/services/drives/types'
 
 import { API } from '@/services'
 import { AxiosError } from 'axios'
@@ -50,8 +50,30 @@ export const useDriveStore = defineStore('useDriveStore', () => {
   ): Promise<APIResponse<Drive | null>> => {
     try {
       const { status, data } = await API.drives.createDrive(drive)
-      if (status === 200) {
+      if (status === 201) {
         drives.value.push(data)
+        return {
+          body: data
+        }
+      }
+    } catch (error) {
+      const _error = error as AxiosError<string>
+      return {
+        status: _error.response ? _error.response.status : 400,
+        body: null
+      }
+    }
+
+    return {
+      body: null,
+      status: 400
+    }
+  }
+
+  const dispatchGetDriveAssets = async (uid: string): Promise<APIResponse<DriveDetail | null>> => {
+    try {
+      const { status, data } = await API.drives.getDriveAssets(uid)
+      if (status === 200) {
         return {
           body: data
         }
@@ -75,6 +97,7 @@ export const useDriveStore = defineStore('useDriveStore', () => {
     initDrives,
     removeDrive,
     dispatchGetDrives,
-    dispatchCreateDrive
+    dispatchCreateDrive,
+    dispatchGetDriveAssets
   }
 })

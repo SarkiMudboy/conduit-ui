@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Drive } from './types';
+import { type Drive } from '@/services/drives/types';
 import { Box } from 'lucide-vue-next';
 import { UserRound, Users, ArrowRight, Calendar } from 'lucide-vue-next';
 import { calculateDiskUsage, cn } from '@/lib/utils';

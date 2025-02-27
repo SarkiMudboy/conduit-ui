@@ -1,20 +1,9 @@
-export type Asset = {
-  uid: string
-  name: string
-  size: number
-  created_at: string
-}
+import { type Asset } from '../types'
+import type { FileObject } from '../files/types'
 
 export type Drive = Asset & {
   used: number
   type: 'personal' | 'shared'
-}
-
-export type FileObject = Asset & {
-  path: string
-  content?: FileObject[]
-  metadata: object
-  is_directory: boolean
 }
 
 export type DriveDetail = Asset & {

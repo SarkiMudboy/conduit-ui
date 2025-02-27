@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import Folder from './icons/Folder.vue'
-import File from './icons/File.vue'
-import { type FileObject } from './Drives/types'
-import { calculateFileSize, protectedReq, type reqOptions } from '@/lib/utils';
+import Folder from '@/components/icons/Folder.vue'
+import File from '@/components/icons/File.vue'
+import { type FileObject } from '@/services/files/types';
+import { calculateFileSize } from '@/lib/utils';
 import { ref, type Ref } from 'vue';
-import UploadFile from '@/components/file_upload/UploadFile.vue';
+import UploadFile from './UploadFile.vue';
 import FolderNav from '@/components/FolderNav.vue';
 import { useFileTreeContextStore, type ObjectNode } from '@/stores/fileTreeContextStore';
-import { driveAssetsQuery } from '@/components/Drives/utils';
+import { useDriveStore } from '@/stores/drives';
+import { useFileObjectStore } from '@/stores/files';
+import { toast } from '@/components/ui/toast';
 
 const props = defineProps<{ assets: FileObject[] }>()
 
 const filePathNavStore = useFileTreeContextStore()
 const drive = filePathNavStore.filePath[0]
+const { dispatchGetDriveAssets } = useDriveStore()
+const fileStore = useFileObjectStore()
 
 const objType = (fileObject: FileObject) => {
   if (!fileObject.is_directory) return File
@@ -26,41 +30,33 @@ const selectObject = (obj: FileObject) => {
   if (obj.is_directory) loadFolderAssets({ uid: obj.uid, name: obj.name })
 }
 
-function checkAsset(source: string | ObjectNode) {
+async function checkAsset(source: string | ObjectNode) {
 
   if (typeof source == "string") {
-    driveAssetsQuery(source).then((response) => {
-      assets.value = response.response.storage_objects
+    const response = await dispatchGetDriveAssets(source)
+    if (response.body) {
+      assets.value = response.body.storage_objects
       parent.value = source
-      filePathNavStore.setNode({ uid: source, name: response.response.name })
-    })
+      filePathNavStore.setNode({ uid: source, name: response.body.name })
+    }
   } else loadFolderAssets(source)
 
 }
 
 const loadFolderAssets = async (folder: ObjectNode) => {
 
-  const url = 'http://localhost:8000/api/v1/drives/' + `${drive.uid}/objects/${folder.uid}`
-
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-
-  const params: reqOptions = {
-    data: null,
-    headers: myHeaders,
-    url: url,
-    method: 'GET'
+  const response = await fileStore.loadFolderAssets(folder.uid, drive.uid)
+  if (response.body) {
+    assets.value = response.body.content ? response.body.content : assets.value
+    parent.value = folder.uid
+    filePathNavStore.setNode(folder)
+  } else {
+    toast({
+      title: "Get Files Failed",
+      description: "Couldn't fetch files",
+      variant: "destructive"
+    })
   }
-
-  await protectedReq(params).then((r) => {
-
-    if (r.status == 200) {
-
-      assets.value = r.response.content
-      parent.value = folder.uid
-      filePathNavStore.setNode(folder)
-    }
-  })
 }
 
 </script>

@@ -14,10 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import SearchMembers from '@/components/SearchMembers.vue'
 import { ref } from 'vue'
-import { protectedReq, type reqOptions } from '@/lib/utils'
-import { type Drive } from './types'
 import Button from '@/components/ui/button/Button.vue'
-import type { InputCreateDrive } from '@/services/drives/types'
+import type { Drive, InputCreateDrive } from '@/services/drives/types'
 import { useDriveStore } from '@/stores/drives'
 
 const emit = defineEmits<{
