@@ -129,10 +129,11 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
 
     if (file.data.metadata) {
       file.data.metadata['x-amz-meta-file_path'] = file.data.path as string
+      file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString()
     }
-    const uploaded = await fileUploadStore.dispatchUploadFiles(file)
 
-    if (uploaded) {
+    const response = await fileUploadStore.dispatchUploadFiles(file)
+    if (response.body) {
       toast(
         {
           title: 'File uploaded',
@@ -148,35 +149,7 @@ const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
   })
 
   fileUploadStore.clearFiles()
-  //if (preloadFilesPresignedURLPromise) {
-  //  try {
-  //    const presignedUrlData = await preloadFilesPresignedURLPromise;
-  //    const presignedUrls = presignedUrlData.presigned_urls
-  //
-  //    if (presignedUrls?.length) {
-  //
-  //      for (const url of presignedUrls) {
-  //
-  //        //fileUploadStore.setUploadURL(url.id, url.url);
-  //        const fileObj = fileUploadStore.getFile(url.id);
-  //
-  //        const metadata = presignedUrlData.metadata
-  //        const filepath = fileUploadStore.getFilePath(url.id)
-  //
-  //        if (filepath) metadata['x-amz-meta-file_path'] = filepath
-  //        else throw new Error('Invalid File')
-  //
-  //        await uploadFileToS3(url.url, fileObj, metadata);
-  //      }
-  //    } else {
-  //      console.error('Error: No presigned URLs received.');
-  //      // Trigger toast notification for error here
-  //    }
-  //  } catch (error) {
-  //    console.error('Error getting presigned URLs:', error);
-  //    // Trigger toast notification for error here
-  //  }
-  //}
+
 }
 
 // drag files event handlers 
