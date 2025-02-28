@@ -10,7 +10,7 @@ import { calculateFileSize } from '@/lib/utils';
 
 
 const fileStore = useUploadFileStore();
-const f = fileStore.selectedFiles
+const f = fileStore.files
 const selectedFiles = ref(f)
 const emit = defineEmits<{ (e: 'clear-files'): void }>();
 
@@ -47,13 +47,13 @@ const ClearFile = (id?: string) => {
     </PopoverTrigger>
     <PopoverContent side="right" align="start">
       <ScrollArea :class="['max-h-72', { 'h-72': selectedFiles.length > 7 }]">
-        <div v-for="file in selectedFiles" :key="file.id">
+        <div v-for="file in selectedFiles" :key="file.data.id">
           <div class="grid grid-cols-5">
             <div class="text-sm font-bold truncate col-span-3">
               {{ file.file.name }}
             </div>
             <span class="text-sm">{{ calculateFileSize(file.file.size) }}</span>
-            <X class="w-4 h-4 justify-self-end" @click="ClearFile(file.id)" />
+            <X class="w-4 h-4 justify-self-end" @click="ClearFile(file.data.id)" />
           </div>
           <hr v-if="selectedFiles.indexOf(file) != selectedFiles.length - 1"
             style="border: none; border-top: 1px solid #ccc; margin: 10px 0;">
