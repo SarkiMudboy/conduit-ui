@@ -23,11 +23,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useUploadFileStore } from '@/stores/uploadFileStore'
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
-import {
-  //getAWSUploadPresignedURL,
-  uploadFileToS3,
-  //type FileUploadPresignedURLData
-} from '@/lib/uploads/fileUpload'
+
 import { ref, type Ref } from 'vue';
 import Button from '@/components/ui/button/Button.vue';
 import UploadIcon from '@/components/icons/UploadIcon.vue';
@@ -40,6 +36,7 @@ const filePathNav = useFileTreeContextStore()
 const { toast } = useToast()
 const fileUploadStore = useUploadFileStore()
 
+const note = ref('') // bind to note elem and in preloadFilesPresignedURLs add the note to store, add to payload
 const fileSelected: Ref<boolean> = ref(false)
 const inputRef: Ref<HTMLInputElement | null> = ref(null);
 
@@ -70,12 +67,16 @@ const handleUploadInputClick = (e: MouseEvent | KeyboardEvent) => {
 }
 
 const formSchema = toTypedSchema(z.object({
-  note: z.string().min(2).max(2500),
-  files: z.array(z.instanceof(File)).min(1, 'Select a file').max(40, 'Max files exeeded'),
+  note: z.string().min(0).max(2500),
+  files: z.array(z.instanceof(File)).min(1, 'Select a file').max(2, 'Max files exeeded'),
 }))
 
-useForm({
+const { isFieldDirty, handleSubmit } = useForm({
   validationSchema: formSchema,
+})
+
+const onSubmit = handleSubmit((values) => {
+  initiateUpload()
 })
 
 
@@ -120,8 +121,7 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
   } else setFileSelected(false);
 }
 
-const initiateUpload = async (e: KeyboardEvent | MouseEvent) => {
-  e.preventDefault()
+const initiateUpload = async () => {
 
   closeFileUploadDialog()
 
@@ -201,14 +201,15 @@ const toggleFileDropActive = () => fileDropActive.value = !fileDropActive.value
       <DialogHeader>
         <DialogTitle class="font-semibold text-lg md:text-2xl">Upload Files</DialogTitle>
       </DialogHeader>
-      <form>
-        <FormField name="note">
+      <form @submit="onSubmit">
+        <FormField name="note" v-slot="{ componentField }" :validate-on-blur="!isFieldDirty">
           <FormItem>
             <FormLabel class="font-bold mt-5">Note
             </FormLabel>
             <FormControl>
               <textarea
-                class='flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'></textarea>
+                class='flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+                v-bind="componentField"></textarea>
             </FormControl>
             <FormDescription>
               Add a message for recipients
@@ -216,15 +217,15 @@ const toggleFileDropActive = () => fileDropActive.value = !fileDropActive.value
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField name="files">
+        <FormField name="files" v-slot="{ componentField }" :validate-on-blur="!isFieldDirty">
           <FormItem class="mt-10">
             <FormLabel class="font-bold">Upload File
             </FormLabel>
             <FormControl>
               <input v-if="isFolderUpload" style="display: none;" id="file-upload" type="file" ref="inputRef" multiple
-                webkitdirectory @change="handleFileChange" />
+                webkitdirectory @change="handleFileChange" v-bind="componentField" />
               <input v-else style="display: none;" id="file-upload" type="file" ref="inputRef" multiple
-                @change="handleFileChange" />
+                @change="handleFileChange" v-bind="componentField" />
               <Button v-if="!fileSelected"
                 :class="['flex', 'flex-col', 'items-center', 'justify-items-center', 'w-full', 'max-w-md', 'h-36', 'text-black', 'dark:text-white', 'bg-transparent', 'border', 'border-gray-400', 'border-dashed', 'hover:bg-transparent]', { 'border-solid border-green-400 border-4': fileDropActive }]"
                 @click="handleUploadInputClick" @drop="handleFileDrop" @dragover.prevent
@@ -245,7 +246,7 @@ const toggleFileDropActive = () => fileDropActive.value = !fileDropActive.value
           <Switch :checked="isFolderUpload" @update:checked="toggleUploadType" />
         </div>
         <DialogFooter>
-          <Button class="mt-5" type="submit" @click="initiateUpload">
+          <Button class="mt-5" type="submit">
             Send
           </Button>
         </DialogFooter>
