@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 import DrivesWindow from "@/components/Drives/DrivesWindow.vue"
+import Notifications from "@/components/Notifications.vue"
 </script>
 
 <template>
@@ -27,9 +28,7 @@ import DrivesWindow from "@/components/Drives/DrivesWindow.vue"
         <Button variant="ghost" size="icon">
           <Grid class="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon">
-          <Bell class="h-4 w-4" />
-        </Button>
+        <Notifications />
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger as-child>

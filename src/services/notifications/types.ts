@@ -1,7 +1,7 @@
 export type DriveNotification = {
-  author: string
-  drive: string
-  assets: string[]
+  uid: string
+  author: { uid: string; tag: string }
+  drive: { uid: string; name: string }
   note: string
-  mentioned_members: string[]
+  created_at: string
 }
