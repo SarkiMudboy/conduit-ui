@@ -68,7 +68,7 @@ const handleUploadInputClick = (e: MouseEvent | KeyboardEvent) => {
 
 const formSchema = toTypedSchema(z.object({
   note: z.string().min(0).max(2500),
-  files: z.array(z.instanceof(File)).min(1, 'Select a file').max(2, 'Max files exeeded'),
+  files: z.array(z.instanceof(File)).min(1, 'Select a file').max(40, 'Max files exeeded'),
 }))
 
 const { isFieldDirty, handleSubmit } = useForm({
@@ -113,6 +113,9 @@ const preloadFilesPresignedURLs = async (fileList: File[]) => {
 }
 
 const handleFileChange = async (e: any /* change to HTML Event */) => {
+
+  (note.value && fileUploadStore.setUploadData("note", note.value))
+
   if (e.target.files) {
 
     const files: File[] = Array.from(e.target.files)
@@ -209,7 +212,7 @@ const toggleFileDropActive = () => fileDropActive.value = !fileDropActive.value
             <FormControl>
               <textarea
                 class='flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
-                v-bind="componentField"></textarea>
+                v-bind="componentField" v-model="note"></textarea>
             </FormControl>
             <FormDescription>
               Add a message for recipients

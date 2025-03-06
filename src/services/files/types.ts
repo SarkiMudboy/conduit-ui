@@ -30,6 +30,8 @@ export type GetPresignedURLData = {
   files: FileData[]
   resource?: string
   bulk: boolean
+  note?: string
+  mentioned_members?: string[]
 }
 
 export type PresignedURLS = {

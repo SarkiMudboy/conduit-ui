@@ -43,6 +43,13 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     })
   }
 
+  const setUploadData = <T extends keyof GetPresignedURLData>(
+    field: T,
+    value: GetPresignedURLData[T]
+  ) => {
+    presignedFiles.value[field] = value
+  }
+
   const setUploadMeta = (id: string, url: string, metadata: FileMetaData) => {
     const file = files.value.find((file) => file.data.id == id)
     if (file) {
@@ -126,6 +133,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     clearFiles,
     getFilePath,
     dispatchGetPresignedURLS,
-    dispatchUploadFiles
+    dispatchUploadFiles,
+    setUploadData
   }
 })
