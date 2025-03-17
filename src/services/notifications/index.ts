@@ -8,4 +8,10 @@ async function getNotifications() {
   return must(client.get<DriveNotification[]>, ['notifications/'])
 }
 
-export default { getNotifications }
+async function markRead(notif_uid: string) {
+  const config = { withAuth: true }
+  const client = getClient(config)
+  return must(client.post<boolean>, [`notifications/${notif_uid}/mark-read/`])
+}
+
+export default { getNotifications, markRead }

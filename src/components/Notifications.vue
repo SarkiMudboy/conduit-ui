@@ -4,47 +4,97 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { API } from '@/services'
-import { ref, type Ref } from 'vue';
-import { type DriveNotification } from '@/services/notifications/types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { computed, provide } from 'vue';
 import { useCurrentUserStore } from '@/stores/userStore';
 import Button from '@/components/ui/button/Button.vue';
 import { Bell } from 'lucide-vue-next';
-
+import { cn } from '@/lib/utils';
+import { useNotificationStore } from '@/stores/notificationStore';
+import { useFileObjectStore } from '@/stores/files';
+import { useDriveStore } from '@/stores/drives';
+import type { DriveNotification } from '@/services/notifications/types';
+import type { FileObjectView } from '@/services/files/types';
+import { ref, type Ref } from 'vue';
+import type { DriveDetail } from '@/services/drives/types';
 
 const userStore = useCurrentUserStore()
+const notifStore = useNotificationStore()
+const fileObjectStore = useFileObjectStore()
+const driveStore = useDriveStore()
 const currentUser = userStore.getUser()
-const notifications: Ref<DriveNotification[]> = ref([])
+
+//const emit = defineEmits<{
+//  (e: 'opened', viewObject: FileObjectView | string): void
+//}>()
+
+const view: Ref<FileObjectView | DriveDetail | null> = ref(null)
+provide('view-object', view)
+
+const notifications = computed(() => {
+  return notifStore.notifications
+})
 
 function getNoun(author: { uid: string, tag: string }) {
-  if (currentUser && author.uid === currentUser.uid) return "You"
-  else return author.tag
+  return currentUser && (author.uid === currentUser.uid) ? "You" : author.tag
 }
 
-async function fetchDriveNotifications() {
-  const { status, data } = await API.notifications.getNotifications()
-  if (status === 200) notifications.value = data
+async function handleNotificationClick(notification_uid: string) {
+
+  const n = notifStore.getNotification(notification_uid) as DriveNotification
+  if (n.source) {
+    await fileObjectStore.loadFolderAssets(n.source, n.drive.uid)
+    view.value = {
+      drive: n.drive,
+      file_objects: fileObjectStore.files
+    }
+  } else {
+    const response = await driveStore.dispatchGetDriveAssets(n.drive.uid)
+    view.value = response.body ? response.body : null
+  }
+  await notifStore.dispatchMarkAsRead(notification_uid)
+
 }
-await fetchDriveNotifications()
+
+await notifStore.dispatchGetNotifications()
 </script>
 
 <template>
   <Popover>
-    <PopoverTrigger>
-      <Button variant="ghost" size="icon">
-        <Bell class="h-4 w-4" />
+    <PopoverTrigger asChild>
+      <Button variant="outline" size="icon" class="relative">
+        <Bell class="h-5 w-5" />
+        <span v-if="notifications.length > 0"
+          class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-primary-foreground dark:text-white">
+          {{ notifications.length }}
+        </span>
       </Button>
     </PopoverTrigger>
-    <PopoverContent>
-      <div v-for="notif in notifications" class="hover:bg-gray-200" :key=notif.uid>
-        <p>
-          <span class="font-bold">{{ notif.author.tag }}</span> added some files to {{ notif.drive.name }} <span
-            v-if="notif.note">saying <span class="w-2 font-bold text-wrap">{{
-              notif.note }}</span></span>
-        </p>
-        <hr v-if="notifications.indexOf(notif) != notifications.length - 1"
-          style="border: none; border-top: 1px solid #ccc; margin: 10px 0;">
-      </div>
+    <PopoverContent class="w-80 p-0" align="end">
+      <Card class="border-0">
+        <CardHeader class="pb-3">
+          <CardTitle>Notifications</CardTitle>
+        </CardHeader>
+        <CardContent class="max-h-[300px] overflow-auto p-0">
+          <div v-if="notifications.length > 0" class="divide-y">
+            <div v-for="notif in notifications" :key="notif.uid"
+              :class="cn('cursor-pointer p-4 transition-colors hover:bg-muted', !notif.read && 'bg-muted/50')"
+              @click="handleNotificationClick(notif.uid)">
+              <div class="flex items-start gap-2">
+                <div class="flex-1 space-y-1">
+                  <p class="text-sm text-muted-foreground">
+                    <span class="font-bold">{{ getNoun({ uid: notif.author.uid, tag: notif.author.tag }) }}</span> added
+                    some files to {{ notif.drive.name }}
+                    <span v-if="notif.note">saying <span class="w-2 font-bold text-wrap">{{ notif.note }}</span></span>
+                  </p>
+                </div>
+                <span v-if="!notif.read" class="mt-1 h-2 w-2 rounded-full bg-red-500" />
+              </div>
+            </div>
+          </div>
+          <p v-else class="py-6 text-center text-muted-foreground">No notifications</p>
+        </CardContent>
+      </Card>
     </PopoverContent>
   </Popover>
 </template>

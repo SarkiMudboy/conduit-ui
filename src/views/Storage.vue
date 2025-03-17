@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Bell, Grid, Search } from "lucide-vue-next"
+import { Grid, Search } from "lucide-vue-next"
 import {
   DropdownMenu,
   DropdownMenuContent,

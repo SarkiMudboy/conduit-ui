@@ -1,3 +1,4 @@
+import type { BasicDriveView } from '../drives/types'
 import type { Asset } from '../types'
 
 export type FileObject = Asset & {
@@ -37,4 +38,9 @@ export type GetPresignedURLData = {
 export type PresignedURLS = {
   presigned_urls: { id: string; url: string }[]
   metadata: FileMetaData
+}
+
+export type FileObjectView = {
+  drive: BasicDriveView
+  file_objects: FileObject[]
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { computed, ref, type Ref } from 'vue';
-import type { Drive, DriveDetail } from '@/services/drives/types';
+import { computed, inject, ref, watch, type Ref } from 'vue';
+import type { BasicDriveView, Drive, DriveDetail } from '@/services/drives/types';
 import DriveCard from './DriveCard.vue';
 import AddDrive from './AddDrive.vue';
 import { useToast } from '@/components/ui/toast';
@@ -10,6 +10,8 @@ import FileObjects from '@/components//Files/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import { useDriveStore } from '@/stores/drives';
+import type { FileObjectView } from '@/services/files/types';
+
 
 const { toast } = useToast()
 const filePathNavStore = useFileTreeContextStore()
@@ -19,13 +21,25 @@ await driveStore.dispatchGetDrives()
 const drives = computed<Drive[]>(() => {
   return driveStore.drives
 })
-const selectedDrive: Ref<DriveDetail | null> = ref(null)
+
+
+const source = inject('view-object', null)
+const selectedDrive: Ref<DriveDetail | FileObjectView | null> = ref(null)
+
 
 const setDriveFileObjects = computed(() => {
-  const objects = selectedDrive.value ? selectedDrive.value.storage_objects : []
-  return objects
-})
+  //return selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
+  console.log(selectedDrive.value)
+  if (selectedDrive.value) {
+    if ("storage_objects" in selectedDrive.value) {
+      return selectedDrive.value.storage_objects
+    } else if ("file_objects" in selectedDrive.value) {
+      return selectedDrive.value.file_objects
+    }
+  }
+  return []
 
+})
 
 const getDriveAssets = async (uid: string) => {
 
@@ -44,7 +58,6 @@ const getDriveAssets = async (uid: string) => {
     })
   }
 }
-
 
 const addNewDrive = (drive: Drive) => {
   toast({

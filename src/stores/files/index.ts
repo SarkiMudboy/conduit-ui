@@ -46,6 +46,7 @@ export const useFileObjectStore = defineStore('useFileObjectStore', () => {
   }
 
   return {
+    files,
     initObjects,
     removeFileObject,
     loadFolderAssets

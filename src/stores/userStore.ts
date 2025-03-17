@@ -18,11 +18,12 @@ export const useCurrentUserStore = defineStore('useCurrentUserStore', () => {
   const currentUser: Ref<User | {}> = ref({})
 
   const setUser = (user: User) => {
+    console.log(user)
     currentUser.value = user
   }
 
   const getUser = (): User => {
-    return currentUser.value
+    return currentUser.value as User
   }
 
   return {

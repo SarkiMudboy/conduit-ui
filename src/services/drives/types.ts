@@ -12,6 +12,11 @@ export type DriveDetail = Asset & {
   storage_objects: FileObject[]
 }
 
+export type BasicDriveView = {
+  uid: string
+  name: string
+}
+
 export type InputCreateDrive = {
   name: string
   members: string[]

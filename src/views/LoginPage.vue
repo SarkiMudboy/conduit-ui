@@ -7,6 +7,7 @@ import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CustomHeader from '@/components/CustomHeader.vue'
 import { authGitHub } from '@/lib/utils'
+import { useCurrentUserStore } from '@/stores/userStore'
 
 const credentials: { email: string | undefined; tag: string | undefined; password: string } =
   reactive({
@@ -16,6 +17,7 @@ const credentials: { email: string | undefined; tag: string | undefined; passwor
   })
 
 const router = useRouter()
+const userStore = useCurrentUserStore()
 
 let identifier = ref('')
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -36,6 +38,7 @@ async function logIn(creds: { email?: string; tag?: string; password: string }) 
     .then(async (response) => {
       if (response.status == 200) {
         const r = await response.json()
+        userStore.setUser(r.current_user)
         router.push('/files')
       }
     })
@@ -63,20 +66,13 @@ async function signInUser() {
       <div class="grid gap-4">
         <div class="grid gap-2">
           <Label for="email">Email/Tag</Label>
-          <Input
-            id="email"
-            type="text"
-            placeholder="m@example.com or @ted5x4"
-            v-model="identifier"
-            required
-          />
+          <Input id="email" type="text" placeholder="m@example.com or @ted5x4" v-model="identifier" required />
         </div>
         <div class="grid gap-2">
           <div class="flex items-center">
             <Label for="password">Password</Label>
-            <RouterLink to="/reset-password" class="ml-auto inline-block text-sm underline"
-              >Forgot Password?</RouterLink
-            >
+            <RouterLink to="/reset-password" class="ml-auto inline-block text-sm underline">Forgot Password?
+            </RouterLink>
           </div>
           <Input id="password" type="password" v-model="credentials.password" required />
         </div>

@@ -11,10 +11,11 @@ import { useDriveStore } from '@/stores/drives';
 import { useFileObjectStore } from '@/stores/files';
 import { toast } from '@/components/ui/toast';
 
-const props = defineProps<{ assets: FileObject[] }>()
 
+const props = defineProps<{ assets: FileObject[] }>()
 const filePathNavStore = useFileTreeContextStore()
 const drive = filePathNavStore.filePath[0]
+
 const { dispatchGetDriveAssets } = useDriveStore()
 const fileStore = useFileObjectStore()
 
