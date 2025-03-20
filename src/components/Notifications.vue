@@ -5,7 +5,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { computed, provide } from 'vue';
+import { computed } from 'vue';
 import { useCurrentUserStore } from '@/stores/userStore';
 import Button from '@/components/ui/button/Button.vue';
 import { Bell } from 'lucide-vue-next';
@@ -15,8 +15,6 @@ import { useFileObjectStore } from '@/stores/files';
 import { useDriveStore } from '@/stores/drives';
 import type { DriveNotification } from '@/services/notifications/types';
 import type { FileObjectView } from '@/services/files/types';
-import { ref, type Ref } from 'vue';
-import type { DriveDetail } from '@/services/drives/types';
 
 const userStore = useCurrentUserStore()
 const notifStore = useNotificationStore()
@@ -24,12 +22,9 @@ const fileObjectStore = useFileObjectStore()
 const driveStore = useDriveStore()
 const currentUser = userStore.getUser()
 
-//const emit = defineEmits<{
-//  (e: 'opened', viewObject: FileObjectView | string): void
-//}>()
-
-const view: Ref<FileObjectView | DriveDetail | null> = ref(null)
-provide('view-object', view)
+const emit = defineEmits<{
+  (e: 'opened', view: FileObjectView): void
+}>()
 
 const notifications = computed(() => {
   return notifStore.notifications
@@ -44,16 +39,17 @@ async function handleNotificationClick(notification_uid: string) {
   const n = notifStore.getNotification(notification_uid) as DriveNotification
   if (n.source) {
     await fileObjectStore.loadFolderAssets(n.source, n.drive.uid)
-    view.value = {
+    emit('opened', {
       drive: n.drive,
       file_objects: fileObjectStore.files
-    }
+    })
   } else {
     const response = await driveStore.dispatchGetDriveAssets(n.drive.uid)
-    view.value = response.body ? response.body : null
+    if (response.body) {
+      emit('opened', { drive: n.drive, file_objects: response.body.storage_objects })
+    }
   }
   await notifStore.dispatchMarkAsRead(notification_uid)
-
 }
 
 await notifStore.dispatchGetNotifications()

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Grid, Search } from "lucide-vue-next"
+import { Grid, Search, CircleUser } from "lucide-vue-next"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,16 @@ import {
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 import DrivesWindow from "@/components/Drives/DrivesWindow.vue"
 import Notifications from "@/components/Notifications.vue"
+import { ref, type Ref } from "vue"
+import { type FileObjectView } from "@/services/files/types"
+
+const viewObject: Ref<FileObjectView | null> = ref(null)
+
+const setObjectView = (view: FileObjectView) => {
+  console.log(view)
+  viewObject.value = view
+}
+
 </script>
 
 <template>
@@ -28,7 +38,7 @@ import Notifications from "@/components/Notifications.vue"
         <Button variant="ghost" size="icon">
           <Grid class="h-4 w-4" />
         </Button>
-        <Notifications />
+        <Notifications @opened="setObjectView" />
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
@@ -48,6 +58,6 @@ import Notifications from "@/components/Notifications.vue"
         </DropdownMenu>
       </div>
     </header>
-    <DrivesWindow />
+    <DrivesWindow :view="viewObject" />
   </div>
 </template>

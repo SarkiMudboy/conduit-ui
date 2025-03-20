@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { computed, inject, ref, watch, type Ref } from 'vue';
+import { computed, ref, watch, type Ref } from 'vue';
 import type { BasicDriveView, Drive, DriveDetail } from '@/services/drives/types';
 import DriveCard from './DriveCard.vue';
 import AddDrive from './AddDrive.vue';
@@ -13,6 +13,10 @@ import { useDriveStore } from '@/stores/drives';
 import type { FileObjectView } from '@/services/files/types';
 
 
+const source = defineProps<{
+  view: FileObjectView | null
+}>()
+
 const { toast } = useToast()
 const filePathNavStore = useFileTreeContextStore()
 const driveStore = useDriveStore()
@@ -22,24 +26,21 @@ const drives = computed<Drive[]>(() => {
   return driveStore.drives
 })
 
-
-const source = inject('view-object', null)
-const selectedDrive: Ref<DriveDetail | FileObjectView | null> = ref(null)
-
+const selectedDrive: Ref<DriveDetail | null> = ref(null)
 
 const setDriveFileObjects = computed(() => {
-  //return selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
-  console.log(selectedDrive.value)
-  if (selectedDrive.value) {
-    if ("storage_objects" in selectedDrive.value) {
-      return selectedDrive.value.storage_objects
-    } else if ("file_objects" in selectedDrive.value) {
-      return selectedDrive.value.file_objects
-    }
-  }
-  return []
-
+  return selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
 })
+
+const viewAssets = computed(() => {
+  return source.view?.file_objects
+})
+
+//watch(assets, (newVal) => {
+//  console.log(newVal)
+//  return newVal
+//})
+const assets = computed(() => setDriveFileObjects.value || viewAssets.value)
 
 const getDriveAssets = async (uid: string) => {
 
@@ -72,7 +73,7 @@ const addNewDrive = (drive: Drive) => {
   <div class="p-6">
     <div :class="cn('w-full overflow-x-auto scrollbar-none')">
       <div v-if="selectedDrive">
-        <FileObjects :assets="setDriveFileObjects" />
+        <FileObjects :assets="assets" />
       </div>
       <div v-else>
         <DriveActions>

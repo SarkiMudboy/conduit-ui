@@ -33,7 +33,7 @@ export function getUploadToast(filename: string, fileUploadProgress: Ref<number>
 
   return toast({
     title: 'File Upload',
-    description: h('div', { class: 'min-w-[20rem]' }, [
+    description: h('div', { class: 'min-w-[20rem] mb-2' }, [
       h('p', { class: 'w-full' }, `Uploading ${filename}...`),
       h(markRaw(ToastProgress), {
         progress: fileUploadProgress,
