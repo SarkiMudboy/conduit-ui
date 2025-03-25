@@ -10,6 +10,7 @@ import { useFileTreeContextStore, type ObjectNode } from '@/stores/fileTreeConte
 import { useDriveStore } from '@/stores/drives';
 import { useFileObjectStore } from '@/stores/files';
 import { toast } from '@/components/ui/toast';
+import Menu from './Menu.vue';
 
 
 const props = defineProps<{ assets: FileObject[] }>()
@@ -68,11 +69,13 @@ const loadFolderAssets = async (folder: ObjectNode) => {
   </FolderNav>
   <div v-if="assets.length > 0" class="flex flex-wrap mt-5 gap-3 min-w-full p-1">
     <div v-for="obj in assets" :key="obj.uid">
-      <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
-        <component :is="objType(obj)" @click="selectObject(obj)" />
-        <p class="text-lg font-mono font-light w-40 text-center truncate">{{ obj.name }}</p>
-        <p class="font-light font-mono text-gray-300">{{ calculateFileSize(obj.size) }}</p>
-      </div>
+      <Menu>
+        <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
+          <component :is="objType(obj)" @click="selectObject(obj)" />
+          <p class="text-lg font-mono font-light w-40 text-center truncate">{{ obj.name }}</p>
+          <p class="font-light font-mono text-gray-300">{{ calculateFileSize(obj.size) }}</p>
+        </div>
+      </Menu>
     </div>
   </div>
   <div v-else class="flex flex-col items-center justify-center h-[30rem] gap-3 text-center mt-9">
