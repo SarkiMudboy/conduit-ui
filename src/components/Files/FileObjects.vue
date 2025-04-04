@@ -69,7 +69,7 @@ const loadFolderAssets = async (folder: ObjectNode) => {
   </FolderNav>
   <div v-if="assets.length > 0" class="flex flex-wrap mt-5 gap-3 min-w-full p-1">
     <div v-for="obj in assets" :key="obj.uid">
-      <Menu assetId="obj.uid">
+      <Menu :driveId="drive.uid" :assetId="obj.uid">
         <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
           <component :is="objType(obj)" @click="selectObject(obj)" />
           <p class="text-lg font-mono font-light w-40 text-center truncate">{{ obj.name }}</p>

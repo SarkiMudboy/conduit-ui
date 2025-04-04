@@ -1,0 +1,63 @@
+<script setup lang="ts">
+import { Check, Copy, Download } from 'lucide-vue-next';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/toast';
+import { ref } from 'vue';
+
+const props = defineProps<{ link: string, open: boolean, setOpen: (open: boolean) => void }>()
+const copied = ref(false)
+const { toast } = useToast()
+
+console.log(props.link)
+
+const copyToClipboard = async () => {
+  try {
+    await navigator.clipboard.writeText(props.link)
+    copied.value = true
+    toast({
+      title: "Link Copied",
+      description: "The link has been copied to your clipboard."
+    })
+
+    setTimeout(() => copied.value = false, 2000)
+  } catch (err) {
+    toast({
+      title: "Failed to copy",
+      description: "Could not copy the link to your clipboard.",
+      variant: "destructive",
+    })
+  }
+}
+
+</script>
+
+<template>
+  <Dialog :open="props.open" @update:open="props.setOpen">
+    <!-- <DialogTrigger as-child>
+      <slot />
+    </DialogTrigger> -->
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Share Link/Download</DialogTitle>
+        <DialogDescription>Copy this link to share it with others.</DialogDescription>
+      </DialogHeader>
+      <div class="flex items-center space-x-2">
+        <div class="grid flex-1 gap-2">
+          <Input id="link" class="w-full" :value="props.link" readonly @click="(e: Event) => {
+            const inputElem = e.currentTarget as HTMLInputElement
+            inputElem.select()
+          }" />
+        </div>
+        <Button size="sm" class="px-3" @click="copyToClipboard" :variant='copied ? "link" : "default"'
+          title="Copy to clipboard">
+          <Check v-if="copied" class="h-4 w-4" />
+          <Copy v-else class="h-4 w-4" />
+          <span class="sr-only">Copy</span>
+        </Button>
+      </div>
+    </DialogContent>
+  </Dialog>
+</template>

@@ -6,14 +6,30 @@ import {
   ContextMenuItem,
   ContextMenuShortcut
 } from '@/components/ui/context-menu';
-import { Download } from 'lucide-vue-next';
+import { Link2 } from 'lucide-vue-next';
+import { useDownloadFileStore } from '@/stores/downloadFileStore';
+import DownloadLink from './DownloadLink.vue';
+import { computed, ref } from 'vue';
 
-const props = defineProps<{ assetId: string }>();
-// add a store for dowloads? 
-
-async function downloadAsset() {
-
+const openDownloadDialog = ref(false)
+const setDownloadDialogOpen = (open: boolean) => {
+  openDownloadDialog.value = open
 }
+
+const downloadLink = ref("kddkdksnsjnjsjk")
+const downloadFileStore = useDownloadFileStore()
+const props = defineProps<{ driveId: string, assetId: string }>();
+
+const downloadAsset = async () => {
+  const response = await downloadFileStore.dispatchGetDownloadPresignedURL(props.driveId, props.assetId)
+  if (response.body) {
+    downloadLink.value = response.body.url
+    setDownloadDialogOpen(true)
+  }
+}
+
+//const assetDownloadLink = computed(() => downloadLink.value)
+
 </script>
 
 <template>
@@ -25,7 +41,7 @@ async function downloadAsset() {
       <ContextMenuItem inset @click="downloadAsset">
         Download
         <ContextMenuShortcut>
-          <Download class="h-4 w-4" />
+          <Link2 class="h-4 w-4" />
         </ContextMenuShortcut>
       </ContextMenuItem>
       <ContextMenuItem inset disabled>
@@ -33,4 +49,5 @@ async function downloadAsset() {
       </ContextMenuItem>
     </ContextMenuContent>
   </ContextMenu>
+  <DownloadLink :open="openDownloadDialog" :setOpen="setDownloadDialogOpen" :link="downloadLink" />
 </template>

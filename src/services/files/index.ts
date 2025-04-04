@@ -16,6 +16,12 @@ export function getObjectPresignedURL(data: GetPresignedURLData, drive_uid: stri
   return must(client.post<PresignedURLS>, [`drives/${drive_uid}/share/get-upload-url/`, data])
 }
 
+export function getDownloadPresignedURL(drive_uid: string, object_uid: string) {
+  const config = { withAuth: true }
+  const client = getClient(config)
+  return must(client.get, [`drives/${drive_uid}/share/${object_uid}/get-download-url/`])
+}
+
 export const uploadFile = async (
   presignedURL: string,
   file: File,
@@ -47,5 +53,6 @@ export const uploadFile = async (
 export default {
   getObjects,
   getObjectPresignedURL,
+  getDownloadPresignedURL,
   uploadFile
 }
