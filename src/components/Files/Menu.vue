@@ -9,14 +9,14 @@ import {
 import { Link2 } from 'lucide-vue-next';
 import { useDownloadFileStore } from '@/stores/downloadFileStore';
 import DownloadLink from './DownloadLink.vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
 const openDownloadDialog = ref(false)
 const setDownloadDialogOpen = (open: boolean) => {
   openDownloadDialog.value = open
 }
 
-const downloadLink = ref("kddkdksnsjnjsjk")
+const downloadLink = ref("")
 const downloadFileStore = useDownloadFileStore()
 const props = defineProps<{ driveId: string, assetId: string }>();
 
@@ -27,8 +27,6 @@ const downloadAsset = async () => {
     setDownloadDialogOpen(true)
   }
 }
-
-//const assetDownloadLink = computed(() => downloadLink.value)
 
 </script>
 

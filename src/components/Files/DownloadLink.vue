@@ -5,13 +5,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{ link: string, open: boolean, setOpen: (open: boolean) => void }>()
 const copied = ref(false)
 const { toast } = useToast()
 
-console.log(props.link)
+const assetLink = computed(() => props.link)
 
 const copyToClipboard = async () => {
   try {
@@ -32,13 +32,36 @@ const copyToClipboard = async () => {
   }
 }
 
+const downloadLink = () => {
+  try {
+    const linkAnchor = document.createElement('a')
+    linkAnchor.href = props.link
+    linkAnchor.download = "file-name here..."
+    document.body.appendChild(linkAnchor)
+    linkAnchor.click()
+
+    // Clean up
+    document.body.removeChild(linkAnchor)
+
+    toast({
+      title: "Downloading File...",
+      description: "Your file is being downloaded",
+    })
+  } catch (err) {
+    toast({
+      title: "Download Failed",
+      description: "Your file failed to download",
+      variant: "destructive"
+    })
+
+  }
+}
+
 </script>
 
 <template>
   <Dialog :open="props.open" @update:open="props.setOpen">
-    <!-- <DialogTrigger as-child>
-      <slot />
-    </DialogTrigger> -->
+
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>Share Link/Download</DialogTitle>
@@ -46,7 +69,7 @@ const copyToClipboard = async () => {
       </DialogHeader>
       <div class="flex items-center space-x-2">
         <div class="grid flex-1 gap-2">
-          <Input id="link" class="w-full" :value="props.link" readonly @click="(e: Event) => {
+          <Input id="link" class="w-full" v-model="assetLink" readonly @click="(e: Event) => {
             const inputElem = e.currentTarget as HTMLInputElement
             inputElem.select()
           }" />
@@ -56,6 +79,10 @@ const copyToClipboard = async () => {
           <Check v-if="copied" class="h-4 w-4" />
           <Copy v-else class="h-4 w-4" />
           <span class="sr-only">Copy</span>
+        </Button>
+        <Button class="px-3" size="sm" @click="downloadLink" variant="outline" title="Download File locally">
+          <Download class="h-4 w-4" />
+          <span class="sr-only">Download</span>
         </Button>
       </div>
     </DialogContent>
