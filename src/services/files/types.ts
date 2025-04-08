@@ -44,3 +44,9 @@ export type FileObjectView = {
   drive: BasicDriveView
   file_objects: FileObject[]
 }
+
+export type DownloadPresignedURL = {
+  uid: string
+  path: string
+  url: string
+}

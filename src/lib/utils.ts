@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useCSRFTokenStore } from '@/stores/tokenStore'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import getClient from '@/services/api'
 
 export function cn(...inputs: ClassValue[]) {
@@ -61,6 +61,8 @@ export async function protectedReq(params: reqOptions) {
     })
   return response
 }
+
+// ---------------------------------
 
 // tokens
 

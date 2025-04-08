@@ -1,5 +1,11 @@
 import getClient from '@/services/api'
-import type { FileMetaData, FileObject, GetPresignedURLData, PresignedURLS } from './types'
+import type {
+  DownloadPresignedURL,
+  FileMetaData,
+  FileObject,
+  GetPresignedURLData,
+  PresignedURLS
+} from './types'
 import { must, getUploadToast } from '../utils'
 import { ref } from 'vue'
 import axios from 'axios'
@@ -19,7 +25,9 @@ export function getObjectPresignedURL(data: GetPresignedURLData, drive_uid: stri
 export function getDownloadPresignedURL(drive_uid: string, object_uid: string) {
   const config = { withAuth: true }
   const client = getClient(config)
-  return must(client.get, [`drives/${drive_uid}/share/${object_uid}/get-download-url/`])
+  return must(client.get<DownloadPresignedURL[]>, [
+    `drives/${drive_uid}/share/${object_uid}/get-download-url/`
+  ])
 }
 
 export const uploadFile = async (

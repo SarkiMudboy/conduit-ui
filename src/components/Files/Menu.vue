@@ -7,9 +7,10 @@ import {
   ContextMenuShortcut
 } from '@/components/ui/context-menu';
 import { Link2 } from 'lucide-vue-next';
-import { useDownloadFileStore } from '@/stores/downloadFileStore';
+import { useDownloadFileStore } from '@/stores/downloads/downloadFileStore';
 import DownloadLink from './DownloadLink.vue';
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
+//import type { DownloadPresignedURL } from '@/services/files/types';
 
 const openDownloadDialog = ref(false)
 const setDownloadDialogOpen = (open: boolean) => {
@@ -23,7 +24,7 @@ const props = defineProps<{ driveId: string, assetId: string }>();
 const downloadAsset = async () => {
   const response = await downloadFileStore.dispatchGetDownloadPresignedURL(props.driveId, props.assetId)
   if (response.body) {
-    downloadLink.value = response.body.url
+    downloadLink.value = await downloadFileStore.processURLs()
     setDownloadDialogOpen(true)
   }
 }

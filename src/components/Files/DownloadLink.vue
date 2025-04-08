@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Check, Copy, Download } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
@@ -36,7 +36,7 @@ const downloadLink = () => {
   try {
     const linkAnchor = document.createElement('a')
     linkAnchor.href = props.link
-    linkAnchor.download = "file-name here..."
+    linkAnchor.download = "filename.zip"
     document.body.appendChild(linkAnchor)
     linkAnchor.click()
 
