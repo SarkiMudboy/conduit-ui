@@ -9,24 +9,24 @@ import {
 import { Link2 } from 'lucide-vue-next';
 import { useDownloadFileStore } from '@/stores/downloads/downloadFileStore';
 import DownloadLink from './DownloadLink.vue';
-import { ref, type Ref } from 'vue';
-//import type { DownloadPresignedURL } from '@/services/files/types';
+import { ref } from 'vue';
+import type { DownloadAssetProp } from './types';
 
 const openDownloadDialog = ref(false)
 const setDownloadDialogOpen = (open: boolean) => {
   openDownloadDialog.value = open
 }
 
-const downloadLink = ref("")
 const downloadFileStore = useDownloadFileStore()
-const props = defineProps<{ driveId: string, assetId: string, assetName: string }>();
+const props = defineProps<{ driveId: string, assetData: DownloadAssetProp }>();
 
 const downloadAsset = async () => {
-  const response = await downloadFileStore.dispatchGetDownloadPresignedURL(props.driveId, props.assetId)
+  const response = await downloadFileStore.dispatchGetDownloadPresignedURL(props.driveId, props.assetData.assetId)
   if (response.body) {
-    downloadLink.value = await downloadFileStore.processURLs()
-    setDownloadDialogOpen(true)
+    return await downloadFileStore.processURLs()
   }
+
+  return ""
 }
 
 </script>
@@ -37,7 +37,7 @@ const downloadAsset = async () => {
       <slot />
     </ContextMenuTrigger>
     <ContextMenuContent class="w-40">
-      <ContextMenuItem inset @click="downloadAsset">
+      <ContextMenuItem inset @click="setDownloadDialogOpen(true)">
         Download
         <ContextMenuShortcut>
           <Link2 class="h-4 w-4" />
@@ -48,6 +48,6 @@ const downloadAsset = async () => {
       </ContextMenuItem>
     </ContextMenuContent>
   </ContextMenu>
-  <DownloadLink :open="openDownloadDialog" :setOpen="setDownloadDialogOpen" :link="downloadLink"
-    :filename="props.assetName" />
+  <DownloadLink :open="openDownloadDialog" :setOpen="setDownloadDialogOpen" :objectData="props.assetData"
+    :downloadAsset="downloadAsset" />
 </template>
