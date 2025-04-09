@@ -19,7 +19,7 @@ const setDownloadDialogOpen = (open: boolean) => {
 
 const downloadLink = ref("")
 const downloadFileStore = useDownloadFileStore()
-const props = defineProps<{ driveId: string, assetId: string }>();
+const props = defineProps<{ driveId: string, assetId: string, assetName: string }>();
 
 const downloadAsset = async () => {
   const response = await downloadFileStore.dispatchGetDownloadPresignedURL(props.driveId, props.assetId)
@@ -48,5 +48,6 @@ const downloadAsset = async () => {
       </ContextMenuItem>
     </ContextMenuContent>
   </ContextMenu>
-  <DownloadLink :open="openDownloadDialog" :setOpen="setDownloadDialogOpen" :link="downloadLink" />
+  <DownloadLink :open="openDownloadDialog" :setOpen="setDownloadDialogOpen" :link="downloadLink"
+    :filename="props.assetName" />
 </template>

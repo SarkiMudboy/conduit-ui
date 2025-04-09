@@ -6,8 +6,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { computed, ref } from 'vue';
+import axios from 'axios';
 
-const props = defineProps<{ link: string, open: boolean, setOpen: (open: boolean) => void }>()
+const props = defineProps<{ link: string, filename: string, open: boolean, setOpen: (open: boolean) => void }>()
 const copied = ref(false)
 const { toast } = useToast()
 
@@ -32,16 +33,25 @@ const copyToClipboard = async () => {
   }
 }
 
-const downloadLink = () => {
+const downloadLink = async () => {
   try {
-    const linkAnchor = document.createElement('a')
-    linkAnchor.href = props.link
-    linkAnchor.download = "filename.zip"
-    document.body.appendChild(linkAnchor)
-    linkAnchor.click()
 
-    // Clean up
-    document.body.removeChild(linkAnchor)
+    const response = await axios.get(props.link, { responseType: "blob" })
+
+    if (response.status == 200) {
+
+      const link = URL.createObjectURL(response.data)
+
+      const linkAnchor = document.createElement('a')
+      linkAnchor.href = link
+      linkAnchor.download = props.filename
+      document.body.appendChild(linkAnchor)
+      linkAnchor.click()
+
+      // Clean up
+      document.body.removeChild(linkAnchor)
+      URL.revokeObjectURL(link)
+    }
 
     toast({
       title: "Downloading File...",

@@ -24,9 +24,8 @@ export const generateZipAssetForFolders = async (
   )
 
   // save it
-  zip.generateAsync({ type: 'blob' }).then((content) => {
+  await zip.generateAsync({ type: 'blob' }).then((content) => {
     url = URL.createObjectURL(content)
-    console.log(url)
   })
 
   return url
