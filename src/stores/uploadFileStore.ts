@@ -17,6 +17,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     files: [] as FileData[],
     bulk: false
   })
+  const totalUploadSize = ref(0)
 
   const addFiles = (fileObjects: File[], isDriveRoot: boolean) => {
     fileObjects.forEach((file) => {
@@ -24,6 +25,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
 
       let filepath = file.webkitRelativePath
       if (isDriveRoot || !filepath) filepath = file.name
+      totalUploadSize.value += file.size
 
       const f = {
         id: id,
@@ -113,12 +115,18 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     }
   }
 
-  const dispatchUploadFiles = async (file: UploadFile): Promise<APIResponse<boolean>> => {
+  const dispatchUploadFiles = async (
+    file: UploadFile,
+    uploadCompleted: Ref<number>,
+    folderUpload: boolean
+  ): Promise<APIResponse<boolean>> => {
     try {
       const uploaded = await API.files.uploadFile(
         file.uploadPresignedURL,
         file.file,
-        file.data.metadata as FileMetaData
+        file.data.metadata as FileMetaData,
+        uploadCompleted,
+        folderUpload ? totalUploadSize.value : undefined
       )
       return { body: uploaded }
     } catch (error) {
@@ -132,6 +140,8 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     getFile,
     clearFiles,
     getFilePath,
+    //totalUploadSize,
+    presignedFiles,
     dispatchGetPresignedURLS,
     dispatchUploadFiles,
     setUploadData

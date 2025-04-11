@@ -7,7 +7,7 @@ import type {
   PresignedURLS
 } from './types'
 import { must, getUploadToast } from '../utils'
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import axios from 'axios'
 
 async function getObjects(object_uid: string, drive_uid: string) {
@@ -33,24 +33,27 @@ export function getDownloadPresignedURL(drive_uid: string, object_uid: string) {
 export const uploadFile = async (
   presignedURL: string,
   file: File,
-  metadata: FileMetaData
+  metadata: FileMetaData,
+  fileUploadCompleted: Ref<number>,
+  fileUploadTotal?: number
 ): Promise<boolean> => {
-  const fileUploadCompleted = ref(0)
-  const uploadToast = getUploadToast(file.name, fileUploadCompleted)
+  //const fileUploadCompleted = ref(0)
+  //const uploadToast = getUploadToast(file.name, fileUploadCompleted)
 
   try {
     const response = await axios.put(presignedURL, file, {
       headers: { ...metadata, 'Content-Type': '*' },
       onUploadProgress: (event) => {
-        if (event.lengthComputable && event.total) {
-          fileUploadCompleted.value = Math.floor((event.loaded / event.total) * 100)
+        const total = fileUploadTotal || event.total
+        if (event.lengthComputable && total) {
+          fileUploadCompleted.value = Math.floor((event.loaded / total) * 100)
         }
       }
     })
 
     if (response.status != 200) throw new Error('Failed')
     else {
-      uploadToast.dismiss()
+      //uploadToast.dismiss()
       return true
     }
   } catch (error) {

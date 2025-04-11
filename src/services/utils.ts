@@ -28,13 +28,18 @@ export async function must<T>(
   }
 }
 
-export function getUploadToast(filename: string, fileUploadProgress: Ref<number>) {
+export function getUploadToast(
+  filename: string,
+  fileUploadProgress: Ref<number>,
+  folderUpload: boolean
+) {
   const { toast } = useToast()
+  const asset = folderUpload ? 'Folder' : filename
 
   return toast({
-    title: 'File Upload',
+    title: folderUpload ? 'Folder Upload' : 'File Upload',
     description: h('div', { class: 'min-w-[20rem] mb-2' }, [
-      h('p', { class: 'w-full' }, `Uploading ${filename}...`),
+      h('p', { class: 'w-full' }, `Uploading ${asset}...`),
       h(markRaw(ToastProgress), {
         progress: fileUploadProgress,
         class: 'mt-2 h-[10px]'

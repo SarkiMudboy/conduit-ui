@@ -29,6 +29,7 @@ import Button from '@/components/ui/button/Button.vue';
 import UploadIcon from '@/components/icons/UploadIcon.vue';
 import FileDock from './FileDock.vue';
 import { useToast } from '@/components/ui/toast';
+import { getUploadToast } from '@/services/utils';
 
 const fileDropActive = ref(false)
 const filePathNav = useFileTreeContextStore()
@@ -128,6 +129,12 @@ const initiateUpload = async () => {
 
   closeFileUploadDialog()
 
+  const fileUploadCompleted = ref(0)
+  const isDir = !fileUploadStore.presignedFiles.bulk && fileUploadStore.presignedFiles.files.length > 1
+
+  // Find solution to this 
+  const uploadToast = getUploadToast(file.name, fileUploadCompleted)
+
   fileUploadStore.files.forEach(async (file) => {
 
     if (file.data.metadata) {
@@ -135,7 +142,7 @@ const initiateUpload = async () => {
       file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString()
     }
 
-    const response = await fileUploadStore.dispatchUploadFiles(file)
+    const response = await fileUploadStore.dispatchUploadFiles(file, fileUploadCompleted, isDir)
     if (response.body) {
       toast(
         {
