@@ -5,5 +5,5 @@ const props = defineProps(['progress'])
 </script>
 
 <template>
-  <Progress :model-value="props.progress.value" />
+  <Progress class="[&>*]:bg-purple-500" :model-value="props.progress.value" />
 </template>

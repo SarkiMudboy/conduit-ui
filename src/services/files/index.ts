@@ -6,8 +6,8 @@ import type {
   GetPresignedURLData,
   PresignedURLS
 } from './types'
-import { must, getUploadToast } from '../utils'
-import { ref, type Ref } from 'vue'
+import { must } from '../utils'
+import { type Ref } from 'vue'
 import axios from 'axios'
 
 async function getObjects(object_uid: string, drive_uid: string) {
@@ -37,9 +37,6 @@ export const uploadFile = async (
   fileUploadCompleted: Ref<number>,
   fileUploadTotal?: number
 ): Promise<boolean> => {
-  //const fileUploadCompleted = ref(0)
-  //const uploadToast = getUploadToast(file.name, fileUploadCompleted)
-
   try {
     const response = await axios.put(presignedURL, file, {
       headers: { ...metadata, 'Content-Type': '*' },
@@ -53,7 +50,6 @@ export const uploadFile = async (
 
     if (response.status != 200) throw new Error('Failed')
     else {
-      //uploadToast.dismiss()
       return true
     }
   } catch (error) {

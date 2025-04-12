@@ -77,7 +77,9 @@ const { isFieldDirty, handleSubmit } = useForm({
 })
 
 const onSubmit = handleSubmit((values) => {
-  initiateUpload()
+  closeFileUploadDialog()
+  if (fileUploadStore.isFolderUpload()) startFolderUpload()
+  else startFileUpload()
 })
 
 
@@ -125,25 +127,59 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
   } else setFileSelected(false);
 }
 
-const initiateUpload = async () => {
-
-  closeFileUploadDialog()
+const startFolderUpload = async () => {
 
   const fileUploadCompleted = ref(0)
-  const isDir = !fileUploadStore.presignedFiles.bulk && fileUploadStore.presignedFiles.files.length > 1
+  const uploadToast = getUploadToast(fileUploadStore.folderName, fileUploadCompleted, true)
 
-  // Find solution to this 
-  const uploadToast = getUploadToast(file.name, fileUploadCompleted)
+  //fileUploadStore.files.forEach(async (file) => {
+
+  await Promise.all(
+    fileUploadStore.files.map(async (file) => {
+
+      if (file.data.metadata) {
+        file.data.metadata['x-amz-meta-file_path'] = file.data.path as string
+        file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString()
+      }
+
+      const response = await fileUploadStore.dispatchUploadFiles(file, fileUploadCompleted, false)
+      if (!response.body) {
+        toast({
+          title: 'Failed upload',
+          description: `Failed to upload ${file.file.name}`,
+          variant: 'destructive'
+        })
+        return
+      }
+    })
+  )
+
+  uploadToast.dismiss()
+  toast(
+    {
+      title: 'File uploaded',
+      description: `${fileUploadStore.folderName} has been uploaded sucessfully`
+    })
+
+
+  fileUploadStore.clearFiles()
+}
+
+const startFileUpload = async () => {
+
+  const fileUploadCompleted = ref(0)
 
   fileUploadStore.files.forEach(async (file) => {
+    const uploadToast = getUploadToast(file.file.name, fileUploadCompleted, false)
 
     if (file.data.metadata) {
       file.data.metadata['x-amz-meta-file_path'] = file.data.path as string
       file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString()
     }
 
-    const response = await fileUploadStore.dispatchUploadFiles(file, fileUploadCompleted, isDir)
+    const response = await fileUploadStore.dispatchUploadFiles(file, fileUploadCompleted, false)
     if (response.body) {
+      uploadToast.dismiss()
       toast(
         {
           title: 'File uploaded',

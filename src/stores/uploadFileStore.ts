@@ -18,6 +18,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     bulk: false
   })
   const totalUploadSize = ref(0)
+  const folderName = ref('')
 
   const addFiles = (fileObjects: File[], isDriveRoot: boolean) => {
     fileObjects.forEach((file) => {
@@ -43,6 +44,15 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
 
       presignedFiles.value.files.push(f)
     })
+
+    // set folder name if folder upload
+    if (isFolderUpload() && presignedFiles.value.files[0].path) {
+      folderName.value = presignedFiles.value.files[0].path.split('/')[0]
+    }
+  }
+
+  const isFolderUpload = (): boolean => {
+    return !presignedFiles.value.bulk && presignedFiles.value.files.length > 1
   }
 
   const setUploadData = <T extends keyof GetPresignedURLData>(
@@ -140,7 +150,8 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     getFile,
     clearFiles,
     getFilePath,
-    //totalUploadSize,
+    folderName,
+    isFolderUpload,
     presignedFiles,
     dispatchGetPresignedURLS,
     dispatchUploadFiles,
