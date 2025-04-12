@@ -35,6 +35,7 @@ export const uploadFile = async (
   file: File,
   metadata: FileMetaData,
   fileUploadCompleted: Ref<number>,
+  folderUploadCompleted?: Ref<number>,
   fileUploadTotal?: number
 ): Promise<boolean> => {
   try {
@@ -43,7 +44,10 @@ export const uploadFile = async (
       onUploadProgress: (event) => {
         const total = fileUploadTotal || event.total
         if (event.lengthComputable && total) {
-          fileUploadCompleted.value = Math.floor((event.loaded / total) * 100)
+          const loaded = folderUploadCompleted
+            ? (folderUploadCompleted.value += event.loaded) // a bug lives here
+            : event.loaded
+          fileUploadCompleted.value = Math.floor((loaded / total) * 100)
         }
       }
     })

@@ -131,7 +131,7 @@ const startFolderUpload = async () => {
 
   const fileUploadCompleted = ref(0)
   const uploadToast = getUploadToast(fileUploadStore.folderName, fileUploadCompleted, true)
-
+  const folderUploadProgress = ref(0)
   //fileUploadStore.files.forEach(async (file) => {
 
   await Promise.all(
@@ -142,7 +142,7 @@ const startFolderUpload = async () => {
         file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString()
       }
 
-      const response = await fileUploadStore.dispatchUploadFiles(file, fileUploadCompleted, false)
+      const response = await fileUploadStore.dispatchUploadFiles(file, true, fileUploadCompleted, folderUploadProgress)
       if (!response.body) {
         toast({
           title: 'Failed upload',
@@ -177,7 +177,7 @@ const startFileUpload = async () => {
       file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString()
     }
 
-    const response = await fileUploadStore.dispatchUploadFiles(file, fileUploadCompleted, false)
+    const response = await fileUploadStore.dispatchUploadFiles(file, false, fileUploadCompleted)
     if (response.body) {
       uploadToast.dismiss()
       toast(

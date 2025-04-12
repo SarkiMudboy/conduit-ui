@@ -127,8 +127,9 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
 
   const dispatchUploadFiles = async (
     file: UploadFile,
+    folderUpload: boolean,
     uploadCompleted: Ref<number>,
-    folderUpload: boolean
+    folderUploadProgress?: Ref<number>
   ): Promise<APIResponse<boolean>> => {
     try {
       const uploaded = await API.files.uploadFile(
@@ -136,6 +137,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
         file.file,
         file.data.metadata as FileMetaData,
         uploadCompleted,
+        folderUploadProgress,
         folderUpload ? totalUploadSize.value : undefined
       )
       return { body: uploaded }
