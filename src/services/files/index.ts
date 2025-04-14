@@ -45,8 +45,9 @@ export const uploadFile = async (
         const total = fileUploadTotal || event.total
         if (event.lengthComputable && total) {
           const loaded = folderUploadCompleted
-            ? (folderUploadCompleted.value += event.loaded) // a bug lives here
+            ? folderUploadCompleted.value + event.loaded
             : event.loaded
+
           fileUploadCompleted.value = Math.floor((loaded / total) * 100)
         }
       }

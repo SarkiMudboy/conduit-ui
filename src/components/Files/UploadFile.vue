@@ -130,34 +130,39 @@ const handleFileChange = async (e: any /* change to HTML Event */) => {
 const startFolderUpload = async () => {
 
   const fileUploadCompleted = ref(0)
-  const uploadToast = getUploadToast(fileUploadStore.folderName, fileUploadCompleted, true)
   const folderUploadProgress = ref(0)
-  //fileUploadStore.files.forEach(async (file) => {
 
-  await Promise.all(
-    fileUploadStore.files.map(async (file) => {
+  const uploadToast = getUploadToast(fileUploadStore.folderName, fileUploadCompleted, true)
 
-      if (file.data.metadata) {
-        file.data.metadata['x-amz-meta-file_path'] = file.data.path as string
-        file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString()
-      }
+  for (const file of fileUploadStore.files) {
+    if (file.data.metadata) {
+      file.data.metadata['x-amz-meta-file_path'] = file.data.path as string;
+      file.data.metadata['x-amz-meta-filesize'] = file.file.size.toString();
+    }
 
-      const response = await fileUploadStore.dispatchUploadFiles(file, true, fileUploadCompleted, folderUploadProgress)
-      if (!response.body) {
-        toast({
-          title: 'Failed upload',
-          description: `Failed to upload ${file.file.name}`,
-          variant: 'destructive'
-        })
-        return
-      }
-    })
-  )
+    const response = await fileUploadStore.dispatchUploadFiles(
+      file,
+      true,
+      fileUploadCompleted,
+      folderUploadProgress
+    );
+
+    if (!response.body) {
+      toast({
+        title: 'Failed upload',
+        description: `Failed to upload ${file.file.name}`,
+        variant: 'destructive'
+      });
+      break;
+      // Optionally: break here if you want to stop on first failure
+    }
+    folderUploadProgress.value += file.file.size
+  }
 
   uploadToast.dismiss()
   toast(
     {
-      title: 'File uploaded',
+      title: 'Folder uploaded',
       description: `${fileUploadStore.folderName} has been uploaded sucessfully`
     })
 

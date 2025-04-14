@@ -49,6 +49,7 @@ export const useUploadFileStore = defineStore('useUploadFileStore', () => {
     if (isFolderUpload() && presignedFiles.value.files[0].path) {
       folderName.value = presignedFiles.value.files[0].path.split('/')[0]
     }
+    console.log(totalUploadSize.value)
   }
 
   const isFolderUpload = (): boolean => {
