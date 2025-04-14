@@ -12,9 +12,16 @@ import { calculateFileSize } from '@/lib/utils';
 const fileStore = useUploadFileStore();
 const f = fileStore.files
 const selectedFiles = ref(f)
+const isFolderUpload = fileStore.isFolderUpload()
 const emit = defineEmits<{ (e: 'clear-files'): void }>();
 
 const openfileList = ref(false)
+
+const setOpenFileList = () => {
+  if (!isFolderUpload) {
+    openfileList.value = true
+  }
+}
 
 const selectedFileNames = computed(() => {
   return selectedFiles.value.map(file => file.file.name).join(", ")
@@ -38,7 +45,7 @@ const ClearFile = (id?: string) => {
     <PopoverTrigger as-child>
       <Button
         class="flex flex-col items-center justify-items-center h-36 w-full max-w-md text-black dark:text-white bg-transparent border border-gray-400 border-solid hover:bg-transparent"
-        @mouseenter="openfileList = true">
+        @mouseenter="setOpenFileList">
         <span>
           <FileIcon class=" fill-black dark:fill-white" />
         </span>
