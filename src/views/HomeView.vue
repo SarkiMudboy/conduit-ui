@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import CustomHeader from '@/components/CustomHeader.vue'
+import Header from '@/components/Header.vue'
+import Hero from '@/components/Hero.vue'
 </script>
 
 <template>
-  <CustomHeader>
-    <RouterLink to="/"> Home </RouterLink>
-    <RouterLink to="/login"> Login </RouterLink>
-    <RouterLink to="/sign-up"> Sign Up </RouterLink>
-  </CustomHeader>
-  <div class="container p-10">
-    <p>Welcome to Conduit</p>
-  </div>
+  <main class="flex min-h-screen flex-col items-center">
+    <Header />
+    <Hero />
+
+  </main>
 </template>
 
 <style></style>

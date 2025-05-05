@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import CustomHeader from '@/components/CustomHeader.vue'
+import Header from '@/components/Header.vue'
 import { authGitHub } from '@/lib/utils'
 import { useCurrentUserStore } from '@/stores/userStore'
 
@@ -54,9 +54,9 @@ async function signInUser() {
 </script>
 
 <template>
-  <CustomHeader>
+  <Header>
     <RouterLink to="/"> Home </RouterLink>
-  </CustomHeader>
+  </Header>
   <Card class="mx-auto max-w-sm mt-12">
     <CardHeader>
       <CardTitle class="text-2xl"> Login </CardTitle>

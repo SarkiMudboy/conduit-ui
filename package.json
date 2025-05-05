@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.5",
     "@vee-validate/zod": "^4.13.2",
     "@vueuse/core": "^11.1.0",
     "axios": "^1.7.9",

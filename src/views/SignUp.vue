@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import CustomHeader from '@/components/CustomHeader.vue'
+import Header from '@/components/Header.vue'
 import { reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUserStore } from '@/stores/userStore'
@@ -53,9 +53,9 @@ async function signUp() {
 </script>
 
 <template>
-  <CustomHeader>
+  <Header>
     <RouterLink to="/"> Home </RouterLink>
-  </CustomHeader>
+  </Header>
   <Card class="mx-auto max-w-sm mt-12">
     <CardHeader>
       <CardTitle class="text-xl"> Sign Up </CardTitle>
