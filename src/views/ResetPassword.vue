@@ -34,7 +34,7 @@ const token = computed(() => {
 
 <template>
   <Header>
-    <RouterLink to="/"> Home </RouterLink>
+    <!-- <RouterLink to="/"> Home </RouterLink> -->
   </Header>
   <Suspense>
     <component :is="renderPage" :email_token="token" @reset-email-token-recieved="renderOTPView"

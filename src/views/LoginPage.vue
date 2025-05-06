@@ -55,7 +55,7 @@ async function signInUser() {
 
 <template>
   <Header>
-    <RouterLink to="/"> Home </RouterLink>
+    <!-- <RouterLink to="/"> Home </RouterLink> -->
   </Header>
   <Card class="mx-auto max-w-sm mt-12">
     <CardHeader>
