@@ -8,8 +8,16 @@ import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import { authGitHub } from '@/lib/utils'
 import { useCurrentUserStore } from '@/stores/userStore'
+import type { LoginCredentials } from '@/services/auth/types'
+import { useToast } from '@/components/ui/toast'
+import { FormField, FormLabel } from '@/components/ui/form/FormLabel.vue'
 
-const credentials: { email: string | undefined; tag: string | undefined; password: string } =
+import * as z from 'zod'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+
+
+const credentials: LoginCredentials =
   reactive({
     email: '',
     tag: '',
@@ -17,32 +25,37 @@ const credentials: { email: string | undefined; tag: string | undefined; passwor
   })
 
 const router = useRouter()
+const { toast } = useToast()
 const userStore = useCurrentUserStore()
 
 let identifier = ref('')
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
-async function logIn(creds: { email?: string; tag?: string; password: string }) {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
+const formSchema = toTypedSchema(
+  z.object({
+    email: z.coerce.string(),
+    tag: z.coerce.string(),
+    password: z.coerce.string()
+  })
+)
 
-  const raw = JSON.stringify(creds)
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    credentials: 'include',
-    body: raw
-  }
+const { handleSubmit, setValues } = useForm({
+  validationSchema: formSchema
+})
 
-  await fetch('http://localhost:8000/api/v1/users/sign-in/', requestOptions)
-    .then(async (response) => {
-      if (response.status == 200) {
-        const r = await response.json()
-        userStore.setUser(r.current_user)
-        router.push('/files')
-      }
+async function logIn(creds: LoginCredentials) {
+  const response = await userStore.dispatchLogin(creds)
+  if (response.body) {
+    userStore.setUser(response.body)
+    router.push('/files')
+  } else {
+    toast({
+      title: 'Sign Up Failed',
+      description: `Something went wrong`,
+      variant: 'destructive'
     })
-    .catch((error) => console.error(error))
+
+  }
 }
 
 async function signInUser() {
@@ -62,6 +75,7 @@ async function signInUser() {
       <CardTitle class="text-2xl"> Login </CardTitle>
       <CardDescription> Enter your email or tag below to login to your account </CardDescription>
     </CardHeader>
+    <form @submit="onsubmit">${0}</form>
     <CardContent>
       <div class="grid gap-4">
         <div class="grid gap-2">
@@ -85,4 +99,5 @@ async function signInUser() {
       </div>
     </CardContent>
   </Card>
+  <Toaster />
 </template>

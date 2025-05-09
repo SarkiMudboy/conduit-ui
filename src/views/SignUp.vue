@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import Header from '@/components/Header.vue'
-import { reactive, watch } from 'vue'
+import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUserStore } from '@/stores/userStore'
-import { authGitHub, parseGithubAuthURL, req, type reqOptions } from '@/lib/utils'
+import { authGitHub } from '@/lib/utils'
+import { type RegisterData } from '@/services/auth/types'
+import { useToast } from '@/components/ui/toast'
 
-type registerData = {
-  email: string
-  password: string
-  tag: string
-}
+import * as z from 'zod'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+
 
 const userData = reactive({
   email: '',
@@ -23,32 +24,42 @@ const userData = reactive({
 
 const userStore = useCurrentUserStore()
 const router = useRouter()
+const { toast } = useToast()
 
-async function register(data: registerData) {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
+// find out how to validate the email 
+const formSchema = toTypedSchema(
+  z.object({
+    email: z.coerce.string(),
+    tag: z.coerce.string(),
+    password: z.coerce.string().min(5, { message: "Password must be at least 5 characters long" }),
+  })
+)
 
-  const raw = JSON.stringify(data)
 
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw
-  }
+const { handleSubmit, setValues } = useForm({
+  validationSchema: formSchema,
+})
 
-  let { ...currentUser } = await fetch(
-    'http://localhost:8000/api/v1/users/sign-up/',
-    requestOptions
-  )
-    .then((response) => response.json())
-    .catch((error) => console.error(error))
-
-  userStore.setUser(currentUser)
-  router.push('/files')
-}
-
-async function signUp() {
+const onSubmit = handleSubmit(async (userData) => {
   await register(userData)
+})
+
+
+async function register(data: RegisterData) {
+
+  const response = await userStore.dispatchRegister(data)
+  if (response.body) {
+    const currentUser = response.body
+    userStore.setUser(currentUser)
+    router.push('/files')
+  } else {
+    toast({
+      title: 'Sign Up Failed',
+      description: `Something went wrong`,
+      variant: 'destructive'
+    })
+
+  }
 }
 </script>
 
@@ -61,36 +72,46 @@ async function signUp() {
       <CardTitle class="text-xl"> Sign Up </CardTitle>
       <CardDescription> Enter your information to create an account </CardDescription>
     </CardHeader>
-    <CardContent>
-      <div class="grid gap-4">
-        <div class="grid gap-2">
-          <Label for="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" v-model="userData.email" required />
+    <form @submit="onSubmit">
+      <CardContent>
+        <div class="grid gap-4">
+          <div class="grid gap-2">
+            <FormField v-slot="{ componentField }" name="email">
+              <FormLabel for="email">Email</FormLabel>
+              <Input id="email" type="email" placeholder="m@example.com" v-bind="componentField"
+                v-model="userData.email" required />
+            </FormField>
+          </div>
+          <div class="grid gap-2">
+            <FormField v-slot="{ componentField }" name="tag">
+              <FormLabel for="tag">Tag (Username)</FormLabel>
+              <Input id="tag" type="text" placeholder="tedx56" v-bind="componentField" v-model="userData.tag" />
+            </FormField>
+          </div>
+          <div class="grid gap-2">
+            <FormField v-slot="{ componentField }" name="password">
+              <FormLabel for="password">Password</FormLabel>
+              <Input id="password" type="password" v-bind="componentField" v-model="userData.password" />
+            </FormField>
+          </div>
+          <Button type="submit" class="w-full"> Create an account </Button>
+          <Button variant="outline" class="w-full" @click="authGitHub"> Sign up with GitHub </Button>
         </div>
-        <div class="grid gap-2">
-          <Label for="tag">Tag (Username)</Label>
-          <Input id="tag" type="text" placeholder="tedx56" v-model="userData.tag" />
+        <div class="mt-4 text-center text-sm">
+          Already have an account?
+          <RouterLink to="/login" class="underline">Sign in</RouterLink>
         </div>
-        <div class="grid gap-2">
-          <Label for="password">Password</Label>
-          <Input id="password" type="password" v-model="userData.password" />
+        <div class="pt-5">
+          <p class="text-xs text-foreground-lighter sm:mx-auto sm:max-w-sm">
+            By continuing, you agree to Conduit's
+            <a class="underline hover:text-foreground-light" href="https://supabase.com/terms">Terms of Service</a>
+            and
+            <a class="underline hover:text-foreground-light" href="https://supabase.com/privacy">Privacy Policy</a>, and
+            to receive periodic emails with updates.
+          </p>
         </div>
-        <Button type="submit" class="w-full" @click="signUp"> Create an account </Button>
-        <Button variant="outline" class="w-full" @click="authGitHub"> Sign up with GitHub </Button>
-      </div>
-      <div class="mt-4 text-center text-sm">
-        Already have an account?
-        <RouterLink to="/login" class="underline">Sign in</RouterLink>
-      </div>
-      <div class="pt-5">
-        <p class="text-xs text-foreground-lighter sm:mx-auto sm:max-w-sm">
-          By continuing, you agree to Conduit's
-          <a class="underline hover:text-foreground-light" href="https://supabase.com/terms">Terms of Service</a>
-          and
-          <a class="underline hover:text-foreground-light" href="https://supabase.com/privacy">Privacy Policy</a>, and
-          to receive periodic emails with updates.
-        </p>
-      </div>
-    </CardContent>
+      </CardContent>
+    </form>
   </Card>
+  <Toaster />
 </template>

@@ -72,20 +72,11 @@ const onPasswordSubmit = handleSubmit(({ password }) => {
       <FormItem>
         <FormLabel>OTP</FormLabel>
         <FormControl>
-          <PinInput
-            id="pin-input"
-            :model-value="value"
-            placeholder="○"
-            class="flex gap-2 items-center mt-1"
-            otp
-            type="number"
-            :name="componentField.name"
-            @update:model-value="
-              (arrStr) => {
+          <PinInput id="pin-input" :model-value="value" placeholder="○" class="flex gap-2 items-center mt-1" otp
+            type="number" :name="componentField.name" @update:model-value="(arrStr) => {
                 setFieldValue('password', arrStr.filter(Boolean))
               }
-            "
-          >
+              ">
             <PinInputGroup>
               <PinInputInput v-for="(id, index) in 6" :key="id" :index="index" />
             </PinInputGroup>
