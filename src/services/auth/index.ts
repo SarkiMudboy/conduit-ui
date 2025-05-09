@@ -8,7 +8,7 @@ async function register(data: RegisterData) {
 }
 
 async function login(data: LoginCredentials) {
-  const config = { withAuth: false }
+  const config = { withAuth: true }
   const client = getClient(config)
   return client.post<User>('users/sign-in/', data)
 }

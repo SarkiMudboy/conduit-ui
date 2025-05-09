@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { FormField, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import Header from '@/components/Header.vue'
 import { reactive } from 'vue'
@@ -9,12 +9,19 @@ import { useRouter } from 'vue-router'
 import { useCurrentUserStore } from '@/stores/userStore'
 import { authGitHub } from '@/lib/utils'
 import { type RegisterData } from '@/services/auth/types'
-import { useToast } from '@/components/ui/toast'
+import { useToast, Toaster } from '@/components/ui/toast'
 
 import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 
+
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+
+function checkEmail(email: string) {
+  return emailRegex.test(email)
+}
 
 const userData = reactive({
   email: '',
@@ -29,7 +36,9 @@ const { toast } = useToast()
 // find out how to validate the email 
 const formSchema = toTypedSchema(
   z.object({
-    email: z.coerce.string(),
+    email: z.coerce.string().refine((emailAddr) => checkEmail(emailAddr), {
+      message: "Invalid email"
+    }),
     tag: z.coerce.string(),
     password: z.coerce.string().min(5, { message: "Password must be at least 5 characters long" }),
   })
@@ -80,12 +89,14 @@ async function register(data: RegisterData) {
               <FormLabel for="email">Email</FormLabel>
               <Input id="email" type="email" placeholder="m@example.com" v-bind="componentField"
                 v-model="userData.email" required />
+              <FormMessage />
             </FormField>
           </div>
           <div class="grid gap-2">
             <FormField v-slot="{ componentField }" name="tag">
               <FormLabel for="tag">Tag (Username)</FormLabel>
               <Input id="tag" type="text" placeholder="tedx56" v-bind="componentField" v-model="userData.tag" />
+              <FormMessage />
             </FormField>
           </div>
           <div class="grid gap-2">
