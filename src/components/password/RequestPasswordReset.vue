@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { ref } from 'vue'
+import getHTTPClient from '@/services/api'
 
 const emit = defineEmits<{
   (e: 'reset-email-token-recieved', token: string): void
@@ -20,29 +21,23 @@ const email = ref('')
 const emailToken = ref('')
 
 async function sendEmail() {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
 
-  const raw = JSON.stringify({ email: email.value })
-
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw
+  const request = { email: email.value }
+  const config = { withAuth: false }
+  const http = getHTTPClient(config)
+  try {
+    const { status, data } = await http.post(
+      '/users/request-reset-password/', request
+    )
+    if (status == 200) {
+      emailToken.value = data.token
+      emit('reset-email-token-recieved', emailToken.value)
+    }
+    else throw new Error('An error occured')
+  } catch (error) {
+    console.error(error)
   }
 
-  let responseData = await fetch(
-    'http://localhost:8000/api/v1/users/request-reset-password/',
-    requestOptions
-  )
-    .then((response) => {
-      if (response.ok) return response.json()
-      else throw new Error('An error occured')
-    })
-    .catch((error) => console.error(error))
-
-  emailToken.value = responseData.token
-  emit('reset-email-token-recieved', emailToken.value)
 }
 </script>
 
@@ -51,9 +46,7 @@ async function sendEmail() {
     <Card class="mx-auto max-w-sm mt-12">
       <CardHeader>
         <CardTitle>Reset Password</CardTitle>
-        <CardDescription
-          >If an account with the email exist, an email with an OTP will be sent</CardDescription
-        >
+        <CardDescription>If an account with the email exist, an email with an OTP will be sent</CardDescription>
       </CardHeader>
       <CardContent>
         <form>

@@ -15,10 +15,10 @@ import { Toaster } from '@/components/ui/toast'
 import { Input } from '@/components/ui/input'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { req, type reqOptions } from '@/lib/utils'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
+import getHTTPClient from '@/services/api'
 
 const emailToken = defineProps({
   email_token: {
@@ -43,21 +43,19 @@ const form = useForm({
   validationSchema: formSchema
 })
 
-const onSubmit = form.handleSubmit((passwords) => {
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-  const requestParams: reqOptions = {
-    data: {
-      password: passwords.password,
-      token: emailToken.email_token
-    },
-    headers: myHeaders,
-    url: 'http://localhost:8000/api/v1/users/reset-password/',
-    method: 'PUT'
+const onSubmit = form.handleSubmit(async (passwords) => {
+
+  const request = {
+    password: passwords.password,
+    token: emailToken.email_token
   }
-  req(requestParams).then((r) => {
-    console.log(r)
-    if (r.status == 200) {
+
+  const config = { withAuth: false }
+  const http = getHTTPClient(config)
+
+  try {
+    const { status } = await http.put('/users/reset-password/', request)
+    if (status == 200) {
       toast({
         title: 'Success',
         description: 'Your Password has been successfully reset.'
@@ -66,13 +64,17 @@ const onSubmit = form.handleSubmit((passwords) => {
         router.push('/login')
       }, 3000)
     } else {
-      toast({
-        title: 'Uh Oh',
-        description: 'Something went wrong, Please try again',
-        variant: 'destructive'
-      })
+      throw new Error("Failed")
     }
-  })
+
+  } catch (error) {
+    toast({
+      title: 'Uh Oh',
+      description: 'Something went wrong, Please try again',
+      variant: 'destructive'
+    })
+  }
+
 })
 </script>
 
@@ -90,13 +92,8 @@ const onSubmit = form.handleSubmit((passwords) => {
               <div class="flex flex-col space-y-1.5">
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    id="name"
-                    type="password"
-                    placeholder="New password"
-                    v-model="newPassword"
-                    v-bind="componentField"
-                  />
+                  <Input id="name" type="password" placeholder="New password" v-model="newPassword"
+                    v-bind="componentField" />
                 </FormControl>
               </div>
               <FormMessage />
@@ -106,13 +103,8 @@ const onSubmit = form.handleSubmit((passwords) => {
             <FormItem>
               <div class="flex flex-col space-y-1.5">
                 <FormLabel>Confirm Password</FormLabel>
-                <FormControl
-                  ><Input
-                    id="name"
-                    type="password"
-                    placeholder="Enter again..."
-                    v-bind="componentField"
-                /></FormControl>
+                <FormControl><Input id="name" type="password" placeholder="Enter again..." v-bind="componentField" />
+                </FormControl>
               </div>
               <FormMessage />
             </FormItem>
