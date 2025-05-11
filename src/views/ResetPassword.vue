@@ -33,12 +33,12 @@ const token = computed(() => {
 </script>
 
 <template>
-  <Header>
-    <!-- <RouterLink to="/"> Home </RouterLink> -->
-  </Header>
-  <Suspense>
-    <component :is="renderPage" :email_token="token" @reset-email-token-recieved="renderOTPView"
-      @otp-confirmed="renderChangePasswordView" />
-    <template v-slot:fallback> Data is loading... </template>
-  </Suspense>
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100">
+    <Header />
+    <Suspense>
+      <component :is="renderPage" :email_token="token" class="mx-auto mt-10" @reset-email-token-recieved="renderOTPView"
+        @otp-confirmed="renderChangePasswordView" />
+      <template v-slot:fallback> Data is loading... </template>
+    </Suspense>
+  </div>
 </template>

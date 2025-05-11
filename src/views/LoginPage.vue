@@ -71,44 +71,47 @@ const onSubmit = handleSubmit(async (userData) => {
 </script>
 
 <template>
-  <Header>
-    <!-- <RouterLink to="/"> Home </RouterLink> -->
-  </Header>
-  <Card class="mx-auto max-w-sm mt-12">
-    <CardHeader>
-      <CardTitle class="text-2xl"> Login </CardTitle>
-      <CardDescription> Enter your email or tag below to login to your account </CardDescription>
-    </CardHeader>
-    <form @submit="onSubmit">
-      <CardContent>
-        <div class="grid gap-4">
-          <div class="grid gap-2">
-            <FormField v-slot="{ componentField }" name="email">
-              <FormLabel for="email">Email/Tag</FormLabel>
-              <Input id="email" type="text" placeholder="m@example.com or @ted5x4" v-bind="componentField"
-                v-model="identifier" required />
-            </FormField>
-          </div>
-          <div class="grid gap-2">
-            <FormField v-slot="{ componentField }" name="password">
-              <div class="flex items-center">
-                <FormLabel for="password">Password</FormLabel>
-                <RouterLink to="/reset-password" class="ml-auto inline-block text-sm underline">Forgot Password?
-                </RouterLink>
+  <div class="flex flex-col gap-0 bg-gradient-to-br from-blue-100 via-white to-purple-100">
+    <Header />
+    <div class="min-h-screen">
+      <Card class="mx-auto my-auto max-w-sm mt-12">
+        <CardHeader>
+          <CardTitle class="text-2xl"> Login </CardTitle>
+          <CardDescription> Enter your email or tag below to login to your account </CardDescription>
+        </CardHeader>
+        <form @submit="onSubmit">
+          <CardContent>
+            <div class="grid gap-4">
+              <div class="grid gap-2">
+                <FormField v-slot="{ componentField }" name="email">
+                  <FormLabel for="email">Email/Tag</FormLabel>
+                  <Input id="email" type="text" placeholder="m@example.com or @ted5x4" v-bind="componentField"
+                    v-model="identifier" required />
+                </FormField>
               </div>
-              <Input id="password" type="password" v-bind="componentField" v-model="credentials.password" required />
-              <FormMessage />
-            </FormField>
-          </div>
-          <Button type="submit" class="w-full"> Login </Button>
-          <Button variant="outline" class="w-full" @click="authGitHub"> Login with GitHub </Button>
-        </div>
-        <div class="mt-4 text-center text-sm">
-          Don't have an account?
-          <RouterLink to="/sign-up" class="underline">Sign Up</RouterLink>
-        </div>
-      </CardContent>
-    </form>
-  </Card>
+              <div class="grid gap-2">
+                <FormField v-slot="{ componentField }" name="password">
+                  <div class="flex items-center">
+                    <FormLabel for="password">Password</FormLabel>
+                    <RouterLink to="/reset-password" class="ml-auto inline-block text-sm underline">Forgot Password?
+                    </RouterLink>
+                  </div>
+                  <Input id="password" type="password" v-bind="componentField" v-model="credentials.password"
+                    required />
+                  <FormMessage />
+                </FormField>
+              </div>
+              <Button type="submit" class="w-full"> Login </Button>
+              <Button variant="outline" class="w-full" @click="authGitHub"> Login with GitHub </Button>
+            </div>
+            <div class="mt-4 text-center text-sm">
+              Don't have an account?
+              <RouterLink to="/sign-up" class="underline">Sign Up</RouterLink>
+            </div>
+          </CardContent>
+        </form>
+      </Card>
+    </div>
+  </div>
   <Toaster />
 </template>
