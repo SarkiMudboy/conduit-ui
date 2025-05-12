@@ -59,7 +59,7 @@ const getDriveCreatedDate = (dateString: string) => {
             calculateFileSize(drive.size) }}</span>
         </div>
         <div class="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-          <div class="h-full bg-zinc-900 dark:bg-zinc-100 rounded-full"
+          <div class="h-full bg-purple-500 dark:bg-purple-500 rounded-full"
             :style="{ width: calculateDiskUsage(drive.used, drive.size) + '%' }" />
         </div>
       </div>

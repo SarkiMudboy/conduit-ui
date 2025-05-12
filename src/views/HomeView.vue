@@ -9,7 +9,7 @@ import Footer from '@/components/Footer.vue';
 </script>
 
 <template>
-  <main class="flex min-h-screen flex-col items-center">
+  <main class="flex min-h-screen flex-col items-center bg-gradient-to-br from-blue-100 via-white to-purple-100">
     <Header>
       <NavBar />
     </Header>

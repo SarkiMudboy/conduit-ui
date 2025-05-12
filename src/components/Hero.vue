@@ -3,7 +3,7 @@ import Button from '@/components/ui/button/Button.vue';
 </script>
 
 <template>
-  <section class="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-br from-blue-100 via-white to-purple-100">
+  <section class="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-transparent">
     <div class="container px-4 md:px-6">
       <div class="flex flex-col items-center space-y-4 text-center">
         <h1 class="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
