@@ -27,14 +27,11 @@ const { toast } = useToast()
 const userStore = useCurrentUserStore()
 
 let identifier = ref('')
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
 const formSchema = toTypedSchema(
   z.object({
-    email: z.coerce.string().refine((emailAddr) => checkEmail(emailAddr), {
-      message: "Invalid Email"
-    }),
-    tag: z.coerce.string(),
+    email: z.string(),
+    tag: z.string().optional(),
     password: z.coerce.string()
   })
 )
@@ -58,14 +55,12 @@ async function logIn(creds: LoginCredentials) {
   }
 }
 
-function checkEmail(email: string) {
-  return emailRegex.test(email)
-}
 
 const onSubmit = handleSubmit(async (userData) => {
-  const isEmail = checkEmail(userData.email)
-  isEmail ? (credentials.email = identifier.value) : (credentials.tag = identifier.value)
-  isEmail ? delete credentials.tag : delete credentials.email
+  const userEmail = z.coerce.string().email()
+  const isEmail = userEmail.safeParse(userData.email)
+  isEmail.success ? (credentials.email = identifier.value) : (credentials.tag = identifier.value)
+  isEmail.success ? delete credentials.tag : delete credentials.email
   await logIn(credentials)
 })
 </script>

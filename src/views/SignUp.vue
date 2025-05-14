@@ -17,12 +17,6 @@ import { useForm } from 'vee-validate'
 
 
 
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-
-function checkEmail(email: string) {
-  return emailRegex.test(email)
-}
-
 const userData = reactive({
   email: '',
   password: '',
@@ -36,10 +30,8 @@ const { toast } = useToast()
 // find out how to validate the email 
 const formSchema = toTypedSchema(
   z.object({
-    email: z.coerce.string().refine((emailAddr) => checkEmail(emailAddr), {
-      message: "Invalid email"
-    }),
-    tag: z.coerce.string(),
+    email: z.coerce.string().email({ message: "Invalid email" }),
+    tag: z.union([z.string(), z.literal('')]).optional().default(''),
     password: z.coerce.string().min(5, { message: "Password must be at least 5 characters long" }),
   })
 )
