@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FormField, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import Header from '@/components/Header.vue'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUserStore } from '@/stores/userStore'
 import { authGitHub } from '@/lib/utils'
@@ -14,6 +14,7 @@ import { useToast, Toaster } from '@/components/ui/toast'
 import * as z from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
+import ShowTag from '@/components/ShowTag.vue'
 
 
 
@@ -26,6 +27,8 @@ const userData = reactive({
 const userStore = useCurrentUserStore()
 const router = useRouter()
 const { toast } = useToast()
+
+const savedTag = ref('')
 
 // find out how to validate the email 
 const formSchema = toTypedSchema(
@@ -52,7 +55,7 @@ async function register(data: RegisterData) {
   if (response.body) {
     const currentUser = response.body
     userStore.setUser(currentUser)
-    router.push('/files')
+    savedTag.value = currentUser.tag
   } else {
     toast({
       title: 'Sign Up Failed',
@@ -65,7 +68,10 @@ async function register(data: RegisterData) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-0 bg-gradient-to-br from-blue-100 via-white to-purple-100">
+  <div v-if="savedTag">
+    <ShowTag :userTag="savedTag" />
+  </div>
+  <div v-else class="flex flex-col gap-0 bg-gradient-to-br from-blue-100 via-white to-purple-100">
     <Header />
     <div class="min-h-screen">
       <Card class="mx-auto max-w-sm mt-12">

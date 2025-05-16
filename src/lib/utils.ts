@@ -94,26 +94,6 @@ export async function refreshToken(): Promise<Boolean> {
   }
 }
 
-export function validatePassword(password: string) {
-  const minLength = 4
-  const hasLetter = /[a-zA-Z]/
-  const hasNumber = /\d/
-
-  if (password.length < minLength) {
-    return 'Password must be at least 4 characters long.'
-  }
-
-  if (!hasLetter.test(password)) {
-    return 'Password must contain at least one letter.'
-  }
-
-  if (!hasNumber.test(password)) {
-    return 'Password must contain at least one number.'
-  }
-
-  return 'Password is valid.'
-}
-
 export const authGitHub = async () => {
   const options: reqOptions = {
     data: null,
@@ -167,4 +147,22 @@ export const calculateFileSize = (size: number) => {
 
 export const calculateDiskUsage = (used: number, totalAvailableSpace: number) => {
   return (used / totalAvailableSpace) * 100
+}
+
+export const AddAnimationEffectToElementOnLoad = (effect: string) => {
+  const sections = document.querySelectorAll('section')
+  const options = {
+    root: null,
+    threshold: 0.75,
+    rootMargin: '-20px'
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      entry.target.classList.add(effect)
+    })
+  }, options)
+
+  sections.forEach((section) => observer.observe(section))
 }
