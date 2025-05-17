@@ -5,7 +5,6 @@ import { FormField, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import Header from '@/components/Header.vue'
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useCurrentUserStore } from '@/stores/userStore'
 import { authGitHub } from '@/lib/utils'
 import { type RegisterData } from '@/services/auth/types'
@@ -25,7 +24,6 @@ const userData = reactive({
 })
 
 const userStore = useCurrentUserStore()
-const router = useRouter()
 const { toast } = useToast()
 
 const savedTag = ref('')
@@ -55,14 +53,13 @@ async function register(data: RegisterData) {
   if (response.body) {
     const currentUser = response.body
     userStore.setUser(currentUser)
-    savedTag.value = currentUser.tag
+    savedTag.value = response.body.tag
   } else {
     toast({
       title: 'Sign Up Failed',
       description: `Something went wrong`,
       variant: 'destructive'
     })
-
   }
 }
 </script>
