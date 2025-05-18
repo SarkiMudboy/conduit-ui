@@ -10,12 +10,12 @@ import FileObjects from '@/components//Files/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import { useDriveStore } from '@/stores/drives';
-import type { FileObjectView } from '@/services/files/types';
+//import type { FileObjectView } from '@/services/files/types';
 
 
-const source = defineProps<{
-  view: FileObjectView | null
-}>()
+//const source = defineProps<{
+//  view: FileObjectView | null
+//}>()
 
 const { toast } = useToast()
 const filePathNavStore = useFileTreeContextStore()
@@ -32,15 +32,11 @@ const setDriveFileObjects = computed(() => {
   return selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
 })
 
-const viewAssets = computed(() => {
-  return source.view?.file_objects
-})
-
-//watch(assets, (newVal) => {
-//  console.log(newVal)
-//  return newVal
+//const viewAssets = computed(() => {
+//  return source.view?.file_objects
 //})
-const assets = computed(() => setDriveFileObjects.value || viewAssets.value)
+
+//const assets = computed(() => setDriveFileObjects.value || viewAssets.value)
 
 const getDriveAssets = async (uid: string) => {
 
@@ -73,7 +69,7 @@ const addNewDrive = (drive: Drive) => {
   <div class="p-6">
     <div :class="cn('w-full overflow-x-auto scrollbar-none')">
       <div v-if="selectedDrive">
-        <FileObjects :assets="assets" />
+        <FileObjects :assets="setDriveFileObjects" />
       </div>
       <div v-else>
         <DriveActions>

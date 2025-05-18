@@ -13,15 +13,15 @@ import {
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 import DrivesWindow from "@/components/Drives/DrivesWindow.vue"
 import Notifications from "@/components/Notifications.vue"
-import { ref, type Ref } from "vue"
-import { type FileObjectView } from "@/services/files/types"
+//import { ref, type Ref } from "vue"
+//import { type FileObjectView } from "@/services/files/types"
 
-const viewObject: Ref<FileObjectView | null> = ref(null)
-
-const setObjectView = (view: FileObjectView) => {
-  console.log(view)
-  viewObject.value = view
-}
+//const viewObject: Ref<FileObjectView | null> = ref(null)
+//
+//const setObjectView = (view: FileObjectView) => {
+//  console.log(view)
+//  viewObject.value = view
+//}
 
 </script>
 
@@ -38,7 +38,7 @@ const setObjectView = (view: FileObjectView) => {
         <Button variant="ghost" size="icon">
           <Grid class="h-4 w-4" />
         </Button>
-        <Notifications @opened="setObjectView" />
+        <Notifications @opened="console.log('opened')" />
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
@@ -58,6 +58,6 @@ const setObjectView = (view: FileObjectView) => {
         </DropdownMenu>
       </div>
     </header>
-    <DrivesWindow :view="viewObject" />
+    <DrivesWindow />
   </div>
 </template>

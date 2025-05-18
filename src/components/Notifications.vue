@@ -15,16 +15,19 @@ import { useFileObjectStore } from '@/stores/files';
 import { useDriveStore } from '@/stores/drives';
 import type { DriveNotification } from '@/services/notifications/types';
 import type { FileObjectView } from '@/services/files/types';
+import { useGlobalAssetStore } from '@/stores/globalAssetStore';
+
 
 const userStore = useCurrentUserStore()
 const notifStore = useNotificationStore()
 const fileObjectStore = useFileObjectStore()
 const driveStore = useDriveStore()
 const currentUser = userStore.getUser()
+const globalAssetStore = useGlobalAssetStore()
 
-const emit = defineEmits<{
-  (e: 'opened', view: FileObjectView): void
-}>()
+//const emit = defineEmits<{
+//  (e: 'opened', view: FileObjectView): void
+//}>()
 
 const notifications = computed(() => {
   return notifStore.notifications
@@ -39,14 +42,25 @@ async function handleNotificationClick(notification_uid: string) {
   const n = notifStore.getNotification(notification_uid) as DriveNotification
   if (n.source) {
     await fileObjectStore.loadFolderAssets(n.source, n.drive.uid)
-    emit('opened', {
+    //emit('opened', {
+    //  drive: n.drive,
+    //  file_objects: fileObjectStore.files
+    //})
+
+    globalAssetStore.setAsset({
       drive: n.drive,
       file_objects: fileObjectStore.files
     })
+
   } else {
     const response = await driveStore.dispatchGetDriveAssets(n.drive.uid)
     if (response.body) {
-      emit('opened', { drive: n.drive, file_objects: response.body.storage_objects })
+      //emit('opened', { drive: n.drive, file_objects: response.body.storage_objects })
+      globalAssetStore.setAsset({
+        drive: n.drive,
+        file_objects: fileObjectStore.files
+      })
+
     }
   }
   await notifStore.dispatchMarkAsRead(notification_uid)
