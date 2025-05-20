@@ -41,27 +41,21 @@ async function handleNotificationClick(notification_uid: string) {
 
   const n = notifStore.getNotification(notification_uid) as DriveNotification
   if (n.source) {
-    await fileObjectStore.loadFolderAssets(n.source, n.drive.uid)
+    //await fileObjectStore.loadFolderAssets(n.source, n.drive.uid)
     //emit('opened', {
     //  drive: n.drive,
     //  file_objects: fileObjectStore.files
     //})
 
-    globalAssetStore.setAsset({
-      drive: n.drive,
-      file_objects: fileObjectStore.files
-    })
+    globalAssetStore.setAsset({ source: n.source, drive: n.drive.uid })
 
   } else {
-    const response = await driveStore.dispatchGetDriveAssets(n.drive.uid)
-    if (response.body) {
-      //emit('opened', { drive: n.drive, file_objects: response.body.storage_objects })
-      globalAssetStore.setAsset({
-        drive: n.drive,
-        file_objects: fileObjectStore.files
-      })
+    //const response = await driveStore.dispatchGetDriveAssets(n.drive.uid)
+    //if (response.body) {
+    //emit('opened', { drive: n.drive, file_objects: response.body.storage_objects })
+    globalAssetStore.setAsset({ drive: n.drive.uid })
 
-    }
+    //}
   }
   await notifStore.dispatchMarkAsRead(notification_uid)
 }

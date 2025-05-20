@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
 import { computed, ref, watch, type Ref } from 'vue';
-import type { BasicDriveView, Drive, DriveDetail } from '@/services/drives/types';
+import type { Drive, DriveDetail } from '@/services/drives/types';
 import DriveCard from './DriveCard.vue';
 import AddDrive from './AddDrive.vue';
 import { useToast } from '@/components/ui/toast';
@@ -10,16 +10,18 @@ import FileObjects from '@/components//Files/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import { useDriveStore } from '@/stores/drives';
-//import type { FileObjectView } from '@/services/files/types';
+import { useGlobalAssetStore, type GlobalAsset } from '@/stores/globalAssetStore';
+import { storeToRefs } from 'pinia';
+import { useFileObjectStore } from '@/stores/files';
 
-
-//const source = defineProps<{
-//  view: FileObjectView | null
-//}>()
 
 const { toast } = useToast()
 const filePathNavStore = useFileTreeContextStore()
 const driveStore = useDriveStore()
+const globalStore = useGlobalAssetStore()
+const fileObjectStore = useFileObjectStore()
+const { asset } = storeToRefs(globalStore)
+
 
 await driveStore.dispatchGetDrives()
 const drives = computed<Drive[]>(() => {
@@ -32,11 +34,28 @@ const setDriveFileObjects = computed(() => {
   return selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
 })
 
-//const viewAssets = computed(() => {
-//  return source.view?.file_objects
-//})
 
-//const assets = computed(() => setDriveFileObjects.value || viewAssets.value)
+watch(asset, async () => {
+  const obj = asset?.value
+  if (!obj?.source && obj?.drive) {
+    console.log(asset.value)
+    await getDriveAssets(obj.drive)
+  } else if (obj?.source) {
+
+    const response = await fileStore.loadFolderAssets(folder.uid, drive.uid)
+    if (response.body) {
+      selectedDrive.value = {}
+    }
+  }
+  //}
+})
+
+//watch(() => globalStore.asset, () => {
+//console.log("HELLOOOO")
+//if (!newFileObject.source && newFileObject.drive) {
+//  await getDriveAssets(newFileObject.drive)
+//}
+//})
 
 const getDriveAssets = async (uid: string) => {
 

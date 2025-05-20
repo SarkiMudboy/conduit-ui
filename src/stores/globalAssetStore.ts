@@ -1,12 +1,19 @@
 import { defineStore } from 'pinia'
-import type { FileObjectView } from '@/services/files/types'
-import { ref, type Ref } from 'vue'
+import { reactive, ref, type Ref } from 'vue'
+
+export interface GlobalAsset {
+  source?: string
+  drive: string
+}
 
 export const useGlobalAssetStore = defineStore('useGlobalAssetStore', () => {
-  const asset: Ref<FileObjectView | null> = ref(null)
+  const asset: Ref<GlobalAsset | null> = ref(null)
 
-  function setAsset(obj: FileObjectView) {
+  function setAsset(obj: GlobalAsset) {
+    //asset.drive = obj.drive
+    //asset.source = obj.source ? obj.source : undefined
     asset.value = obj
+    console.log(asset.value)
   }
 
   return { asset, setAsset }

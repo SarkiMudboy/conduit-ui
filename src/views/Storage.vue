@@ -38,7 +38,7 @@ import Notifications from "@/components/Notifications.vue"
         <Button variant="ghost" size="icon">
           <Grid class="h-4 w-4" />
         </Button>
-        <Notifications @opened="console.log('opened')" />
+        <Notifications />
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
