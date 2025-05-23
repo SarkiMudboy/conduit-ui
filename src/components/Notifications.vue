@@ -20,17 +20,31 @@ import { useGlobalAssetStore } from '@/stores/globalAssetStore';
 
 const userStore = useCurrentUserStore()
 const notifStore = useNotificationStore()
-const fileObjectStore = useFileObjectStore()
-const driveStore = useDriveStore()
+//const fileObjectStore = useFileObjectStore()
+//const driveStore = useDriveStore()
 const currentUser = userStore.getUser()
 const globalAssetStore = useGlobalAssetStore()
 
-//const emit = defineEmits<{
-//  (e: 'opened', view: FileObjectView): void
-//}>()
-
 const notifications = computed(() => {
-  return notifStore.notifications
+  //return notifStore.notifications
+
+  return [
+    {
+      uid: "83838383838",
+      author: {
+        uid: "gdgdgdgdg",
+        tag: "hdhdhdh",
+      },
+      drive: {
+        uid: "wewewew",
+        name: 'kddkkdk',
+      },
+      note: "eeeee",
+      source: "",
+      read: false,
+      created_at: "lololo",
+    }
+  ]
 })
 
 function getNoun(author: { uid: string, tag: string }) {
@@ -40,22 +54,13 @@ function getNoun(author: { uid: string, tag: string }) {
 async function handleNotificationClick(notification_uid: string) {
 
   const n = notifStore.getNotification(notification_uid) as DriveNotification
-  if (n.source) {
-    //await fileObjectStore.loadFolderAssets(n.source, n.drive.uid)
-    //emit('opened', {
-    //  drive: n.drive,
-    //  file_objects: fileObjectStore.files
-    //})
+  if (!n) {
+    //globalAssetStore.setAsset({ source: n.source, drive: n.drive.uid })
 
-    globalAssetStore.setAsset({ source: n.source, drive: n.drive.uid })
-
+    globalAssetStore.setAsset({ source: "f9650604-536a-4f4f-bd4f-e7b87470467d", drive: "07d2335e-cd0f-4a54-be36-14bea7ae2aeb" })
   } else {
-    //const response = await driveStore.dispatchGetDriveAssets(n.drive.uid)
-    //if (response.body) {
-    //emit('opened', { drive: n.drive, file_objects: response.body.storage_objects })
-    globalAssetStore.setAsset({ drive: n.drive.uid })
-
-    //}
+    //globalAssetStore.setAsset({ drive: n.drive.uid })
+    globalAssetStore.setAsset({ source: "f9650604-536a-4f4f-bd4f-e7b87470467d", drive: "07d2335e-cd0f-4a54-be36-14bea7ae2aeb" })
   }
   await notifStore.dispatchMarkAsRead(notification_uid)
 }

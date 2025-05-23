@@ -3,7 +3,7 @@ import Folder from '@/components/icons/Folder.vue'
 import File from '@/components/icons/File.vue'
 import { type FileObject } from '@/services/files/types';
 import { calculateFileSize } from '@/lib/utils';
-import { ref, type Ref } from 'vue';
+import { ref, computed, type Ref } from 'vue';
 import UploadFile from './UploadFile.vue';
 import FolderNav from '@/components/FolderNav.vue';
 import { useFileTreeContextStore, type ObjectNode } from '@/stores/fileTreeContextStore';
@@ -11,7 +11,6 @@ import { useDriveStore } from '@/stores/drives';
 import { useFileObjectStore } from '@/stores/files';
 import { toast } from '@/components/ui/toast';
 import Menu from './Menu.vue';
-
 
 const props = defineProps<{ assets: FileObject[] }>()
 const filePathNavStore = useFileTreeContextStore()
@@ -26,7 +25,11 @@ const objType = (fileObject: FileObject) => {
 }
 
 const assets: Ref<FileObject[]> = ref(props.assets)
-const parent = ref(drive.uid)
+const setAssets = computed(() => {
+  return assets.value
+})
+
+//const parent = ref(drive.uid)
 
 const selectObject = (obj: FileObject) => {
   if (obj.is_directory) loadFolderAssets({ uid: obj.uid, name: obj.name })
@@ -38,7 +41,7 @@ async function checkAsset(source: string | ObjectNode) {
     const response = await dispatchGetDriveAssets(source)
     if (response.body) {
       assets.value = response.body.storage_objects
-      parent.value = source
+      //parent.value = source
       filePathNavStore.setNode({ uid: source, name: response.body.name })
     }
   } else loadFolderAssets(source)
@@ -50,7 +53,7 @@ const loadFolderAssets = async (folder: ObjectNode) => {
   const response = await fileStore.loadFolderAssets(folder.uid, drive.uid)
   if (response.body) {
     assets.value = response.body.content ? response.body.content : assets.value
-    parent.value = folder.uid
+    //parent.value = folder.uid
     filePathNavStore.setNode(folder)
   } else {
     toast({
@@ -67,8 +70,8 @@ const loadFolderAssets = async (folder: ObjectNode) => {
   <FolderNav @node-selected="checkAsset">
     <UploadFile />
   </FolderNav>
-  <div v-if="assets.length > 0" class="flex flex-wrap mt-5 gap-3 min-w-full p-1">
-    <div v-for="obj in assets" :key="obj.uid">
+  <div v-if="setAssets.length > 0" class="flex flex-wrap mt-5 gap-3 min-w-full p-1">
+    <div v-for="obj in setAssets" :key="obj.uid">
       <Menu :driveId="drive.uid" :assetData="{ assetId: obj.uid, assetName: obj.name, isDir: obj.is_directory }">
         <div :class="['flex flex-col', 'items-center', { 'cursor-pointer': (objType(obj) == Folder) }]">
           <component :is="objType(obj)" @click="selectObject(obj)" />

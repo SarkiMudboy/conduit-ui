@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { computed, ref, watch, type Ref } from 'vue';
+import { computed, onUpdated, ref, watch, type Ref } from 'vue';
 import type { Drive, DriveDetail } from '@/services/drives/types';
 import DriveCard from './DriveCard.vue';
 import AddDrive from './AddDrive.vue';
@@ -10,9 +10,10 @@ import FileObjects from '@/components//Files/FileObjects.vue';
 import DriveActions from './DriveActions.vue';
 import { useFileTreeContextStore } from '@/stores/fileTreeContextStore';
 import { useDriveStore } from '@/stores/drives';
-import { useGlobalAssetStore, type GlobalAsset } from '@/stores/globalAssetStore';
+import { useGlobalAssetStore } from '@/stores/globalAssetStore';
 import { storeToRefs } from 'pinia';
 import { useFileObjectStore } from '@/stores/files';
+import type { FileObject } from '@/services/files/types';
 
 
 const { toast } = useToast()
@@ -29,50 +30,56 @@ const drives = computed<Drive[]>(() => {
 })
 
 const selectedDrive: Ref<DriveDetail | null> = ref(null)
+const selectedAssets: Ref<FileObject[]> = ref([])
 
 const setDriveFileObjects = computed(() => {
-  return selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
+  console.log(selectedAssets.value)
+  return selectedAssets.value
 })
+
 
 
 watch(asset, async () => {
+
   const obj = asset?.value
+
   if (!obj?.source && obj?.drive) {
-    console.log(asset.value)
     await getDriveAssets(obj.drive)
   } else if (obj?.source) {
-
-    const response = await fileStore.loadFolderAssets(folder.uid, drive.uid)
-    if (response.body) {
-      selectedDrive.value = {}
-    }
+    await getDriveAssets(obj.drive, obj.source)
   }
-  //}
+
 })
 
-//watch(() => globalStore.asset, () => {
-//console.log("HELLOOOO")
-//if (!newFileObject.source && newFileObject.drive) {
-//  await getDriveAssets(newFileObject.drive)
-//}
-//})
-
-const getDriveAssets = async (uid: string) => {
+const getDriveAssets = async (uid: string, fromSource?: string) => {
 
   const response = await driveStore.dispatchGetDriveAssets(uid)
   if (response.body) {
     selectedDrive.value = response.body
-    // for the path up top
-    if (selectedDrive.value) {
-      filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
-    }
+    selectedDrive.value && filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
   } else {
     toast({
       title: "Get Drive Failed",
       description: "Couldn't fetch that drive",
       variant: "destructive"
     })
+    return
   }
+
+  if (fromSource) {
+    const response = await fileObjectStore.loadFolderAssets(fromSource, uid)
+    if (response.body) {
+      selectedAssets.value = response.body.content ? response.body.content : selectedAssets.value
+    }
+  } else {
+    selectedAssets.value = selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
+  }
+
+  // for the path up top
+  //if (selectedDrive.value) {
+  //filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
+  //}
+
 }
 
 const addNewDrive = (drive: Drive) => {
@@ -87,7 +94,7 @@ const addNewDrive = (drive: Drive) => {
 <template>
   <div class="p-6">
     <div :class="cn('w-full overflow-x-auto scrollbar-none')">
-      <div v-if="selectedDrive">
+      <div v-if="selectedDrive && selectedAssets.length > 0">
         <FileObjects :assets="setDriveFileObjects" />
       </div>
       <div v-else>
