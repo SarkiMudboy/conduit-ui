@@ -13,16 +13,6 @@ import {
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 import DrivesWindow from "@/components/Drives/DrivesWindow.vue"
 import Notifications from "@/components/Notifications.vue"
-//import { ref, type Ref } from "vue"
-//import { type FileObjectView } from "@/services/files/types"
-
-//const viewObject: Ref<FileObjectView | null> = ref(null)
-//
-//const setObjectView = (view: FileObjectView) => {
-//  console.log(view)
-//  viewObject.value = view
-//}
-
 </script>
 
 <template>

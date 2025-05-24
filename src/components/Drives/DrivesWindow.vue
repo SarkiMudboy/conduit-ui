@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { computed, onUpdated, ref, watch, type Ref } from 'vue';
+import { computed, ref, watch, type Ref } from 'vue';
 import type { Drive, DriveDetail } from '@/services/drives/types';
 import DriveCard from './DriveCard.vue';
 import AddDrive from './AddDrive.vue';
@@ -23,6 +23,7 @@ const globalStore = useGlobalAssetStore()
 const fileObjectStore = useFileObjectStore()
 const { asset } = storeToRefs(globalStore)
 
+var isMounted = ref(false)
 
 await driveStore.dispatchGetDrives()
 const drives = computed<Drive[]>(() => {
@@ -32,15 +33,16 @@ const drives = computed<Drive[]>(() => {
 const selectedDrive: Ref<DriveDetail | null> = ref(null)
 const selectedAssets: Ref<FileObject[]> = ref([])
 
+
 const setDriveFileObjects = computed(() => {
-  console.log(selectedAssets.value)
-  return selectedAssets.value
+  if (isMounted.value) {
+    return selectedAssets.value
+  }
+  return []
 })
 
 
-
 watch(asset, async () => {
-
   const obj = asset?.value
 
   if (!obj?.source && obj?.drive) {
@@ -70,16 +72,12 @@ const getDriveAssets = async (uid: string, fromSource?: string) => {
     const response = await fileObjectStore.loadFolderAssets(fromSource, uid)
     if (response.body) {
       selectedAssets.value = response.body.content ? response.body.content : selectedAssets.value
+      await filePathNavStore.addNodes(selectedDrive.value.uid, fromSource)
     }
   } else {
     selectedAssets.value = selectedDrive.value && "storage_objects" in selectedDrive.value ? selectedDrive.value.storage_objects : []
   }
-
-  // for the path up top
-  //if (selectedDrive.value) {
-  //filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
-  //}
-
+  isMounted.value = true
 }
 
 const addNewDrive = (drive: Drive) => {
@@ -94,7 +92,7 @@ const addNewDrive = (drive: Drive) => {
 <template>
   <div class="p-6">
     <div :class="cn('w-full overflow-x-auto scrollbar-none')">
-      <div v-if="selectedDrive && selectedAssets.length > 0">
+      <div v-if="selectedDrive && isMounted">
         <FileObjects :assets="setDriveFileObjects" />
       </div>
       <div v-else>

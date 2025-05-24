@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, type Ref } from 'vue'
+import getHTTPClient from '@/services/api'
 
 export type ObjectNode = {
   uid: string
@@ -16,5 +17,18 @@ export const useFileTreeContextStore = defineStore('useFileTreeContextStore', ()
     else filePath.value.push(node)
   }
 
-  return { filePath, setNode }
+  async function addNodes(drive: string, pathSource: string) {
+    const objectNodes = await dispatchGetNodes(drive, pathSource)
+    filePath.value.push(...objectNodes)
+  }
+
+  async function dispatchGetNodes(drive: string, leaf: string) {
+    const client = getHTTPClient({ withAuth: true })
+    const response = await client.get<ObjectNode[]>(
+      `drives/${drive}/objects/${leaf}/get_path_detail`
+    )
+    return response.data
+  }
+
+  return { filePath, setNode, addNodes }
 })

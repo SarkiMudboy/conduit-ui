@@ -51,8 +51,6 @@ async function register(data: RegisterData) {
 
   const response = await userStore.dispatchRegister(data)
   if (response.body) {
-    const currentUser = response.body
-    userStore.setUser(currentUser)
     savedTag.value = response.body.tag
   } else {
     toast({

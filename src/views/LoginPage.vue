@@ -48,8 +48,8 @@ async function logIn(creds: LoginCredentials) {
     router.push('/files')
   } else {
     toast({
-      title: 'Sign Up Failed',
-      description: `Something went wrong`,
+      title: 'Sign In Failed',
+      description: response.status && response.status == 400 ? 'Invalid credentials' : 'Something went wrong',
       variant: 'destructive'
     })
 

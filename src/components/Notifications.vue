@@ -11,40 +11,17 @@ import Button from '@/components/ui/button/Button.vue';
 import { Bell } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { useNotificationStore } from '@/stores/notificationStore';
-import { useFileObjectStore } from '@/stores/files';
-import { useDriveStore } from '@/stores/drives';
 import type { DriveNotification } from '@/services/notifications/types';
-import type { FileObjectView } from '@/services/files/types';
 import { useGlobalAssetStore } from '@/stores/globalAssetStore';
 
 
 const userStore = useCurrentUserStore()
 const notifStore = useNotificationStore()
-//const fileObjectStore = useFileObjectStore()
-//const driveStore = useDriveStore()
 const currentUser = userStore.getUser()
 const globalAssetStore = useGlobalAssetStore()
 
 const notifications = computed(() => {
-  //return notifStore.notifications
-
-  return [
-    {
-      uid: "83838383838",
-      author: {
-        uid: "gdgdgdgdg",
-        tag: "hdhdhdh",
-      },
-      drive: {
-        uid: "wewewew",
-        name: 'kddkkdk',
-      },
-      note: "eeeee",
-      source: "",
-      read: false,
-      created_at: "lololo",
-    }
-  ]
+  return notifStore.notifications
 })
 
 function getNoun(author: { uid: string, tag: string }) {
@@ -54,13 +31,11 @@ function getNoun(author: { uid: string, tag: string }) {
 async function handleNotificationClick(notification_uid: string) {
 
   const n = notifStore.getNotification(notification_uid) as DriveNotification
-  if (!n) {
-    //globalAssetStore.setAsset({ source: n.source, drive: n.drive.uid })
+  if (n.source) {
+    globalAssetStore.setAsset({ source: n.source, drive: n.drive.uid })
 
-    globalAssetStore.setAsset({ source: "f9650604-536a-4f4f-bd4f-e7b87470467d", drive: "07d2335e-cd0f-4a54-be36-14bea7ae2aeb" })
   } else {
-    //globalAssetStore.setAsset({ drive: n.drive.uid })
-    globalAssetStore.setAsset({ source: "f9650604-536a-4f4f-bd4f-e7b87470467d", drive: "07d2335e-cd0f-4a54-be36-14bea7ae2aeb" })
+    globalAssetStore.setAsset({ drive: n.drive.uid })
   }
   await notifStore.dispatchMarkAsRead(notification_uid)
 }

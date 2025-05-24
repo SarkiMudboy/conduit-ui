@@ -20,7 +20,7 @@ export const useCurrentUserStore = defineStore('useCurrentUserStore', () => {
   const dispatchRegister = async (payload: RegisterData): Promise<APIResponse<User | null>> => {
     try {
       const { status, data } = await API.auth.register(payload)
-      if (status == 200) {
+      if (status == 201) {
         setUser(data)
         return {
           body: data
