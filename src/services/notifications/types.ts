@@ -4,6 +4,7 @@ export type DriveNotification = {
   uid: string
   author: { uid: string; tag: string }
   drive: BasicDriveView
+  assets: string[]
   note: string
   source: string
   read: boolean

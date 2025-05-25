@@ -8,9 +8,19 @@ import type { APIResponse } from '@/services/types'
 
 export const useNotificationStore = defineStore('useNotificationStore', () => {
   const notifications: Ref<DriveNotification[]> = ref([])
+  const newAssets: Ref<string[]> = ref([])
 
   function getNotification(uid: string) {
     return notifications.value.find((notif) => notif.uid === uid)
+  }
+
+  function isNewAsset(uid: string) {
+    const isNew = newAssets.value.find((a) => a === uid)
+
+    if (isNew) {
+      return true
+    }
+    return false
   }
 
   const dispatchGetNotifications = async (): Promise<APIResponse<DriveNotification[] | null>> => {
@@ -18,8 +28,11 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
       const { status, data } = await API.notifications.getNotifications()
       if (status === 200) {
         notifications.value = data
-        // set as unread
-        notifications.value.forEach((notif) => (notif.read = false))
+        // set as unread and add to the generic list of new objects
+        notifications.value.forEach((notif) => {
+          notif.read = false
+          newAssets.value.push(...notif.assets)
+        })
 
         return {
           body: data,
@@ -60,6 +73,7 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
     notifications,
     getNotification,
     dispatchGetNotifications,
-    dispatchMarkAsRead
+    dispatchMarkAsRead,
+    isNewAsset
   }
 })
