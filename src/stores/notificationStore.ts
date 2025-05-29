@@ -8,19 +8,36 @@ import type { APIResponse } from '@/services/types'
 
 export const useNotificationStore = defineStore('useNotificationStore', () => {
   const notifications: Ref<DriveNotification[]> = ref([])
-  const newAssets: Ref<string[]> = ref([])
+  const newAssets: Ref<string[][]> = ref([])
 
   function getNotification(uid: string) {
     return notifications.value.find((notif) => notif.uid === uid)
   }
 
   function isNewAsset(uid: string) {
-    const isNew = newAssets.value.find((a) => a === uid)
+    // mark it as read on both the notification object and on the server -> hard to find an asset
+    // remove it from the global asset store array -> hard to index
 
-    if (isNew) {
-      return true
+    for (let i = 0; i < newAssets.value.length; i++) {
+      for (let j = 0; j < newAssets.value[i].length - 1; j++) {
+        if (newAssets.value[i][j] == uid) return true
+      }
     }
     return false
+  }
+
+  async function viewAssetHandler(uid: string) {
+    let notificationUid
+
+    for (let i = 0; i < newAssets.value.length; i++) {
+      for (let j = 0; j < newAssets.value[i].length - 1; j++) {
+        if (newAssets.value[i][j] == uid) {
+          notificationUid = <string>newAssets.value[i].pop()
+          await dispatchMarkAsRead(notificationUid)
+          //newAssets.value.splice(i, 1)
+        }
+      }
+    }
   }
 
   const dispatchGetNotifications = async (): Promise<APIResponse<DriveNotification[] | null>> => {
@@ -28,10 +45,11 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
       const { status, data } = await API.notifications.getNotifications()
       if (status === 200) {
         notifications.value = data
-        // set as unread and add to the generic list of new objects
+        // set as unread and add to the generic array of new objects
         notifications.value.forEach((notif) => {
           notif.read = false
-          newAssets.value.push(...notif.assets)
+          const assetArray = [...notif.assets, notif.uid]
+          newAssets.value.push(assetArray)
         })
 
         return {
@@ -74,6 +92,8 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
     getNotification,
     dispatchGetNotifications,
     dispatchMarkAsRead,
-    isNewAsset
+    newAssets,
+    isNewAsset,
+    viewAssetHandler
   }
 })

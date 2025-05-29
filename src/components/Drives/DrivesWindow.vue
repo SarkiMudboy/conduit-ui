@@ -43,14 +43,16 @@ const setDriveFileObjects = computed(() => {
 
 
 watch(asset, async () => {
-  const obj = asset?.value
+  // watch the global store for selected uploads and render the folder/drive containing the new assets
+  if (!selectedDrive.value) {
+    const obj = asset?.value
 
-  if (!obj?.source && obj?.drive) {
-    await getDriveAssets(obj.drive)
-  } else if (obj?.source) {
-    await getDriveAssets(obj.drive, obj.source)
+    if (!obj?.source && obj?.drive) {
+      await getDriveAssets(obj.drive)
+    } else if (obj?.source) {
+      await getDriveAssets(obj.drive, obj.source)
+    }
   }
-
 })
 
 const getDriveAssets = async (uid: string, fromSource?: string) => {
