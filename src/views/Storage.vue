@@ -13,6 +13,18 @@ import {
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 import DrivesWindow from "@/components/Drives/DrivesWindow.vue"
 import Notifications from "@/components/Notifications.vue"
+import { useCurrentUserStore } from "@/stores/userStore"
+import { useRouter } from "vue-router"
+
+
+const userStore = useCurrentUserStore()
+const router = useRouter()
+
+const logoutUser = () => {
+  userStore.dispatchLogout()
+  router.push('/login')
+}
+
 </script>
 
 <template>
@@ -43,7 +55,7 @@ import Notifications from "@/components/Notifications.vue"
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem @click="logoutUser()">Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

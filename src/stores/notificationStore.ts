@@ -15,10 +15,7 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
   }
 
   function isNewAsset(uid: string) {
-    // mark it as read on both the notification object and on the server -> hard to find an asset
-    // remove it from the global asset store array -> hard to index
-
-    for (let i = 0; i < newAssets.value.length; i++) {
+    for (let i = 0; i < newAssets.value.length - 1; i++) {
       for (let j = 0; j < newAssets.value[i].length - 1; j++) {
         if (newAssets.value[i][j] == uid) return true
       }
@@ -29,7 +26,7 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
   async function viewAssetHandler(uid: string) {
     let notificationUid
 
-    for (let i = 0; i < newAssets.value.length; i++) {
+    for (let i = 0; i < newAssets.value.length - 1; i++) {
       for (let j = 0; j < newAssets.value[i].length - 1; j++) {
         if (newAssets.value[i][j] == uid) {
           notificationUid = <string>newAssets.value[i].pop()

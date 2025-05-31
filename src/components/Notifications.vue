@@ -17,7 +17,6 @@ import { useGlobalAssetStore } from '@/stores/globalAssetStore';
 
 const userStore = useCurrentUserStore()
 const notifStore = useNotificationStore()
-const currentUser = userStore.getUser()
 const globalAssetStore = useGlobalAssetStore()
 
 const notifications = computed(() => {
@@ -25,7 +24,13 @@ const notifications = computed(() => {
 })
 
 function getNoun(author: { uid: string, tag: string }) {
-  return currentUser && (author.uid === currentUser.uid) ? "You" : author.tag
+  let noun: string = '';
+  const currentUser = userStore.getUser()
+  console.log(currentUser.uid)
+  if (currentUser) {
+    noun = (author.uid === currentUser.uid) ? "You" : author.tag
+  }
+  return noun
 }
 
 async function handleNotificationClick(notification_uid: string) {

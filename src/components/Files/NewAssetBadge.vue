@@ -5,7 +5,6 @@ const props = defineProps<{ assetId: string, isNew: boolean, isFolder: boolean }
 const notifStore = useNotificationStore()
 
 const tempIsNew = props.isNew
-
 if (props.isNew) {
   await notifStore.viewAssetHandler(props.assetId)
 }

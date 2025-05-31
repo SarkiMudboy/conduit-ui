@@ -31,7 +31,6 @@ const globalStore = useGlobalAssetStore()
 const { asset } = storeToRefs(globalStore)
 
 
-
 watch(asset, async () => {
   // watch the global store for selected uploads and render the folder/drive containing the new assets
   const obj = asset.value

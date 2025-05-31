@@ -9,11 +9,11 @@ export const useCurrentUserStore = defineStore('useCurrentUserStore', () => {
   const currentUser: Ref<User | {}> = ref({})
 
   const setUser = (user: User) => {
-    console.log(user)
     currentUser.value = user
   }
 
   const getUser = (): User => {
+    console.log(currentUser.value)
     return currentUser.value as User
   }
 
@@ -63,10 +63,33 @@ export const useCurrentUserStore = defineStore('useCurrentUserStore', () => {
     }
   }
 
+  const dispatchLogout = async (): Promise<APIResponse<null>> => {
+    try {
+      const { status, data } = await API.auth.logout()
+      if (status == 204) {
+        return {
+          body: null,
+          status: 204
+        }
+      }
+    } catch (error) {
+      const _error = error as AxiosError<string>
+      return {
+        status: _error.response ? _error.response.status : 400,
+        body: null
+      }
+    }
+    return {
+      body: null,
+      status: 400
+    }
+  }
+
   return {
     getUser,
     setUser,
     dispatchRegister,
-    dispatchLogin
+    dispatchLogin,
+    dispatchLogout
   }
 })

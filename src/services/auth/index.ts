@@ -13,7 +13,14 @@ async function login(data: LoginCredentials) {
   return client.post<User>('users/sign-in/', data)
 }
 
+async function logout() {
+  const config = { withAuth: true }
+  const client = getClient(config)
+  return client.post<null>('users/sign-out/')
+}
+
 export default {
   register,
-  login
+  login,
+  logout
 }

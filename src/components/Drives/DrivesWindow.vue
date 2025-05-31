@@ -101,7 +101,7 @@ const addNewDrive = (drive: Drive) => {
         <DriveActions>
           <AddDrive :userDrives="drives.map((drive) => drive.name)" @drive-created="addNewDrive" />
         </DriveActions>
-        <div class=" flex gap-3 min-w-full p-1">
+        <div class=" flex flex-row gap-3 min-w-full p-1">
           <DriveCard v-for="drive in drives" :key="drive.uid" v-bind="drive" @drive-selected="getDriveAssets" />
         </div>
       </div>
