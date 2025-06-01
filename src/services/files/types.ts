@@ -6,6 +6,7 @@ export type FileObject = Asset & {
   content?: FileObject[]
   metadata: object
   is_directory: boolean
+  directories?: FileObject[]
 }
 
 export type FileMetaData = { [key: string]: string }

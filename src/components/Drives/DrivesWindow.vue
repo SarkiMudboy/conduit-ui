@@ -61,6 +61,7 @@ const getDriveAssets = async (uid: string, fromSource?: string) => {
   if (response.body) {
     selectedDrive.value = response.body
     selectedDrive.value && filePathNavStore.setNode({ uid: selectedDrive.value.uid, name: selectedDrive.value.name })
+    fileObjectStore.initDirectories(selectedDrive.value.directories)
   } else {
     toast({
       title: "Get Drive Failed",
@@ -101,7 +102,7 @@ const addNewDrive = (drive: Drive) => {
         <DriveActions>
           <AddDrive :userDrives="drives.map((drive) => drive.name)" @drive-created="addNewDrive" />
         </DriveActions>
-        <div class=" flex flex-row gap-3 min-w-full p-1">
+        <div class=" flex flex-row flex-wrap gap-3 min-w-full p-1">
           <DriveCard v-for="drive in drives" :key="drive.uid" v-bind="drive" @drive-selected="getDriveAssets" />
         </div>
       </div>

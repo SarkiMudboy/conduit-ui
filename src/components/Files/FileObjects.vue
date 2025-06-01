@@ -78,17 +78,25 @@ async function checkAsset(source: string | ObjectNode) {
 }
 
 const loadFolderAssets = async (folder: ObjectNode) => {
+  // check the already loaded directories
+  const obj = fileStore.checkLoadedDirectories(folder.uid)
 
-  const response = await fileStore.loadFolderAssets(folder.uid, drive.uid)
-  if (response.body) {
-    assets.value = response.body.content ? response.body.content : assets.value
+  if (obj && obj.content) {
+    assets.value = obj.content
     filePathNavStore.setNode(folder)
   } else {
-    toast({
-      title: "Get Files Failed",
-      description: "Couldn't fetch files",
-      variant: "destructive"
-    })
+    // make request now
+    const response = await fileStore.loadFolderAssets(folder.uid, drive.uid)
+    if (response.body) {
+      assets.value = response.body.content ? response.body.content : assets.value
+      filePathNavStore.setNode(folder)
+    } else {
+      toast({
+        title: "Get Files Failed",
+        description: "Couldn't fetch files",
+        variant: "destructive"
+      })
+    }
   }
 }
 

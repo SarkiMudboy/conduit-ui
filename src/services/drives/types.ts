@@ -10,6 +10,7 @@ export type DriveDetail = Asset & {
   used: number
   members: string[]
   storage_objects: FileObject[]
+  directories?: FileObject[]
 }
 
 export type BasicDriveView = {

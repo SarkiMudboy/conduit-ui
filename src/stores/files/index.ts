@@ -7,9 +7,20 @@ import { AxiosError } from 'axios'
 
 export const useFileObjectStore = defineStore('useFileObjectStore', () => {
   const files: Ref<FileObject[]> = ref([])
+  const preloadedDirectories: Ref<FileObject[]> = ref([])
 
-  function initObjects(objects: FileObject[]) {
-    files.value = objects
+  function initObjects(objects: FileObject) {
+    files.value = objects.content ? objects.content : files.value
+    initDirectories(objects.directories)
+  }
+
+  function initDirectories(dirs?: FileObject[]) {
+    preloadedDirectories.value = dirs ? dirs : preloadedDirectories.value
+  }
+
+  function checkLoadedDirectories(uid: string) {
+    const found = preloadedDirectories.value.find((file) => file.uid == uid)
+    return found
   }
 
   const removeFileObject = (uid: string) => {
@@ -26,7 +37,7 @@ export const useFileObjectStore = defineStore('useFileObjectStore', () => {
     try {
       const { status, data } = await API.files.getObjects(folder, drive)
       if (status === 200 && data.content) {
-        initObjects(data.content)
+        initObjects(data)
         return {
           body: data
         }
@@ -48,7 +59,9 @@ export const useFileObjectStore = defineStore('useFileObjectStore', () => {
   return {
     files,
     initObjects,
+    initDirectories,
     removeFileObject,
-    loadFolderAssets
+    loadFolderAssets,
+    checkLoadedDirectories
   }
 })
