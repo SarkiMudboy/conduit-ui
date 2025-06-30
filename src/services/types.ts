@@ -3,6 +3,13 @@ export type APIResponse<T> = {
   status?: number
 }
 
+export type PaginatedAPIResponse<T> = {
+  count: number
+  previous: string
+  next: string
+  results: T[]
+}
+
 export type RequestConfig = {
   root?: boolean
   withAuth?: boolean

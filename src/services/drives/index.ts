@@ -1,11 +1,12 @@
 import getClient from '@/services/api'
 import { type Drive, type DriveDetail, type InputCreateDrive } from './types'
 import { must } from '../utils'
+import type { PaginatedAPIResponse } from '../types'
 
 async function getDrives() {
   const config = { withAuth: true }
   const client = getClient(config)
-  return must(client.get<Drive[]>, ['drives/'])
+  return must(client.get<PaginatedAPIResponse<Drive>>, ['drives/'])
 }
 
 async function createDrive(data: InputCreateDrive) {

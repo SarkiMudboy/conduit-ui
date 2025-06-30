@@ -26,7 +26,7 @@ export const useDriveStore = defineStore('useDriveStore', () => {
     try {
       const { status, data } = await API.drives.getDrives()
       if (status === 200) {
-        initDrives(data)
+        initDrives(data.results)
         return {
           body: null
         }
