@@ -12,7 +12,7 @@ app.use(createPinia())
 app.use(router)
 
 async function setCSRFToken() {
-  await fetch('http://localhost:8001/api/set-csrf-token/', {
+  await fetch('https://conduit.dedyn.io/api/set-csrf-token/', {
     method: 'GET',
     credentials: 'include'
   })
