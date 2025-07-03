@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 export const useCSRFTokenStore = defineStore('useCSRFTokenStore', () => {
   const csrfToken = ref('')
+  console.log(document.cookie)
   const getCSRFToken = () => {
     csrfToken.value = document.cookie
       .split(';')
