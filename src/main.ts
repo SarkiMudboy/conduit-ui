@@ -12,7 +12,9 @@ app.use(createPinia())
 app.use(router)
 
 async function setCSRFToken() {
-  await fetch('https://conduit.dedyn.io/api/set-csrf-token/', {
+  const baseURL = import.meta.env.VITE_CONDUIT_BASE_URL
+
+  await fetch(`${baseURL}set-csrf-token/`, {
     method: 'GET',
     credentials: 'include'
   })
