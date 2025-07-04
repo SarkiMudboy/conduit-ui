@@ -17,6 +17,9 @@ import {
 } from '@/components/ui/tags-input'
 import Button from './ui/button/Button.vue'
 import { protectedReq, type reqOptions } from '@/lib/utils'
+import getHTTPClient from '@/services/api'
+import { AwardIcon } from 'lucide-vue-next'
+import type { PaginatedAPIResponse } from '@/services/types'
 
 type User = {
   uid: string
@@ -47,19 +50,15 @@ const searchUser = async () => {
     errorMessage.value = 'Please add a member!'
     throw new Error()
   }
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-  const params: reqOptions = {
-    data: null,
-    headers: myHeaders,
-    url: `http://localhost:8000/api/v1/users/search/?key=${searchTerm.value}`,
-    method: 'GET'
-  }
-  await protectedReq(params).then((r) => {
-    foundUsers.value = r.response
-    if (r.response.length == 0) notFound.value = true
-    open.value = true
-  })
+
+  const client = getHTTPClient({ withAuth: true })
+
+  const response = await client.get<PaginatedAPIResponse<User>>(`users/search/?key=${searchTerm.value}`)
+  console.log(response.data)
+  if (response.data.count > 0) {
+    foundUsers.value = response.data.results
+  } else notFound.value = true
+  open.value = true
 }
 
 const filteredUsers = computed(() =>
