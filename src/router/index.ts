@@ -1,4 +1,4 @@
-import { verify } from '@/lib/utils'
+import { setTheme, verify } from '@/lib/utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import Storage from '@/views/Storage.vue'
 
@@ -8,17 +8,20 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/HomeView.vue')
+      component: () => import('@/views/HomeView.vue'),
+      meta: { toggleLightMode: true }
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/LoginPage.vue')
+      component: () => import('@/views/LoginPage.vue'),
+      meta: { toggleLightMode: true }
     },
     {
       path: '/sign-up',
       name: 'sign-up',
-      component: () => import('@/views/SignUp.vue')
+      component: () => import('@/views/SignUp.vue'),
+      meta: { toggleLightMode: true }
     },
     {
       path: '/files',
@@ -38,11 +41,6 @@ const router = createRouter({
       name: 'password-reset',
       component: () => import('@/views/ResetPassword.vue')
     }
-    //{
-    //  path: '/greet',
-    //  name: 'greet-user',
-    //  component: () => import('@/components/ShowTag.vue')
-    //}
   ]
 })
 
@@ -56,6 +54,8 @@ router.beforeEach(async (to, from) => {
         query: { redirect: to.fullPath }
       }
     }
+  } else if (to.meta.toggleLightMode) {
+    setTheme('light')
   }
 })
 

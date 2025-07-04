@@ -43,7 +43,6 @@ const { handleSubmit, setValues } = useForm({
 async function logIn(creds: LoginCredentials) {
   const response = await userStore.dispatchLogin(creds)
   if (response.body) {
-    //console.log(response.body)
     userStore.setUser(response.body)
     router.push('/files')
   } else {

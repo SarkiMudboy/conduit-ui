@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge'
 import { useCSRFTokenStore } from '@/stores/tokenStore'
 import { useRouter } from 'vue-router'
 import getClient from '@/services/api'
+import { useColorMode } from '@vueuse/core'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -165,4 +166,9 @@ export const AddAnimationEffectToElementOnLoad = (effect: string) => {
   }, options)
 
   sections.forEach((section) => observer.observe(section))
+}
+
+export function setTheme(theme: 'light' | 'dark') {
+  const colorMode = useColorMode()
+  colorMode.value = theme == 'light' || theme == 'dark' ? theme : colorMode.value
 }

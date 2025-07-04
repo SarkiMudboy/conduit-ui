@@ -20,9 +20,11 @@ import { useRouter } from "vue-router"
 const userStore = useCurrentUserStore()
 const router = useRouter()
 
-const logoutUser = () => {
-  userStore.dispatchLogout()
-  router.push('/login')
+const logoutUser = async () => {
+  const response = await userStore.dispatchLogout()
+  if (response.status == 204) {
+    router.push('/login')
+  }
 }
 
 </script>
