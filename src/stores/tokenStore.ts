@@ -14,12 +14,6 @@ export const useCSRFTokenStore = defineStore('useCSRFTokenStore', () => {
       .then((data) => {
         csrfToken.value = data.csrfToken
       })
-    console.log(csrfToken)
-    //console.info(document.cookie)
-    //csrfToken.value = document.cookie
-    //  .split(';')
-    //  .find((row) => row.startsWith('csrftoken='))
-    //  ?.split('=')[1] as string
   }
   getCSRFToken()
 
