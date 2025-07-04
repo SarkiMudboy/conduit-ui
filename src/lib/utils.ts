@@ -4,6 +4,7 @@ import { useCSRFTokenStore } from '@/stores/tokenStore'
 import { useRouter } from 'vue-router'
 import getClient from '@/services/api'
 import { useColorMode } from '@vueuse/core'
+import axios from 'axios'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -96,20 +97,18 @@ export async function refreshToken(): Promise<Boolean> {
 }
 
 export const authGitHub = async () => {
-  const options: reqOptions = {
-    data: null,
-    headers: new Headers(),
-    url: 'http://localhost:8000/api/v1/users/oauth/github',
-    method: 'GET'
-  }
-  const response = await req(options)
+  const baseURL = import.meta.env.VITE_CONDUIT_API_BASE_URL
+
+  const response = await axios.get<{ client_id: string; callback: string; state: string }>(
+    `${baseURL}users/oauth/github`
+  )
   if (response.status == 200) {
-    const oauthCallbackURL = response.response.callback
-    const oauthClientID = response.response.client_id
-    const state = response.response.state
+    const oauthCallbackURL = response.data.callback
+    const oauthClientID = response.data.client_id
+    const state = response.data.state
     const authURL = parseGithubAuthURL(oauthClientID, oauthCallbackURL, state)
     window.location.href = authURL
-  } else console.log(response.response)
+  } else console.log(response.data)
 }
 
 export function parseGithubAuthURL(clientID: string, callbackURL: string, state: string): string {
