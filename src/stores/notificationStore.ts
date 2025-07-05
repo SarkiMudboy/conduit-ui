@@ -41,7 +41,7 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
     try {
       const { status, data } = await API.notifications.getNotifications()
       if (status === 200) {
-        notifications.value = data
+        notifications.value = data.results
         // set as unread and add to the generic array of new objects
         notifications.value.forEach((notif) => {
           notif.read = false
@@ -50,7 +50,7 @@ export const useNotificationStore = defineStore('useNotificationStore', () => {
         })
 
         return {
-          body: data,
+          body: data.results,
           status: 200
         }
       } else throw new Error('Something went wrong')
